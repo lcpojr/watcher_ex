@@ -32,16 +32,16 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
   @possible_protocols ~s(openid-connect)
   @possible_access_types ~s(cofidential)
 
-  @required_fields [:name]
-
-  @optional_fields [
-    :description,
+  @required_fields [
+    :name,
     :status,
     :protocol,
     :access_type,
     :direct_access_grant_enabled,
     :service_account_enabled
   ]
+
+  @optional_fields [:description]
 
   schema "client_applications" do
     field :name, :string

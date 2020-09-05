@@ -35,7 +35,13 @@ defmodule ResourceManager.MixProject do
 
       # Database
       {:postgrex, "~> 0.15", only: [:dev, :test], runtime: false},
-      {:ecto_sql, "~> 3.4"}
+      {:ecto_sql, "~> 3.4"},
+
+      # Tools
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.13", only: :test}
     ]
   end
 end

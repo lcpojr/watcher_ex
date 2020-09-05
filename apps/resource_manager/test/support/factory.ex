@@ -3,7 +3,7 @@ defmodule ResourceManager.Factory do
 
   alias ResourceManager.Credentials.Schemas.{Password, PublicKey}
   alias ResourceManager.Identity.Schemas.{ClientApplication, User}
-  alias ResourceManager.Permissions.Schemas.Scope
+  alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, Scope, UserScope}
   alias ResourceManager.Repo
 
   @default_password "My-passw@rd123"
@@ -17,7 +17,7 @@ defmodule ResourceManager.Factory do
 
   def build(:client_application) do
     %ClientApplication{
-      name: "My test application #{System.unique_integer()}",
+      name: "my-application-name#{System.unique_integer()}",
       description: "It's a test application"
     }
   end
@@ -36,24 +36,42 @@ defmodule ResourceManager.Factory do
 
   def build(:scope) do
     %Scope{
-      name: "identity:user:create",
+      name: "identity:user:create#{System.unique_integer()}",
       description: "Can create user identities"
     }
   end
 
+  def build(:user_scope) do
+    %UserScope{
+      user: build(:user),
+      scope: build(:scope)
+    }
+  end
+
+  def build(:client_application_scope) do
+    %ClientApplicationScope{
+      client_application: build(:client_application),
+      scope: build(:scope)
+    }
+  end
+
   @doc false
-  def build(factory_name, attributes) do
+  def build(factory_name, attributes) when is_atom(factory_name) and is_list(attributes) do
     factory_name
     |> build()
     |> struct!(attributes)
   end
 
   @doc false
-  def insert!(factory_name, attributes \\ []) do
+  def insert!(factory_name, attributes \\ []) when is_atom(factory_name) do
     factory_name
     |> build(attributes)
     |> Repo.insert!()
   end
+
+  @doc false
+  def insert_list!(factory_name, count \\ 10, attributes \\ []) when is_atom(factory_name),
+    do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
 
   @doc false
   def gen_hashed_password(password \\ @default_password), do: Argon2.hash_pwd_salt(password)

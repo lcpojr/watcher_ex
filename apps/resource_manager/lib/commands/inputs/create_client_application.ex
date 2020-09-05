@@ -11,22 +11,26 @@ defmodule ResourceManager.Commands.Inputs.CreateClientApplication do
   @type t :: %__MODULE__{
           name: String.t(),
           description: String.t(),
-          public_key: String.t(),
+          public_key_type: String.t(),
+          public_key_type: String.t(),
+          public_key_format: String.t(),
           status: String.t() | nil,
           protocol: String.t() | nil,
           access_type: String.t() | nil,
           scopes: list(String.t()) | nil
         }
 
-  @required [:name, :public_key]
-  @optional [:description, :status, :protocol, :access_type, :scopes]
+  @required [:name, :public_key, :status, :protocol, :access_type]
+  @optional [:description, :scopes]
   embedded_schema do
     field :name, :string
     field :description, :string
     field :public_key, :string
-    field :status, :string
-    field :protocol, :string
-    field :access_type, :string
+    field :public_key_type, :string, default: "rsa"
+    field :public_key_format, :string, default: "pem"
+    field :status, :string, default: "active"
+    field :protocol, :string, default: "openid-connect"
+    field :access_type, :string, default: "confidential"
     field :scopes, {:array, :string}
   end
 
