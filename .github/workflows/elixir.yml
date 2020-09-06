@@ -1,4 +1,4 @@
-name: Elixir CI
+name: CI
 
 on:
   push:
@@ -6,6 +6,9 @@ on:
     
   pull_request:
     branches: [ master ]
+
+env:
+  MIX_ENV: test
 
 jobs:
   build:
@@ -21,37 +24,40 @@ jobs:
         elixir-version: '1.10.3' # Define the elixir version [required]
         otp-version: '22.3' # Define the OTP version [required]
         
-    - name: Run Hex
-      run: mix local.hex --force
-
-    - name: Run Rebar
-      run: mix local.rebar --force
-
     - name: Restore dependencies cache
       uses: actions/cache@v2
+      id: deps-cache
       with:
         path: deps
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
 
     - name: Install dependencies
-      run: mix deps.get
+      if: steps.deps-cache.outputs.cache-hit != 'true'
+      run: |
+        mix local.hex --force
+        mix local.rebar --force
+        mix deps.get
 
     - name: Compile code
       run: mix compile --warnings-as-errors
       
-    - name: Ensure format
-      run: mix format --check-formatted
-
     - name: Ensure code consistence
-      run: mix credo --strict
+      run: |
+        mix format --check-formatted
+        mix credo --strict
 
     - name: Restore dialyzer cache
       uses: actions/cache@v2
+      id: dialyzer-cache
       with:
         path: _build/
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
+
+    - name: Generate PLT
+      if: steps.dialyzer-cache.outputs.cache-hit != 'true'
+      run: mix dialyzer --plt
 
     - name: Run static analysis
       run: mix dialyzer --no-check --halt-exit-status
