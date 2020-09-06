@@ -42,6 +42,8 @@ jobs:
   
   quality:
     name: "Format and code Consistence"
+    runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Run Format
         run: mix format --check-formatted
@@ -51,6 +53,8 @@ jobs:
 
   tests:
     name: "Tests"
+    runs-on: ubuntu-latest
+    needs: quality
     steps:
       - name: Restore dialyzer cache
         uses: actions/cache@v2
