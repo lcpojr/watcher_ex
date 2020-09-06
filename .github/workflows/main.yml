@@ -1,10 +1,5 @@
 name: Main - CI
 
-strategy:
-  matrix:
-    elixir: [1.10.3]
-    otp: [22.3]
-
 on:
   push:
     branches: [ master ]
@@ -19,6 +14,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    
+    matrix:
+      elixir: [1.10.3]
+      otp: [22.3]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -49,6 +49,11 @@ jobs:
     name: Format and Consistence
     runs-on: ubuntu-latest
     needs: build
+
+    matrix:
+      elixir: [1.10.3]
+      otp: [22.3]
+      
     steps:
       - uses: actions/checkout@v2
 
@@ -75,6 +80,11 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     needs: build
+    
+    matrix:
+      elixir: [1.10.3]
+      otp: [22.3]
+
     steps:
       - uses: actions/checkout@v2
 
