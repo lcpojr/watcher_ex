@@ -1,5 +1,10 @@
 name: Main - CI
 
+strategy:
+  matrix:
+    elixir: [1.10.3]
+    otp: [22.3]
+
 on:
   push:
     branches: [ master ]
@@ -16,19 +21,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Elixir
         uses: actions/setup-elixir@v1
         with:
-          elixir-version: '1.10.3' # Define the elixir version [required]
-          otp-version: '22.3' # Define the OTP version [required]
+          elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
+          otp-version: ${{ matrix.otp }} # Define the OTP version [required]
         
       - name: Restore dependencies cache
         uses: actions/cache@v2
         id: deps-cache
         with:
           path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Install dependencies
         if: steps.deps-cache.outputs.cache-hit != 'true'
@@ -46,19 +51,19 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Elixir
         uses: actions/setup-elixir@v1
         with:
-          elixir-version: '1.10.3' # Define the elixir version [required]
-          otp-version: '22.3' # Define the OTP version [required]
+          elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
+          otp-version: ${{ matrix.otp }} # Define the OTP version [required]
 
       - name: Restore dependencies cache
         uses: actions/cache@v2
         id: deps-cache
         with:
           path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Run Format
         run: mix format --check-formatted
@@ -72,27 +77,26 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Elixir
         uses: actions/setup-elixir@v1
         with:
-          elixir-version: '1.10.3' # Define the elixir version [required]
-          otp-version: '22.3' # Define the OTP version [required]
+          elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
+          otp-version: ${{ matrix.otp }} # Define the OTP version [required]
 
       - name: Restore dependencies cache
         uses: actions/cache@v2
         id: deps-cache
         with:
           path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Restore dependencies cache
         uses: actions/cache@v2
         id: plt-cache
         with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          path: _build/plts
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Generate PLT
         if: steps.plt-cache.outputs.cache-hit != 'true'
