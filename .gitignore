@@ -19,4 +19,10 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
+# Elixir LS
+.elixir_ls
 /apps/*/.elixir_ls
+
+# Dialyzer PLTS
+/apps/*/priv/plts/*.plt
+/apps/*/priv/plts/*.plt.hash
