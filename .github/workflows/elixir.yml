@@ -47,7 +47,7 @@ jobs:
       run: mix credo --strict
 
     - name: Restore dialyzer cache
-      uses: actions/cache@v3
+      uses: actions/cache@v2
       with:
         path: _build/
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
