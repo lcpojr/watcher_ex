@@ -26,8 +26,7 @@ defmodule ResourceManager.Identity.Schemas.User do
 
   @possible_statuses ~s(active, inactive, blocked, temporary_blocked)
 
-  @required_fields [:username]
-  @optional_fields [:status]
+  @required_fields [:username, :status]
   schema "users" do
     field :username, :string
     field :status, :string, default: "active"
@@ -41,7 +40,7 @@ defmodule ResourceManager.Identity.Schemas.User do
   @doc false
   def changeset_create(params) when is_map(params) do
     %__MODULE__{}
-    |> cast(params, @required_fields ++ @optional_fields)
+    |> cast(params, @required_fields)
     |> validate_required(@required_fields)
     |> validate_length(:username, min: 5, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
@@ -51,7 +50,7 @@ defmodule ResourceManager.Identity.Schemas.User do
   @doc false
   def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
     model
-    |> cast(params, @required_fields ++ @optional_fields)
+    |> cast(params, @required_fields)
     |> validate_length(:username, min: 5, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
     |> unique_constraint(:username)

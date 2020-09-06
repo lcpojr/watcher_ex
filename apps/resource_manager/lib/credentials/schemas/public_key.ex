@@ -56,4 +56,10 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
     |> validate_inclusion(:format, @possible_formats)
     |> validate_required(@required_fields)
   end
+
+  @doc false
+  def possible_types, do: @possible_types
+
+  @doc false
+  def possible_formats, do: @possible_formats
 end

@@ -50,11 +50,13 @@ defmodule ResourceManager.Schema do
         if key in schema.__schema__(:fields) do
           where(queryable, [c], field(c, ^key) == ^value)
         else
-          queryable
+          custom_query(queryable, {key, value})
         end
       end
 
-      defoverridable update_query: 2
+      defp custom_query(queryable, _any), do: queryable
+
+      defoverridable custom_query: 2
     end
   end
 end

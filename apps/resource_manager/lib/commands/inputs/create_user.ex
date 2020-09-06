@@ -1,6 +1,6 @@
 defmodule ResourceManager.Commands.Inputs.CreateUser do
   @moduledoc """
-  Input parameters for creating user
+  Input parameters for creating user identity
   """
 
   use ResourceManager.Input
@@ -10,17 +10,24 @@ defmodule ResourceManager.Commands.Inputs.CreateUser do
   @typedoc "Create user input fields"
   @type t :: %__MODULE__{
           username: String.t(),
+          status: String.t(),
           password: String.t(),
-          status: String.t() | nil,
+          password_algorithm: String.t(),
           scopes: list(String.t()) | nil
         }
 
-  @required [:username, :password]
-  @optional [:status, :scopes]
+  @required [:username, :password, :algorithm]
+  @optional [:scopes]
   embedded_schema do
+    # Identity
     field :username, :string
+    field :status, :string, default: "active"
+
+    # Credentials
     field :password, :string
-    field :status, :string
+    field :password_algorithm, :string, default: "argon2"
+
+    # Permissions
     field :scopes, {:array, :string}
   end
 

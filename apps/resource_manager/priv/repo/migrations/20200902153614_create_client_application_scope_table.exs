@@ -5,7 +5,7 @@ defmodule ResourceManager.Repo.Migrations.CreateClientApplicationScopeTable do
 
   def change do
     create_if_not_exists table(:client_applications_scopes, primary_key: false) do
-      add :client_application_id, references(:users, type: :uuid), null: false, primary_key: true
+      add :client_application_id, references(:client_applications, type: :uuid), null: false, primary_key: true
       add :scope_id, references(:scopes, type: :uuid), null: false, primary_key: true
 
       timestamps()
