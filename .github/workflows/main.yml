@@ -37,6 +37,14 @@ jobs:
           mix local.rebar --force
           mix deps.get
 
+      - name: Restore build cache
+        uses: actions/cache@v2
+        id: build-cache
+        with:
+          path: _build/
+          key: ${{ runner.os }}-mix-${{ hashFiles('_build/*') }}
+          restore-keys: ${{ runner.os }}-mix-
+
       - name: Compile code
         run: mix compile --warnings-as-errors
   
@@ -57,7 +65,7 @@ jobs:
         id: build-cache
         with:
           path: _build/
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('_build/*') }}
           restore-keys: ${{ runner.os }}-mix-
 
       - name: Restore dependencies cache
@@ -91,7 +99,7 @@ jobs:
         id: build-cache
         with:
           path: _build/
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('_build/*') }}
           restore-keys: ${{ runner.os }}-mix-
 
       - name: Restore dependencies cache
