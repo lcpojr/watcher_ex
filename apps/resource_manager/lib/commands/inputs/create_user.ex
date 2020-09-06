@@ -5,6 +5,8 @@ defmodule ResourceManager.Commands.Inputs.CreateUser do
 
   use ResourceManager.Input
 
+  alias ResourceManager.Identity.Schemas.User
+
   @typedoc "Create user input fields"
   @type t :: %__MODULE__{
           username: String.t(),
@@ -33,6 +35,7 @@ defmodule ResourceManager.Commands.Inputs.CreateUser do
   def cast_and_apply(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
+    |> validate_inclusion(:status, User.possible_statuses())
     |> validate_required(@required)
   end
 end

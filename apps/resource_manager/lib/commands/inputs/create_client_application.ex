@@ -12,7 +12,6 @@ defmodule ResourceManager.Commands.Inputs.CreateClientApplication do
           name: String.t(),
           description: String.t(),
           public_key_type: String.t(),
-          public_key_type: String.t(),
           public_key_format: String.t(),
           status: String.t() | nil,
           protocol: String.t() | nil,
