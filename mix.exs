@@ -64,7 +64,8 @@ defmodule WatcherEx.MixProject do
   defp dialyzer do
     [
       plt_add_apps: [:ex_unit],
-      plt_file: {:no_warn, "_build/watcher_ex.plt"}
+      plt_core_path: "_build/plts",
+      plt_file: {:no_warn, "_build/plts/watcher_ex.plt"}
     ]
   end
 
