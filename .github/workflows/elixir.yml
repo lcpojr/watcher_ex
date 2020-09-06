@@ -21,8 +21,10 @@ jobs:
         elixir-version: '1.10.3' # Define the elixir version [required]
         otp-version: '22.3' # Define the OTP version [required]
         
-    - name: Run basic configurations
+    - name: Run Hex
       run: mix local.hex --force
+
+    - name: Run Rebar
       run: mix local.rebar --force
 
     - name: Restore dependencies cache
