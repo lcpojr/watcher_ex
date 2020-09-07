@@ -1,4 +1,4 @@
-defmodule ResourceManager.Commands.Inputs.CreateUser do
+defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
   @moduledoc """
   Input parameters for creating user identity
   """
