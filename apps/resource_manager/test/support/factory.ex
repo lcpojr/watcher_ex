@@ -18,7 +18,8 @@ defmodule ResourceManager.Factory do
   def build(:client_application) do
     %ClientApplication{
       name: "my-application-name#{System.unique_integer()}",
-      description: "It's a test application"
+      description: "It's a test application",
+      grant_flows: ["resource_owner"]
     }
   end
 

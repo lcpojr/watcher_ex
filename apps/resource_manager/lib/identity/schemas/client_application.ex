@@ -20,8 +20,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
           status: String.t(),
           protocol: String.t(),
           access_type: String.t(),
-          direct_access_grant_enabled: boolean(),
-          service_account_enabled: boolean(),
+          grant_flows: list(String.t()),
           public_key: PublicKey.t(),
           scopes: Scope.t(),
           inserted_at: NaiveDateTime.t(),
@@ -29,28 +28,19 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
         }
 
   @possible_statuses ~s(active, inactive, blocked)
-  @possible_protocols ~s(openid-connect)
-  @possible_access_types ~s(cofidential)
+  @possible_protocols ~s(openid-connect saml)
+  @possible_access_types ~s(cofidential public bearer-only)
+  @possible_grant_flows ~s(resource_owner implicit client_credentials refresh_token authorization_code)
 
-  @required_fields [
-    :name,
-    :status,
-    :protocol,
-    :access_type,
-    :direct_access_grant_enabled,
-    :service_account_enabled
-  ]
-
-  @optional_fields [:description]
-
+  @required_fields [:name, :status, :protocol, :access_type]
+  @optional_fields [:grant_flows, :description]
   schema "client_applications" do
     field :name, :string
     field :description, :string
     field :status, :string, default: "active"
     field :protocol, :string, default: "openid-connect"
     field :access_type, :string, default: "confidential"
-    field :direct_access_grant_enabled, :boolean, default: false
-    field :service_account_enabled, :boolean, default: false
+    field :grant_flows, {:array, :string}
 
     has_one :public_key, PublicKey
     many_to_many :scopes, Scope, join_through: "client_applications_scopes"
@@ -66,6 +56,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     |> validate_length(:name, min: 1, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
     |> validate_inclusion(:protocol, @possible_protocols)
+    |> validate_inclusion(:grant_flows, @possible_grant_flows)
     |> validate_inclusion(:access_type, @possible_access_types)
     |> unique_constraint(:name)
   end
@@ -77,6 +68,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     |> validate_length(:name, min: 1, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
     |> validate_inclusion(:protocol, @possible_protocols)
+    |> validate_inclusion(:grant_flows, @possible_grant_flows)
     |> validate_inclusion(:access_type, @possible_access_types)
     |> unique_constraint(:name)
   end
@@ -89,4 +81,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
 
   @doc false
   def possible_access_types, do: @possible_access_types
+
+  @doc false
+  def possible_grant_flows, do: @possible_grant_flows
 end
