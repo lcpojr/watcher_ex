@@ -32,5 +32,4 @@ config :resource_manager, ResourceManager.Repo,
 config :authenticator, Authenticator.Authentication.Ports.GetIdentity,
   command: ResourceManager.Identity.Commands.GetIdentity
 
-
 import_config "#{Mix.env()}.exs"
