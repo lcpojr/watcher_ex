@@ -8,7 +8,7 @@ defmodule Authenticator.Authentication.Ports.GetIdentity do
 
   @doc "Delegates to command execute/1"
   @spec execute(params :: map()) :: possible_responses()
-  def execute(params), do: implementation().execute(input)
+  def execute(params), do: implementation().execute(params)
 
   defp implementation do
     :authenticator

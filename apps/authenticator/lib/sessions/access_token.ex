@@ -12,7 +12,7 @@ defmodule Authenticator.Sessions.AccessToken do
     |> default_claims()
     |> add_claim("aud", & &1, fn value, _, ctx -> value == ctx.audience end)
     |> add_claim("sub", & &1, fn value, _, ctx -> value == ctx.subject end)
-    |> add_claim("typ", nil, fn value, _, ctx -> value == @default_type end)
+    |> add_claim("typ", nil, fn value, _, _ -> value == @default_type end)
     |> add_claim("scope", nil, &is_binary/1)
   end
 end
