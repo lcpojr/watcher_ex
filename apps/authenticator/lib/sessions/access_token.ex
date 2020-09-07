@@ -1,4 +1,6 @@
 defmodule Authenticator.Sessions.AccessToken do
+  @moduledoc false
+
   use Joken.Config
 
   add_hook(Joken.Hooks.RequiredClaims, ensure: ~w(exp iat nbf iss aud jti sub typ scope))
