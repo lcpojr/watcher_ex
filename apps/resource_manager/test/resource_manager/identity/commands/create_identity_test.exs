@@ -2,7 +2,6 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identity.Commands.CreateIdentity
-  alias ResourceManager.Identity.Commands.Inputs.{CreateClientApplication, CreateUser}
   alias ResourceManager.Identity.Schemas.{ClientApplication, User}
   alias ResourceManager.Repo
 
@@ -12,7 +11,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
 
   describe "#{CreateIdentity}.execute/2" do
     test "succeeds in creating user identity if params are valid", ctx do
-      input = %CreateUser{
+      input = %{
         username: "myusername",
         password: "My-passw@rd",
         scopes: ctx.scopes
@@ -23,7 +22,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
     end
 
     test "succeeds in creating client application identity if params are valid", ctx do
-      input = %CreateClientApplication{
+      input = %{
         name: "my-client-application",
         description: "App for tests",
         public_key: get_priv_public_key(),
@@ -32,6 +31,16 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
 
       assert {:ok, %ClientApplication{} = app} = CreateIdentity.execute(input)
       assert app == Repo.one(ClientApplication)
+    end
+
+    test "fails in creating user if params are invalid" do
+      assert {:error, %{errors: [password: {"can't be blank", [validation: :required]}]}} =
+               CreateIdentity.execute(%{username: "myusername", password: nil})
+    end
+
+    test "fails in creating client application if params are invalid" do
+      assert {:error, %{errors: [public_key: {"can't be blank", [validation: :required]}]}} =
+               CreateIdentity.execute(%{name: "myapplication", public_key: nil})
     end
   end
 end

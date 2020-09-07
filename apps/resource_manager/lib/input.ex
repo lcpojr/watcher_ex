@@ -14,6 +14,26 @@ defmodule ResourceManager.Input do
       @primary_key false
       @foreign_key_type false
 
+      @doc "Validates the given parameters and cast into #{__MODULE__} struct"
+      @spec cast_and_apply(params :: map()) :: {:ok, __MODULE__.t()} | {:error, Changeset.t()}
+      def cast_and_apply(params) when is_map(params) do
+        params
+        |> __MODULE__.changeset()
+        |> case do
+          %{valid?: true} = changeset -> {:ok, Changeset.apply_changes(changeset)}
+          %{valid?: false} = changeset -> {:error, changeset}
+        end
+      end
+
+      @doc "Cast #{__MODULE__} to a list"
+      @spec cast_to_list(input :: __MODULE__.t()) :: list()
+      def cast_to_list(%{__struct__: __MODULE__} = input) do
+        input
+        |> cast_to_map()
+        |> Map.to_list()
+        |> Enum.filter(fn {_key, value} -> not is_nil(value) end)
+      end
+
       @doc "Cast #{__MODULE__} to an atom map"
       @spec cast_to_map(input :: __MODULE__.t()) :: map()
       def cast_to_map(%{__struct__: __MODULE__} = input) do

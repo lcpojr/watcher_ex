@@ -16,7 +16,7 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
           scopes: list(String.t()) | nil
         }
 
-  @required [:username, :password, :algorithm]
+  @required [:username, :password, :password_algorithm]
   @optional [:scopes]
   embedded_schema do
     # Identity
@@ -32,9 +32,10 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
   end
 
   @doc false
-  def cast_and_apply(params) when is_map(params) do
+  def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
+    |> validate_length(:username, min: 1)
     |> validate_inclusion(:status, User.possible_statuses())
     |> validate_required(@required)
   end

@@ -22,8 +22,8 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_types ~s(rsa)
-  @possible_formats ~s(pem)
+  @possible_types ~w(rsa)
+  @possible_formats ~w(pem)
 
   @required_fields [:value]
   @foreign_key_fields [:client_application_id]
