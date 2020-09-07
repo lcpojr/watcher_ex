@@ -4,7 +4,7 @@ defmodule ResourceManager do
   resource server.
   """
 
-  alias ResourceManager.Commands.{CreateIdentity, ConsentScope, RemoveScope}
+  alias ResourceManager.Commands.{ConsentScope, CreateIdentity, RemoveScope}
 
   @doc "Delegates to #{CreateIdentity}/1"
   defdelegate create_identity(input), to: CreateIdentity, as: :execute
