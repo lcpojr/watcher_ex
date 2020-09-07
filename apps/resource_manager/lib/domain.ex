@@ -1,4 +1,4 @@
-defmodule ResourceManager.Resource do
+defmodule ResourceManager.Domain do
   @moduledoc """
   Implements helpfull functions to be used in resource domains.
   """
