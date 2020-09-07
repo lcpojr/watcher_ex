@@ -11,6 +11,7 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateClientApplication do
   @type t :: %__MODULE__{
           name: String.t(),
           description: String.t(),
+          public_key: String.t(),
           public_key_type: String.t(),
           public_key_format: String.t(),
           status: String.t() | nil,
@@ -40,11 +41,11 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateClientApplication do
   end
 
   @doc false
-  def cast_and_apply(params) when is_map(params) do
+  def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
-    |> validate_length(:name, min: 1, max: 150)
-    |> validate_length(:public_key, min: 1, max: 150)
+    |> validate_length(:name, min: 1)
+    |> validate_length(:public_key, min: 1)
     |> validate_inclusion(:status, ClientApplication.possible_statuses())
     |> validate_inclusion(:protocol, ClientApplication.possible_protocols())
     |> validate_inclusion(:grant_flows, ClientApplication.possible_grant_flows())

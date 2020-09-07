@@ -12,6 +12,10 @@ import Config
 
 config :joken, default_signer: "secret"
 
+###################
+# RESOURCE MANAGER
+###################
+
 config :resource_manager, ecto_repos: [ResourceManager.Repo]
 
 config :resource_manager, ResourceManager.Repo,
@@ -20,5 +24,13 @@ config :resource_manager, ResourceManager.Repo,
   password: "postgres",
   hostname: "localhost",
   port: 5432
+
+################
+# AUTHENTICATOR
+################
+
+config :authenticator, Authenticator.Authentication.Ports.GetIdentity,
+  command: ResourceManager.Identity.Commands.GetIdentity
+
 
 import_config "#{Mix.env()}.exs"

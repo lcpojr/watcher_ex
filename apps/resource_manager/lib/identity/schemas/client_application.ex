@@ -27,10 +27,10 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~s(active, inactive, blocked)
-  @possible_protocols ~s(openid-connect saml)
-  @possible_access_types ~s(cofidential public bearer-only)
-  @possible_grant_flows ~s(resource_owner implicit client_credentials refresh_token authorization_code)
+  @possible_statuses ~w(active inactive blocked)
+  @possible_protocols ~w(openid-connect saml)
+  @possible_access_types ~w(confidential public bearer-only)
+  @possible_grant_flows ~w(resource_owner implicit client_credentials refresh_token authorization_code)
 
   @required_fields [:name, :status, :protocol, :access_type]
   @optional_fields [:grant_flows, :description]

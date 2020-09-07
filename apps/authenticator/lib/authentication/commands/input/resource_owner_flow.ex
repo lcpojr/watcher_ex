@@ -1,4 +1,4 @@
-defmodule Authenticator.Commands.Input.ResourceOwnerFlow do
+defmodule Authenticator.Authentication.Commands.Input.ResourceOwnerFlow do
   @moduledoc """
   Input parameter for resource owner authentication flow
   """

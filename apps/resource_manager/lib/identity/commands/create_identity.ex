@@ -16,11 +16,14 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
   @typedoc "All possible identities"
   @type identities :: User.t() | ClientApplication.t()
 
+  @typedoc "All possible inputs"
+  @type input :: CreateUser.t() | CreateClientApplication.t() | map()
+
   @typedoc "All possible responses"
   @type possible_response :: {:ok, identities()} | {:error, Ecto.Changeset.t()}
 
   @doc "Create a new identity with it's credentials"
-  @spec execute(input :: CreateUser.t() | CreateClientApplication.t()) :: possible_response()
+  @spec execute(params :: input()) :: possible_response()
   def execute(%CreateUser{} = input) do
     Logger.info("Creating new user identity")
 
@@ -76,6 +79,24 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
       {:error, step, err, _changes} ->
         Logger.error("Failed to create client application in step #{inspect(step)}", reason: err)
         {:error, err}
+    end
+  end
+
+  def execute(%{username: _, password: _} = params) do
+    params
+    |> CreateUser.cast_and_apply()
+    |> case do
+      {:ok, %CreateUser{} = input} -> execute(input)
+      error -> error
+    end
+  end
+
+  def execute(%{name: _, public_key: _} = params) do
+    params
+    |> CreateClientApplication.cast_and_apply()
+    |> case do
+      {:ok, %CreateClientApplication{} = input} -> execute(input)
+      error -> error
     end
   end
 

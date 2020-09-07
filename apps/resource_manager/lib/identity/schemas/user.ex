@@ -24,7 +24,7 @@ defmodule ResourceManager.Identity.Schemas.User do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~s(active, inactive, blocked, temporary_blocked)
+  @possible_statuses ~w(active inactive blocked temporary_blocked)
 
   @required_fields [:username, :status]
   schema "users" do
