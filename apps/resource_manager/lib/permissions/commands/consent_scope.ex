@@ -1,4 +1,4 @@
-defmodule ResourceManager.Commands.ConsentScope do
+defmodule ResourceManager.Permissions.Commands.ConsentScope do
   @moduledoc """
   Command for consenting new scopes to the an identity.
   """

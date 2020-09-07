@@ -1,7 +1,7 @@
-defmodule ResourceManager.Commands.ConsentScopeTest do
+defmodule ResourceManager.Permissions.Commands.ConsentScopeTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Commands.ConsentScope
+  alias ResourceManager.Permissions.Commands.ConsentScope
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, UserScope}
   alias ResourceManager.Repo
 

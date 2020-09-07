@@ -1,7 +1,7 @@
-defmodule ResourceManager.Commands.RemoveScopeTest do
+defmodule ResourceManager.Permissions.Commands.RemoveScopeTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Commands.RemoveScope
+  alias ResourceManager.Permissions.Commands.RemoveScope
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, UserScope}
   alias ResourceManager.Repo
 

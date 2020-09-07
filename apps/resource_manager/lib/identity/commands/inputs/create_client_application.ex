@@ -1,4 +1,4 @@
-defmodule ResourceManager.Commands.Inputs.CreateClientApplication do
+defmodule ResourceManager.Identity.Commands.Inputs.CreateClientApplication do
   @moduledoc """
   Input parameters for creating client applications
   """
