@@ -1,3 +1,0 @@
-# Authenticator
-
-**TODO: Add description**

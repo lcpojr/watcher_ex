@@ -10,8 +10,6 @@
 
 import Config
 
-config :joken, default_signer: "secret"
-
 config :resource_manager, ecto_repos: [ResourceManager.Repo]
 
 config :resource_manager, ResourceManager.Repo,
