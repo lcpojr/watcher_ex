@@ -1,6 +1,6 @@
 defmodule Authenticator.Authentication.Ports.GetIdentity do
   @moduledoc """
-  Port to access Resource manager get by command
+  Port to access Resource manager get identity command
   """
 
   @typedoc "All possible responses"
