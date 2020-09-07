@@ -7,6 +7,9 @@ defmodule ResourceManager.DataCase do
 
   using do
     quote do
+      import Ecto
+      import Ecto.Query
+
       import ResourceManager.{DataCase, Factory}
 
       alias ResourceManager.Repo

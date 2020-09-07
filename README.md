@@ -1,4 +1,4 @@
-# WatcherEx
+# WatcherEx ![Workflow CI](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg)
 
 **TODO: Add description**
 

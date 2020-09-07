@@ -12,6 +12,7 @@ defmodule ResourceManager.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -19,7 +20,7 @@ defmodule ResourceManager.MixProject do
   def application do
     [
       mod: {ResourceManager.Application, []},
-      extra_applications: [:logger]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -42,6 +43,16 @@ defmodule ResourceManager.MixProject do
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:excoveralls, "~> 0.13", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: [
+        "ecto.create --quiet -r ResourceManager.Repo",
+        "ecto.migrate -r ResourceManager.Repo",
+        "test"
+      ]
     ]
   end
 end

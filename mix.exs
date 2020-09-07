@@ -13,19 +13,13 @@ defmodule WatcherEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
-      aliases: aliases(),
       package: package(),
-      description: description(),
+      description: "Elixir OAuth2 server",
       source_url: @url,
+      dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        coveralls: :test,
-        "coveralls.detail": :test,
-        "coveralls.post": :test,
-        "coveralls.html": :test,
-        "ecto.test_setup": :test,
-        "ecto.test_reset": :test
-      ]
+      preferred_cli_env: preferred_cli_env(),
+      aliases: aliases()
     ]
   end
 
@@ -37,14 +31,12 @@ defmodule WatcherEx.MixProject do
   defp deps do
     [
       # Tools
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:excoveralls, "~> 0.13", only: :test}
     ]
   end
-
-  defp description, do: "Elixir OAuth2 server"
 
   defp package do
     [
@@ -66,6 +58,25 @@ defmodule WatcherEx.MixProject do
         ecto_sql: "https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.html",
         argon2_elixir: "https://hexdocs.pm/argon2_elixir/api-reference.html"
       ]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_add_apps: [:ex_unit],
+      plt_core_path: "_build/plts",
+      plt_file: {:no_warn, "_build/plts/watcher_ex.plt"}
+    ]
+  end
+
+  defp preferred_cli_env do
+    [
+      coveralls: :test,
+      "coveralls.detail": :test,
+      "coveralls.post": :test,
+      "coveralls.html": :test,
+      "ecto.test_setup": :test,
+      "ecto.test_reset": :test
     ]
   end
 
