@@ -1,4 +1,4 @@
-defmodule ResourceManager.Commands.CreateIdentity do
+defmodule ResourceManager.Identity.Commands.CreateIdentity do
   @moduledoc """
   Command for creating a new identity.
   """
@@ -6,9 +6,9 @@ defmodule ResourceManager.Commands.CreateIdentity do
   require Logger
 
   alias Ecto.Multi
-  alias ResourceManager.Commands.ConsentScope
-  alias ResourceManager.Commands.Inputs.{CreateClientApplication, CreateUser}
+  alias ResourceManager.Permissions.Commands.ConsentScope
   alias ResourceManager.Credentials.{Passwords, PublicKeys}
+  alias ResourceManager.Identity.Commands.Inputs.{CreateClientApplication, CreateUser}
   alias ResourceManager.Identity.Schemas.{ClientApplication, User}
   alias ResourceManager.Identity.{ClientApplications, Users}
   alias ResourceManager.Repo

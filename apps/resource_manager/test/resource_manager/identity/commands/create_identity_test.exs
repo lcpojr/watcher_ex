@@ -1,8 +1,8 @@
-defmodule ResourceManager.Commands.CreateIdentityTest do
+defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Commands.CreateIdentity
-  alias ResourceManager.Commands.Inputs.{CreateClientApplication, CreateUser}
+  alias ResourceManager.Identity.Commands.CreateIdentity
+  alias ResourceManager.Identity.Commands.Inputs.{CreateClientApplication, CreateUser}
   alias ResourceManager.Identity.Schemas.{ClientApplication, User}
   alias ResourceManager.Repo
 

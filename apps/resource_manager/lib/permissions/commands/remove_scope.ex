@@ -1,4 +1,4 @@
-defmodule ResourceManager.Commands.RemoveScope do
+defmodule ResourceManager.Permissions.Commands.RemoveScope do
   @moduledoc """
   Command for removing scopes from the identity.
   """
