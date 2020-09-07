@@ -11,12 +11,12 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
   @type t :: %__MODULE__{
           username: String.t(),
           status: String.t(),
-          password: String.t(),
+          password_hash: String.t(),
           password_algorithm: String.t(),
           scopes: list(String.t()) | nil
         }
 
-  @required [:username, :password, :password_algorithm]
+  @required [:username, :password_hash, :password_algorithm]
   @optional [:scopes]
   embedded_schema do
     # Identity
@@ -24,7 +24,7 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
     field :status, :string, default: "active"
 
     # Credentials
-    field :password, :string
+    field :password_hash, :string
     field :password_algorithm, :string, default: "argon2"
 
     # Permissions
@@ -36,6 +36,8 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateUser do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
     |> validate_length(:username, min: 1)
+    |> validate_length(:password_hash, min: 1)
+    |> validate_length(:password_algorithm, min: 1)
     |> validate_inclusion(:status, User.possible_statuses())
     |> validate_required(@required)
   end

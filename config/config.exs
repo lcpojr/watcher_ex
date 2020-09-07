@@ -25,11 +25,7 @@ config :resource_manager, ResourceManager.Repo,
   hostname: "localhost",
   port: 5432
 
-################
-# AUTHENTICATOR
-################
-
-config :authenticator, Authenticator.Authentication.Ports.GetIdentity,
-  command: ResourceManager.Identity.Commands.GetIdentity
+config :resource_manager, ResourceManager.Credentials.Ports.HashSecret,
+  command: Authenticator.Crypto.Commands.GenerateHash
 
 import_config "#{Mix.env()}.exs"

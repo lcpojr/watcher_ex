@@ -82,7 +82,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
     end
   end
 
-  def execute(%{username: _, password: _} = params) do
+  def execute(%{username: _, password_hash: _} = params) do
     params
     |> CreateUser.cast_and_apply()
     |> case do
@@ -100,8 +100,16 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
     end
   end
 
-  defp build_credential(%User{} = user, %{password: password, password_algorithm: algorithm}),
-    do: %{user_id: user.id, password_hash: hash_password(password, algorithm)}
+  defp build_credential(
+         %User{} = user,
+         %{password_hash: password_hash, password_algorithm: algorithm}
+       ) do
+    %{
+      user_id: user.id,
+      password_hash: password_hash,
+      algorithm: algorithm
+    }
+  end
 
   defp build_credential(
          %ClientApplication{} = client_application,
@@ -114,6 +122,4 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
       format: format
     }
   end
-
-  defp hash_password(password, "argon2"), do: Argon2.hash_pwd_salt(password)
 end

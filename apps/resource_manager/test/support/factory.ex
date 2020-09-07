@@ -19,7 +19,8 @@ defmodule ResourceManager.Factory do
     %ClientApplication{
       name: "my-application-name#{System.unique_integer()}",
       description: "It's a test application",
-      grant_flows: ["resource_owner"]
+      grant_flows: ["resource_owner"],
+      secret: gen_hashed_password(Ecto.UUID.generate())
     }
   end
 

@@ -9,6 +9,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
 
   import Ecto.Changeset
 
+  alias ResourceManager.Credentials.Ports.HashSecret
   alias ResourceManager.Credentials.Schemas.PublicKey
   alias ResourceManager.Permissions.Schemas.Scope
 
@@ -33,7 +34,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
   @possible_grant_flows ~w(resource_owner implicit client_credentials refresh_token authorization_code)
 
   @required_fields [:name, :status, :protocol, :access_type]
-  @optional_fields [:grant_flows, :description]
+  @optional_fields [:grant_flows, :description, :redirect_uri]
   schema "client_applications" do
     field :name, :string
     field :description, :string
@@ -41,6 +42,8 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     field :protocol, :string, default: "openid-connect"
     field :access_type, :string, default: "confidential"
     field :grant_flows, {:array, :string}
+    field :redirect_uri, :string
+    field :secret, :string
 
     has_one :public_key, PublicKey
     many_to_many :scopes, Scope, join_through: "client_applications_scopes"
@@ -59,7 +62,11 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     |> validate_inclusion(:grant_flows, @possible_grant_flows)
     |> validate_inclusion(:access_type, @possible_access_types)
     |> unique_constraint(:name)
+    |> generate_secret()
   end
+
+  defp generate_secret(%{valid?: false} = changeset), do: changeset
+  defp generate_secret(c), do: put_change(c, :secret, HashSecret.execute(Ecto.UUID.generate()))
 
   @doc false
   def changeset_update(%__MODULE__{} = model, params) when is_map(params) do

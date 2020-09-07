@@ -46,6 +46,8 @@ defmodule ResourceManager.Identity.Commands.Inputs.CreateClientApplication do
     |> cast(params, @required ++ @optional)
     |> validate_length(:name, min: 1)
     |> validate_length(:public_key, min: 1)
+    |> validate_length(:public_key_type, min: 1)
+    |> validate_length(:public_key_format, min: 1)
     |> validate_inclusion(:status, ClientApplication.possible_statuses())
     |> validate_inclusion(:protocol, ClientApplication.possible_protocols())
     |> validate_inclusion(:grant_flows, ClientApplication.possible_grant_flows())

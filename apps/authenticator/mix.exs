@@ -34,6 +34,8 @@ defmodule Authenticator.MixProject do
 
       # Domain
       {:argon2_elixir, "~> 2.0"},
+      {:bcrypt_elixir, "~> 2.2"},
+      {:pbkdf2_elixir, "~> 1.2"},
       {:joken, "~> 2.2"},
       {:jason, "~> 1.2"},
 
@@ -41,7 +43,8 @@ defmodule Authenticator.MixProject do
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.13", only: :test}
+      {:excoveralls, "~> 0.13", only: :test},
+      {:mox, "~> 0.5", only: :test}
     ]
   end
 end
