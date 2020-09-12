@@ -28,8 +28,11 @@ defmodule Authenticator.SignIn.ResourceOwner do
   @spec execute(input :: ResourceOwner.t() | map()) :: possible_responses()
   def execute(%ResourceOwner{username: username, client_id: client_id} = input) do
     with {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: client_id})},
+         {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:secret_matches?, true} <- {:secret_matches?, app.secret == input.client_secret},
+         {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
+         {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
          {:pass_matches?, true} <- {:pass_matches?, password_matches?(user, input.password)} do
@@ -39,12 +42,24 @@ defmodule Authenticator.SignIn.ResourceOwner do
         Logger.info("Client application #{client_id} not found")
         {:error, :unauthenticated}
 
+      {:flow_enabled?, false} ->
+        Logger.info("Client application #{client_id} resource_owner flow not enabled")
+        {:error, :unauthenticated}
+
       {:app_active?, false} ->
         Logger.info("Client application #{client_id} is not active")
         {:error, :unauthenticated}
 
       {:secret_matches?, false} ->
-        Logger.info("Password do not match any credential")
+        Logger.info("Client application #{client_id} secret do not match any credential")
+        {:error, :unauthenticated}
+
+      {:confidential?, false} ->
+        Logger.info("Client application #{client_id} is not confidential")
+        {:error, :unauthenticated}
+
+      {:valid_protocol?, false} ->
+        Logger.info("Client application #{client_id} protocol is not openid-connect")
         {:error, :unauthenticated}
 
       {:user, {:error, :not_found}} ->
@@ -56,7 +71,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
         {:error, :unauthenticated}
 
       {:pass_matches?, false} ->
-        Logger.info("Password do not match any credential")
+        Logger.info("User #{username} password do not match any credential")
         {:error, :unauthenticated}
     end
   end

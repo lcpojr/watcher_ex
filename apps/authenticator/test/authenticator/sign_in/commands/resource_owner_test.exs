@@ -64,6 +64,21 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       assert {:error, :unauthenticated} == ResourceOwner.execute(input)
     end
 
+    test "fails if client application is flow not enabled", ctx do
+      app = insert!(:client_application, grant_flows: [])
+
+      input = %{
+        username: ctx.user.username,
+        password: ctx.password,
+        grant_type: "password",
+        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        client_id: app.client_id,
+        client_secret: app.client_id
+      }
+
+      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+    end
+
     test "fails if client application is inactive", ctx do
       app = insert!(:client_application, status: "blocked")
 
@@ -87,6 +102,36 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
         client_id: ctx.app.client_id,
         client_secret: Ecto.UUID.generate()
+      }
+
+      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+    end
+
+    test "fails if client application is not confidential", ctx do
+      app = insert!(:client_application, access_type: "public")
+
+      input = %{
+        username: ctx.user.username,
+        password: ctx.password,
+        grant_type: "password",
+        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        client_id: app.client_id,
+        client_secret: app.client_id
+      }
+
+      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+    end
+
+    test "fails if client application protocol is not openid-connect", ctx do
+      app = insert!(:client_application, protocol: "saml")
+
+      input = %{
+        username: ctx.user.username,
+        password: ctx.password,
+        grant_type: "password",
+        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        client_id: app.client_id,
+        client_secret: app.client_id
       }
 
       assert {:error, :unauthenticated} == ResourceOwner.execute(input)
