@@ -17,6 +17,7 @@ defmodule ResourceManager.Factory do
 
   def build(:client_application) do
     %ClientApplication{
+      client_id: Ecto.UUID.generate(),
       name: "my-application-name#{System.unique_integer()}",
       description: "It's a test application",
       grant_flows: ["resource_owner"],
@@ -76,7 +77,10 @@ defmodule ResourceManager.Factory do
     do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
 
   @doc false
-  def gen_hashed_password(password \\ @default_password), do: Argon2.hash_pwd_salt(password)
+  def gen_hashed_password(password \\ @default_password, alg \\ :argon2)
+  def gen_hashed_password(password, :argon2), do: Argon2.hash_pwd_salt(password)
+  def gen_hashed_password(password, :bcrypt), do: Bcrypt.hash_pwd_salt(password)
+  def gen_hashed_password(password, :pbkdf2), do: Pbkdf2.hash_pwd_salt(password)
 
   @doc false
   def get_priv_public_key do

@@ -20,7 +20,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
   @type input :: CreateUser.t() | CreateClientApplication.t() | map()
 
   @typedoc "All possible responses"
-  @type possible_response :: {:ok, identities()} | {:error, Ecto.Changeset.t()}
+  @type possible_response :: {:ok, identities()} | {:error, Ecto.Changeset.t() | :invalid_params}
 
   @doc "Create a new identity with it's credentials"
   @spec execute(params :: input()) :: possible_response()
@@ -99,6 +99,8 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
       error -> error
     end
   end
+
+  def execute(_any), do: {:error, :invalid_params}
 
   defp build_credential(
          %User{} = user,

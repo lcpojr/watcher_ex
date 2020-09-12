@@ -4,6 +4,7 @@ defmodule ResourceManager.Repo.Migrations.CreateClientApplicationsTable do
   def change do
     create_if_not_exists table(:client_applications, primary_key: false) do
       add :id, :uuid, primary_key: true
+      add :client_id, :uuid, null: false
       add :name, :string, null: false
       add :secret, :string, null: false
       add :description, :string, null: true
@@ -16,6 +17,6 @@ defmodule ResourceManager.Repo.Migrations.CreateClientApplicationsTable do
       timestamps()
     end
 
-    create_if_not_exists unique_index(:client_applications, [:name])
+    create_if_not_exists unique_index(:client_applications, [:client_id])
   end
 end

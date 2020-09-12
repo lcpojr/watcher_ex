@@ -15,9 +15,10 @@ defmodule ResourceManager.Identity.Commands.Inputs.GetClientApplication do
           access_type: String.t()
         }
 
-  @optional [:id, :name, :status, :protocol, :access_type]
+  @optional [:id, :client_id, :name, :status, :protocol, :access_type]
   embedded_schema do
     field :id, Ecto.UUID
+    field :client_id, Ecto.UUID
     field :name, :string
     field :status, :string
     field :protocol, :string
