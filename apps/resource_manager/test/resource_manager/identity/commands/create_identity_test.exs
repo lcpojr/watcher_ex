@@ -1,6 +1,7 @@
 defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
   use ResourceManager.DataCase, async: true
 
+  alias ResourceManager.Credentials.Ports.HashSecretMock
   alias ResourceManager.Identity.Commands.CreateIdentity
   alias ResourceManager.Identity.Schemas.{ClientApplication, User}
   alias ResourceManager.Repo
@@ -13,7 +14,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
     test "succeeds in creating user identity if params are valid", ctx do
       input = %{
         username: "myusername",
-        password: "My-passw@rd",
+        password_hash: gen_hashed_password(),
         scopes: ctx.scopes
       }
 
@@ -29,13 +30,18 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
         scopes: ctx.scopes
       }
 
+      expect(HashSecretMock, :execute, fn secret, :argon2 ->
+        assert is_binary(secret)
+        gen_hashed_password(Ecto.UUID.generate())
+      end)
+
       assert {:ok, %ClientApplication{} = app} = CreateIdentity.execute(input)
       assert app == Repo.one(ClientApplication)
     end
 
     test "fails in creating user if params are invalid" do
-      assert {:error, %{errors: [password: {"can't be blank", [validation: :required]}]}} =
-               CreateIdentity.execute(%{username: "myusername", password: nil})
+      assert {:error, %{errors: [password_hash: {"can't be blank", [validation: :required]}]}} =
+               CreateIdentity.execute(%{username: "myusername", password_hash: nil})
     end
 
     test "fails in creating client application if params are invalid" do

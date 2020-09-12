@@ -1,6 +1,7 @@
 defmodule ResourceManager.Identity.ClientApplicationsTest do
   use ResourceManager.DataCase, async: true
 
+  alias ResourceManager.Credentials.Ports.HashSecretMock
   alias ResourceManager.Identity.ClientApplications
   alias ResourceManager.Identity.Schemas.ClientApplication
 
@@ -11,6 +12,11 @@ defmodule ResourceManager.Identity.ClientApplicationsTest do
   describe "#{ClientApplications}.create/1" do
     test "succeed if params are valid" do
       params = %{name: "my-test-application"}
+
+      expect(HashSecretMock, :execute, fn secret, :argon2 ->
+        assert is_binary(secret)
+        gen_hashed_password(Ecto.UUID.generate())
+      end)
 
       assert {:ok, %ClientApplication{id: id} = client_application} =
                ClientApplications.create(params)

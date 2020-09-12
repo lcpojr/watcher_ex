@@ -9,10 +9,12 @@ defmodule ResourceManager.DataCase do
     quote do
       import Ecto
       import Ecto.Query
-
+      import Mox
       import ResourceManager.{DataCase, Factory}
 
       alias ResourceManager.Repo
+
+      setup :verify_on_exit!
     end
   end
 

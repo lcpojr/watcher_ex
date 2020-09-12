@@ -26,7 +26,7 @@ defmodule ResourceManager.Credentials.Schemas.Password do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_algorithms ~w(argon2)
+  @possible_algorithms ~w(argon2 bcrypt pbkdf2)
 
   @required_fields [:password_hash]
   @foreign_key_fields [:user_id]
