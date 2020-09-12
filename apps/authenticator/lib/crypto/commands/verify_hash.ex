@@ -17,4 +17,9 @@ defmodule Authenticator.Crypto.Commands.VerifyHash do
   def execute(value, hash, :pbkdf2)
       when is_binary(value) and is_binary(hash),
       do: Pbkdf2.verify_pass(value, hash)
+
+  @doc "Gets the hash and algorithm from the input and verifies if it matches the hash"
+  @spec execute(identity :: map(), credential :: String.t()) :: boolean()
+  def execute(%{password: %{password_hash: hash, algorithm: alg}}, password),
+    do: execute(password, hash, String.to_atom(alg))
 end

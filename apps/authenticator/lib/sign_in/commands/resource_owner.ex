@@ -35,7 +35,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
-         {:pass_matches?, true} <- {:pass_matches?, password_matches?(user, input.password)} do
+         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)} do
       generate_access_token(user, app, build_scopes(user, app, input.scope))
     else
       {:app, {:error, :not_found}} ->
@@ -86,14 +86,6 @@ defmodule Authenticator.SignIn.ResourceOwner do
   end
 
   def execute(_any), do: {:error, :invalid_params}
-
-  defp password_matches?(
-         %{password: %{password_hash: password_hash, algorithm: algorithm}},
-         password
-       )
-       when is_binary(password) do
-    VerifyHash.execute(password, password_hash, String.to_atom(algorithm))
-  end
 
   defp build_scopes(user, application, scopes) when is_binary(scopes) do
     user_scopes = Enum.map(user.scopes, & &1.name)
