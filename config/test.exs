@@ -13,3 +13,9 @@ config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
 
 config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
   command: ResourceManager.Credentials.Ports.VerifyHashMock
+
+################
+# Authenticator
+################
+
+config :authenticator, Authenticator.Repo, pool: Ecto.Adapters.SQL.Sandbox

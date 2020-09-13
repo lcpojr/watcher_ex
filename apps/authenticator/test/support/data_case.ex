@@ -13,6 +13,7 @@ defmodule Authenticator.DataCase do
       import Authenticator.{DataCase, Factory}
 
       alias Authenticator.Repo
+      alias ResourceManager.Factory, as: RF
 
       setup :verify_on_exit!
     end
@@ -20,9 +21,11 @@ defmodule Authenticator.DataCase do
 
   setup tags do
     :ok = Sandbox.checkout(Authenticator.Repo)
+    :ok = Sandbox.checkout(ResourceManager.Repo)
 
     unless tags[:async] do
       Sandbox.mode(Authenticator.Repo, {:shared, self()})
+      Sandbox.mode(ResourceManager.Repo, {:shared, self()})
     end
 
     :ok

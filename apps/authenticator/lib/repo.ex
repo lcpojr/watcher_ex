@@ -1,5 +1,5 @@
 defmodule Authenticator.Repo do
   @moduledoc false
 
-  use Ecto.Repo, otp_app: :resource_manager, adapter: Ecto.Adapters.Postgres
+  use Ecto.Repo, otp_app: :authenticator, adapter: Ecto.Adapters.Postgres
 end

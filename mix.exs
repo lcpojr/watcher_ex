@@ -84,25 +84,27 @@ defmodule WatcherEx.MixProject do
     [
       "ecto.setup": [
         "ecto.create -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo"
+        "ecto.migrate -r ResourceManager.Repo",
+        "ecto.create -r Authenticator.Repo",
+        "ecto.migrate -r Authenticator.Repo"
       ],
       "ecto.reset": [
         "ecto.drop -r ResourceManager.Repo",
+        "ecto.drop -r Authenticator.Repo",
         "ecto.setup"
       ],
       "ecto.test_setup": [
         "ecto.create -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo"
+        "ecto.migrate -r ResourceManager.Repo",
+        "ecto.create -r Authenticator.Repo",
+        "ecto.migrate -r Authenticator.Repo"
       ],
       "ecto.test_reset": [
         "ecto.drop -r ResourceManager.Repo",
+        "ecto.drop -r Authenticator.Repo",
         "ecto.test_setup"
       ],
-      test: [
-        "ecto.create --quiet -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo",
-        "test"
-      ]
+      test: ["test"]
     ]
   end
 end

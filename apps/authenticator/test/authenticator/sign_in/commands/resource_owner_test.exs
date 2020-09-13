@@ -1,21 +1,21 @@
 defmodule Authenticator.SignIn.Commands.ResourceOwner do
-  use ResourceManager.DataCase, async: true
+  use Authenticator.DataCase, async: true
 
-  alias Authenticator.Sessions.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.ResourceOwner
 
   setup do
-    scopes = insert_list!(:scope, 3)
+    scopes = RF.insert_list!(:scope, 3)
 
-    user = insert!(:user)
-    app = insert!(:client_application)
+    user = RF.insert!(:user)
+    app = RF.insert!(:client_application)
 
-    Enum.each(scopes, &insert!(:user_scope, scope: &1, user: user))
-    Enum.each(scopes, &insert!(:client_application_scope, scope: &1, client_application: app))
+    Enum.each(scopes, &RF.insert!(:user_scope, scope: &1, user: user))
+    Enum.each(scopes, &RF.insert!(:client_application_scope, scope: &1, client_application: app))
 
     password = "MyPassw@rd234"
-    hash = gen_hashed_password(password)
-    insert!(:password, user: user, password_hash: hash)
+    hash = RF.gen_hashed_password(password)
+    RF.insert!(:password, user: user, password_hash: hash)
 
     {:ok, user: user, app: app, password: password, scopes: scopes}
   end
@@ -55,11 +55,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "succeeds and generates a refresh_token", ctx do
-      app = insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
 
       Enum.each(
         ctx.scopes,
-        &insert!(:client_application_scope, scope: &1, client_application: app)
+        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
       )
 
       client_id = app.client_id
@@ -105,7 +105,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "fails if client application is flow not enabled", ctx do
-      app = insert!(:client_application, grant_flows: [])
+      app = RF.insert!(:client_application, grant_flows: [])
 
       input = %{
         username: ctx.user.username,
@@ -120,7 +120,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "fails if client application is inactive", ctx do
-      app = insert!(:client_application, status: "blocked")
+      app = RF.insert!(:client_application, status: "blocked")
 
       input = %{
         username: ctx.user.username,
@@ -148,7 +148,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "fails if client application is not confidential", ctx do
-      app = insert!(:client_application, access_type: "public")
+      app = RF.insert!(:client_application, access_type: "public")
 
       input = %{
         username: ctx.user.username,
@@ -163,7 +163,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "fails if client application protocol is not openid-connect", ctx do
-      app = insert!(:client_application, protocol: "saml")
+      app = RF.insert!(:client_application, protocol: "saml")
 
       input = %{
         username: ctx.user.username,
@@ -191,7 +191,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
 
     test "fails if user is inactive", ctx do
-      user = insert!(:user, status: "blocked")
+      user = RF.insert!(:user, status: "blocked")
 
       input = %{
         username: user.username,

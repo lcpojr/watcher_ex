@@ -15,6 +15,24 @@ defmodule Authenticator.Factory do
   end
 
   @doc false
+  def build(factory_name, attributes) when is_atom(factory_name) and is_list(attributes) do
+    factory_name
+    |> build()
+    |> struct!(attributes)
+  end
+
+  @doc false
+  def insert!(factory_name, attributes \\ []) when is_atom(factory_name) do
+    factory_name
+    |> build(attributes)
+    |> Repo.insert!()
+  end
+
+  @doc false
+  def insert_list!(factory_name, count \\ 10, attributes \\ []) when is_atom(factory_name),
+    do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
+
+  @doc false
   def get_priv_public_key do
     :authenticator
     |> :code.priv_dir()

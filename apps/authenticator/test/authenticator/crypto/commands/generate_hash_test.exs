@@ -1,5 +1,5 @@
 defmodule Authenticator.SignIn.Commands.GenerateHashTest do
-  use ResourceManager.DataCase, async: true
+  use Authenticator.DataCase, async: true
 
   alias Authenticator.Crypto.Commands.GenerateHash
 

@@ -16,7 +16,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   require Logger
 
   alias Authenticator.Crypto.Commands.VerifyHash
-  alias Authenticator.Sessions.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
 
@@ -37,7 +37,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
          {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
-         {:ok, access_token, claims} <- generate_access_token(user, app, scope),
+         {:ok, access_token, _} <- generate_access_token(user, app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(user, app, scope) do
       {:ok, %{access_token: access_token, refresh_token: refresh_token}}
     else
@@ -85,9 +85,9 @@ defmodule Authenticator.SignIn.ResourceOwner do
 
   def execute(%{grant_type: "password"} = params) do
     params
-    |> ResourceOwner.cast_and_apply()
+    |> Input.cast_and_apply()
     |> case do
-      {:ok, %ResourceOwner{} = input} -> execute(input)
+      {:ok, %Input{} = input} -> execute(input)
       error -> error
     end
   end
@@ -115,7 +115,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
       "azp" => application.name,
       "sub" => user.id,
       "typ" => "Bearer",
-      "scope" => build_scope(user, app, scope)
+      "scope" => build_scope(user, application, scope)
     })
   end
 
@@ -126,11 +126,11 @@ defmodule Authenticator.SignIn.ResourceOwner do
         "azp" => application.name,
         "sub" => user.id,
         "typ" => "Bearer",
-        "scope" => build_scope(user, app, scope)
+        "scope" => build_scope(user, application, scope)
       })
     else
       Logger.info("Refresh token not enabled for application #{application.client_id}")
-      {:ok, nil}
+      {:ok, nil, nil}
     end
   end
 end

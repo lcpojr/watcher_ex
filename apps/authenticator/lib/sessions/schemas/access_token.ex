@@ -21,7 +21,7 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
 
   @required_fields [:jti, :claims, :expires_at, :grant_flow]
   @optional_fields [:status]
-  schema "sessions" do
+  schema "access_tokens" do
     field :jti, :string
     field :claims, :map
     field :status, :string, default: "active"
