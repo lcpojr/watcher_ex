@@ -24,14 +24,14 @@ defmodule ResourceManager.Credentials.Ports.VerifyHash do
   @doc "Gets the hash and algorithm from the input and verifies if it matches the hash"
   @spec execute(identity :: map(), credential :: String.t()) :: boolean()
   def execute(entity, secret)
-    when is_map(entity) and is_binary(secret),
-    do: implementation().execute(entity, secret)
+      when is_map(entity) and is_binary(secret),
+      do: implementation().execute(entity, secret)
 
   @doc "Delegates execution to hash secret command"
   @spec execute(secret :: String.t(), hash :: String.t(), algorithm :: algorithms()) :: String.t()
   def execute(secret, hash, algorithm \\ :argon2)
-    when is_binary(secret) and is_binary(hash) and is_atom(algorithm),
-    do: implementation().execute(secret, hash, algorithm)
+      when is_binary(secret) and is_binary(hash) and is_atom(algorithm),
+      do: implementation().execute(secret, hash, algorithm)
 
   defp implementation do
     :resource_manager
