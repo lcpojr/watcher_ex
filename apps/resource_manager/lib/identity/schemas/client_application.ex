@@ -9,13 +9,14 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Credentials.Ports.HashSecret
+  alias ResourceManager.Credentials.Ports.GenerateHash
   alias ResourceManager.Credentials.Schemas.PublicKey
   alias ResourceManager.Permissions.Schemas.Scope
 
   @typedoc "User schema fields"
   @type t :: %__MODULE__{
           id: binary(),
+          client_id: String.t(),
           name: String.t(),
           description: String.t(),
           status: String.t(),
@@ -36,6 +37,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
   @required_fields [:name, :status, :protocol, :access_type]
   @optional_fields [:grant_flows, :description, :redirect_uri]
   schema "client_applications" do
+    field :client_id, Ecto.UUID, autogenerate: true
     field :name, :string
     field :description, :string
     field :status, :string, default: "active"
@@ -66,7 +68,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
   end
 
   defp generate_secret(%{valid?: false} = changeset), do: changeset
-  defp generate_secret(c), do: put_change(c, :secret, HashSecret.execute(Ecto.UUID.generate()))
+  defp generate_secret(c), do: put_change(c, :secret, GenerateHash.execute(Ecto.UUID.generate()))
 
   @doc false
   def changeset_update(%__MODULE__{} = model, params) when is_map(params) do

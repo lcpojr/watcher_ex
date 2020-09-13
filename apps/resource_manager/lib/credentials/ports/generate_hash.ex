@@ -1,4 +1,4 @@
-defmodule ResourceManager.Credentials.Ports.HashSecret do
+defmodule ResourceManager.Credentials.Ports.GenerateHash do
   @moduledoc """
   Port to access Authenticator generate hash command.
   """
@@ -10,7 +10,7 @@ defmodule ResourceManager.Credentials.Ports.HashSecret do
   @callback execute(secret :: map() | String.t(), algorithm :: algorithms()) :: String.t()
 
   @doc "Delegates execution to hash secret command"
-  @spec execute(secret :: map() | String.t(), algorithm :: algorithms()) :: String.t()
+  @spec execute(secret :: String.t(), algorithm :: algorithms()) :: String.t()
   def execute(secret, algorithm \\ :argon2), do: implementation().execute(secret, algorithm)
 
   defp implementation do

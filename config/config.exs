@@ -10,6 +10,7 @@
 
 import Config
 
+config :logger, :console, format: "$metadata[$level] $time $message\n"
 config :joken, default_signer: "secret"
 
 ###################
@@ -25,7 +26,10 @@ config :resource_manager, ResourceManager.Repo,
   hostname: "localhost",
   port: 5432
 
-config :resource_manager, ResourceManager.Credentials.Ports.HashSecret,
+config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
   command: Authenticator.Crypto.Commands.GenerateHash
+
+config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
+  command: Authenticator.Crypto.Commands.VerifyHash
 
 import_config "#{Mix.env()}.exs"

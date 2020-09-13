@@ -17,7 +17,7 @@ defmodule ResourceManager.Identity.Commands.GetIdentity do
   @type input :: GetUser.t() | GetClientApplication.t() | map()
 
   @typedoc "All possible responses"
-  @type possible_responses :: {:ok, identities()} | {:error, :not_found}
+  @type possible_responses :: {:ok, identities()} | {:error, :not_found | :invalid_params}
 
   @doc "Returns an user or application identity seaching by the given input"
   @spec execute(params :: input()) :: possible_responses()
@@ -66,7 +66,7 @@ defmodule ResourceManager.Identity.Commands.GetIdentity do
     end
   end
 
-  def execute(%{name: _} = params) do
+  def execute(%{client_id: _} = params) do
     params
     |> GetClientApplication.cast_and_apply()
     |> case do
@@ -74,4 +74,6 @@ defmodule ResourceManager.Identity.Commands.GetIdentity do
       error -> error
     end
   end
+
+  def execute(_any), do: {:error, :invalid_params}
 end

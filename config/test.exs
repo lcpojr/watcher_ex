@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :logger, level: :error
+config :logger, level: :warn
 
 ###################
 # RESOURCE MANAGER
@@ -8,5 +8,8 @@ config :logger, level: :error
 
 config :resource_manager, ResourceManager.Repo, pool: Ecto.Adapters.SQL.Sandbox
 
-config :resource_manager, ResourceManager.Credentials.Ports.HashSecret,
-  command: ResourceManager.Credentials.Ports.HashSecretMock
+config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
+  command: ResourceManager.Credentials.Ports.GenerateHashMock
+
+config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
+  command: ResourceManager.Credentials.Ports.VerifyHashMock

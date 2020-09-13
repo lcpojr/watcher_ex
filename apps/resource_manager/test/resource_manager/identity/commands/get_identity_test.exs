@@ -25,6 +25,7 @@ defmodule ResourceManager.Identity.Commands.GetIdentityTest do
     test "succeeds in getting client application identity if params are valid", ctx do
       input = %{
         id: ctx.application.id,
+        client_id: ctx.application.client_id,
         name: ctx.application.name,
         status: ctx.application.status,
         protocol: ctx.application.protocol,
