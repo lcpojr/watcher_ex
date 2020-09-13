@@ -10,7 +10,8 @@ defmodule Authenticator.Factory do
       jti: Ecto.UUID.generate(),
       claims: %{},
       status: "active",
-      grant_flow: "resource_owner"
+      grant_flow: "resource_owner",
+      expires_at: default_expiration()
     }
   end
 
@@ -31,6 +32,13 @@ defmodule Authenticator.Factory do
   @doc false
   def insert_list!(factory_name, count \\ 10, attributes \\ []) when is_atom(factory_name),
     do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
+
+  @doc false
+  def default_expiration do
+    NaiveDateTime.utc_now()
+    |> NaiveDateTime.add(60 * 60 * 2, :second)
+    |> NaiveDateTime.truncate(:second)
+  end
 
   @doc false
   def get_priv_public_key do

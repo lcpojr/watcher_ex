@@ -32,6 +32,9 @@ config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
 config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
   command: Authenticator.Crypto.Commands.VerifyHash
 
+config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
+  command: Authenticator.Crypto.Commands.FakeVerifyHash
+
 ################
 # Authenticator
 ################

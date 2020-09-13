@@ -17,7 +17,7 @@ defmodule ResourceManager.Credentials.Ports.VerifyHash do
   @doc "Delegates to #{__MODULE__}.execute/3 command"
   @callback execute(
               secret :: String.t(),
-              hash :: String.t(),
+              hash :: String.t() | nil,
               algorithm :: algorithms()
             ) :: boolean()
 

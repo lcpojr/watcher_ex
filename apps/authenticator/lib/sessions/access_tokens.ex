@@ -1,7 +1,5 @@
 defmodule Authenticator.Sessions.AccessTokens do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   use Authenticator.Domain, schema_model: Authenticator.Sessions.Schemas.AccessToken
 end

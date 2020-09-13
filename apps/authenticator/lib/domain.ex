@@ -28,6 +28,10 @@ defmodule Authenticator.Domain do
         |> Repo.update()
       end
 
+      @doc "Deletes a #{@schema} from the database"
+      @spec delete(model :: @schema.t()) :: {:ok, @schema.t()}
+      def delete(%@schema{} = model), do: Repo.delete(model)
+
       @doc "Checks if a #{@schema} exists with the given fields"
       @spec exists?(fields :: Keyword.t()) :: boolean()
       defdelegate exists?(fields), to: @schema

@@ -12,7 +12,8 @@ defmodule Authenticator.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -50,6 +51,16 @@ defmodule Authenticator.MixProject do
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:excoveralls, "~> 0.13", only: :test},
       {:mox, "~> 0.5", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: [
+        "ecto.create --quiet -r ResourceManager.Repo",
+        "ecto.migrate -r ResourceManager.Repo",
+        "test"
+      ]
     ]
   end
 end

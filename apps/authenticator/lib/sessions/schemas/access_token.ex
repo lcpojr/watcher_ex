@@ -1,7 +1,14 @@
 defmodule Authenticator.Sessions.Schemas.AccessToken do
-  @moduledoc false
+  @moduledoc """
+  Access token sessions.
 
-  use ResourceManager.Schema
+  An access token is a binary string that encapsulates identity
+  session and is used in order to authenticates that the requester
+  is someone who is able to access certain resources and do some
+  actions.
+  """
+
+  use Authenticator.Schema
 
   import Ecto.Changeset
 
@@ -41,7 +48,7 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
   @doc false
   def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
     model
-    |> cast(params, @required_fields)
+    |> cast(params, @optional_fields)
     |> validate_inclusion(:status, @possible_statuses)
   end
 
