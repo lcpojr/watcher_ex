@@ -1,5 +1,7 @@
 defmodule Authenticator.SignIn.Inputs.ResourceOwner do
-  @moduledoc false
+  @moduledoc """
+  Input schema to be used in Resource Owner flow.
+  """
 
   use ResourceManager.Input
 

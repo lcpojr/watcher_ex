@@ -1,6 +1,6 @@
 defmodule Authenticator.Sessions.AccessToken do
   @moduledoc """
-  Access token configurations
+  Access token configurations.
   """
 
   use Joken.Config

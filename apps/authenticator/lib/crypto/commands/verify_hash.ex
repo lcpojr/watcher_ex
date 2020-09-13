@@ -1,9 +1,14 @@
 defmodule Authenticator.Crypto.Commands.VerifyHash do
   @moduledoc """
-  Verify if a given hash matches the passed value
+  Verify if a given hash matches the given value.
   """
 
   @behaviour ResourceManager.Credentials.Ports.VerifyHash
+
+  @impl true
+  def execute(%{password: %{password_hash: hash, algorithm: algorithm}}, password)
+      when is_binary(password),
+      do: execute(password, hash, String.to_atom(algorithm))
 
   @impl true
   def execute(value, hash, :argon2)
@@ -17,9 +22,4 @@ defmodule Authenticator.Crypto.Commands.VerifyHash do
   def execute(value, hash, :pbkdf2)
       when is_binary(value) and is_binary(hash),
       do: Pbkdf2.verify_pass(value, hash)
-
-  @doc "Gets the hash and algorithm from the input and verifies if it matches the hash"
-  @spec execute(identity :: map(), credential :: String.t()) :: boolean()
-  def execute(%{password: %{password_hash: hash, algorithm: alg}}, password),
-    do: execute(password, hash, String.to_atom(alg))
 end

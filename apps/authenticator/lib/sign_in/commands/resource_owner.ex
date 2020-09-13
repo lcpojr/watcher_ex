@@ -18,6 +18,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   alias Authenticator.Crypto.Commands.VerifyHash
   alias Authenticator.Sessions.AccessToken
   alias Authenticator.SignIn.Inputs.ResourceOwner
+  alias ResourceManager.Permissions.Scopes
 
   @typedoc "All possible responses"
   @type possible_responses ::
@@ -92,10 +93,10 @@ defmodule Authenticator.SignIn.ResourceOwner do
     app_scopes = Enum.map(application.scopes, & &1.name)
 
     scopes
-    |> String.split(" ")
+    |> Scopes.convert_to_list()
     |> Enum.filter(&(&1 in app_scopes))
     |> Enum.filter(&(&1 in user_scopes))
-    |> Enum.join(" ")
+    |> Scopes.convert_to_string()
   end
 
   defp generate_access_token(user, application, scope) do
