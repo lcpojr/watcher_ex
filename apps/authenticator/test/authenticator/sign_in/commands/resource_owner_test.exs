@@ -1,7 +1,7 @@
 defmodule Authenticator.SignIn.Commands.ResourceOwner do
   use ResourceManager.DataCase, async: true
 
-  alias Authenticator.Sessions.AccessToken
+  alias Authenticator.Sessions.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.ResourceOwner
 
   setup do
@@ -21,9 +21,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   end
 
   describe "#{ResourceOwner}.execute/1" do
-    test "succeeds if params are valid", ctx do
+    test "succeeds and generates an access_token", ctx do
       subject_id = ctx.user.id
       client_id = ctx.app.client_id
+      client_name = ctx.app.name
       scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
@@ -35,11 +36,13 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.secret
       }
 
-      assert {:ok, access_token} = ResourceOwner.execute(input)
+      assert {:ok, %{access_token: access_token, refresh_token: nil}} =
+               ResourceOwner.execute(input)
 
       assert {:ok,
               %{
                 "aud" => ^client_id,
+                "azp" => ^client_name,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
@@ -49,6 +52,43 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
                 "sub" => ^subject_id,
                 "typ" => "Bearer"
               }} = AccessToken.verify_and_validate(access_token)
+    end
+
+    test "succeeds and generates a refresh_token", ctx do
+      app = insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+
+      Enum.each(
+        ctx.scopes,
+        &insert!(:client_application_scope, scope: &1, client_application: app)
+      )
+
+      client_id = app.client_id
+      scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      input = %{
+        username: ctx.user.username,
+        password: ctx.password,
+        grant_type: "password",
+        scope: scopes,
+        client_id: client_id,
+        client_secret: app.secret
+      }
+
+      assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
+               ResourceOwner.execute(input)
+
+      assert is_binary(access_token)
+
+      assert {:ok,
+              %{
+                "aud" => ^client_id,
+                "exp" => _,
+                "iat" => _,
+                "iss" => "WatcherEx",
+                "jti" => _,
+                "nbf" => _,
+                "typ" => "Bearer"
+              }} = RefreshToken.verify_and_validate(refresh_token)
     end
 
     test "fails if client application do not exist", ctx do

@@ -16,18 +16,18 @@ defmodule Authenticator.SignIn.ResourceOwner do
   require Logger
 
   alias Authenticator.Crypto.Commands.VerifyHash
-  alias Authenticator.Sessions.AccessToken
-  alias Authenticator.SignIn.Inputs.ResourceOwner
+  alias Authenticator.Sessions.{AccessToken, RefreshToken}
+  alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
 
   @typedoc "All possible responses"
   @type possible_responses ::
-          {:ok, access_token :: String.t()}
+          {:ok, %{access_token: String.t(), refresh_token: String.t()}}
           | {:error, Ecto.Changeset.t() | :anauthenticated}
 
   @doc "Sign in an user identity by ResouceOnwer flow"
-  @spec execute(input :: ResourceOwner.t() | map()) :: possible_responses()
-  def execute(%ResourceOwner{username: username, client_id: client_id} = input) do
+  @spec execute(input :: Input.t() | map()) :: possible_responses()
+  def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
     with {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
@@ -36,8 +36,10 @@ defmodule Authenticator.SignIn.ResourceOwner do
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
-         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)} do
-      generate_access_token(user, app, build_scopes(user, app, input.scope))
+         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
+         {:ok, access_token, claims} <- generate_access_token(user, app, scope),
+         {:ok, refresh_token, _} <- generate_refresh_token(user, app, scope) do
+      {:ok, %{access_token: access_token, refresh_token: refresh_token}}
     else
       {:app, {:error, :not_found}} ->
         Logger.info("Client application #{client_id} not found")
@@ -74,6 +76,10 @@ defmodule Authenticator.SignIn.ResourceOwner do
       {:pass_matches?, false} ->
         Logger.info("User #{username} password do not match any credential")
         {:error, :unauthenticated}
+
+      error ->
+        Logger.error("Failed to run command becuase of unknow error", error: inspect(error))
+        error
     end
   end
 
@@ -88,7 +94,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
 
   def execute(_any), do: {:error, :invalid_params}
 
-  defp build_scopes(user, application, scopes) when is_binary(scopes) do
+  defp build_scope(user, application, scopes) do
     user_scopes = Enum.map(user.scopes, & &1.name)
     app_scopes = Enum.map(application.scopes, & &1.name)
 
@@ -97,19 +103,34 @@ defmodule Authenticator.SignIn.ResourceOwner do
     |> Enum.filter(&(&1 in app_scopes))
     |> Enum.filter(&(&1 in user_scopes))
     |> Scopes.convert_to_string()
+    |> case do
+      "" -> nil
+      scope -> scope
+    end
   end
 
   defp generate_access_token(user, application, scope) do
-    %{
+    AccessToken.generate_and_sign(%{
       "aud" => application.client_id,
+      "azp" => application.name,
       "sub" => user.id,
       "typ" => "Bearer",
-      "scope" => scope
-    }
-    |> AccessToken.generate_and_sign()
-    |> case do
-      {:ok, access_token, _claims} -> {:ok, access_token}
-      error -> error
+      "scope" => build_scope(user, app, scope)
+    })
+  end
+
+  defp generate_refresh_token(user, application, scope) do
+    if "refresh_token" in application.grant_flows do
+      RefreshToken.generate_and_sign(%{
+        "aud" => application.client_id,
+        "azp" => application.name,
+        "sub" => user.id,
+        "typ" => "Bearer",
+        "scope" => build_scope(user, app, scope)
+      })
+    else
+      Logger.info("Refresh token not enabled for application #{application.client_id}")
+      {:ok, nil}
     end
   end
 end

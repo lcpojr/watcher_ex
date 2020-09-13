@@ -18,6 +18,7 @@ defmodule Authenticator.MixProject do
 
   def application do
     [
+      mod: {Authenticator.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -38,6 +39,10 @@ defmodule Authenticator.MixProject do
       {:pbkdf2_elixir, "~> 1.2"},
       {:joken, "~> 2.2"},
       {:jason, "~> 1.2"},
+
+      # Database
+      {:postgrex, "~> 0.15", only: [:dev, :test], runtime: false},
+      {:ecto_sql, "~> 3.4"},
 
       # Tools
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
