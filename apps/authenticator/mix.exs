@@ -57,8 +57,8 @@ defmodule Authenticator.MixProject do
   defp aliases do
     [
       test: [
-        "ecto.create --quiet -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo",
+        "ecto.create --quiet -r Authenticator.Repo",
+        "ecto.migrate -r Authenticator.Repo",
         "test"
       ]
     ]

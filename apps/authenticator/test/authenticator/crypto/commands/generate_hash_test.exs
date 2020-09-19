@@ -9,7 +9,7 @@ defmodule Authenticator.SignIn.Commands.GenerateHashTest do
     end
 
     test "generates an hash using bcrypt" do
-      assert "$2b$12$" <> _ = GenerateHash.execute("MyPassw@rd123", :bcrypt)
+      assert "$2b$04$" <> _ = GenerateHash.execute("MyPassw@rd123", :bcrypt)
     end
 
     test "generates an hash using pbkdf2" do

@@ -83,25 +83,19 @@ defmodule WatcherEx.MixProject do
   defp aliases do
     [
       "ecto.setup": [
-        "ecto.create -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo",
-        "ecto.create -r Authenticator.Repo",
-        "ecto.migrate -r Authenticator.Repo"
+        "ecto.create",
+        "ecto.migrate"
       ],
       "ecto.reset": [
-        "ecto.drop -r ResourceManager.Repo",
-        "ecto.drop -r Authenticator.Repo",
+        "ecto.drop",
         "ecto.setup"
       ],
       "ecto.test_setup": [
-        "ecto.create -r ResourceManager.Repo",
-        "ecto.migrate -r ResourceManager.Repo",
-        "ecto.create -r Authenticator.Repo",
-        "ecto.migrate -r Authenticator.Repo"
+        "ecto.create",
+        "ecto.migrate"
       ],
       "ecto.test_reset": [
-        "ecto.drop -r ResourceManager.Repo",
-        "ecto.drop -r Authenticator.Repo",
+        "ecto.drop",
         "ecto.test_setup"
       ],
       test: ["test"]
