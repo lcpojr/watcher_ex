@@ -3,7 +3,7 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
   Input schema to be used in Resource Owner flow.
   """
 
-  use ResourceManager.Input
+  use Authenticator.Input
 
   @typedoc "Resource owner flow input fields"
   @type t :: %__MODULE__{

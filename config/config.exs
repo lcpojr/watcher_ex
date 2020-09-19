@@ -20,7 +20,7 @@ config :joken, default_signer: "secret"
 config :resource_manager, ecto_repos: [ResourceManager.Repo]
 
 config :resource_manager, ResourceManager.Repo,
-  database: "resource_manager_#{Mix.env()}",
+  database: "watcher_ex_#{Mix.env()}",
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
@@ -31,5 +31,21 @@ config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
 
 config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
   command: Authenticator.Crypto.Commands.VerifyHash
+
+config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
+  command: Authenticator.Crypto.Commands.FakeVerifyHash
+
+################
+# Authenticator
+################
+
+config :authenticator, ecto_repos: [Authenticator.Repo]
+
+config :authenticator, Authenticator.Repo,
+  database: "watcher_ex_#{Mix.env()}",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  port: 5432
 
 import_config "#{Mix.env()}.exs"

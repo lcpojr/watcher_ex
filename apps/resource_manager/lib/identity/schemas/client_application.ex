@@ -68,7 +68,11 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
   end
 
   defp generate_secret(%{valid?: false} = changeset), do: changeset
-  defp generate_secret(c), do: put_change(c, :secret, GenerateHash.execute(Ecto.UUID.generate()))
+
+  defp generate_secret(changeset) do
+    secret = GenerateHash.execute(Ecto.UUID.generate(), :bcrypt)
+    put_change(changeset, :secret, secret)
+  end
 
   @doc false
   def changeset_update(%__MODULE__{} = model, params) when is_map(params) do

@@ -13,7 +13,7 @@ defmodule ResourceManager.Identity.ClientApplicationsTest do
     test "succeed if params are valid" do
       params = %{name: "my-test-application"}
 
-      expect(GenerateHashMock, :execute, fn secret, :argon2 ->
+      expect(GenerateHashMock, :execute, fn secret, :bcrypt ->
         assert is_binary(secret)
         gen_hashed_password(Ecto.UUID.generate())
       end)

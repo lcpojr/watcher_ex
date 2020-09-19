@@ -12,12 +12,14 @@ defmodule Authenticator.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
   def application do
     [
+      mod: {Authenticator.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -39,12 +41,26 @@ defmodule Authenticator.MixProject do
       {:joken, "~> 2.2"},
       {:jason, "~> 1.2"},
 
+      # Database
+      {:postgrex, "~> 0.15", only: [:dev, :test], runtime: false},
+      {:ecto_sql, "~> 3.4"},
+
       # Tools
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:excoveralls, "~> 0.13", only: :test},
       {:mox, "~> 0.5", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: [
+        "ecto.create --quiet -r Authenticator.Repo",
+        "ecto.migrate -r Authenticator.Repo",
+        "test"
+      ]
     ]
   end
 end

@@ -9,7 +9,7 @@ defmodule ResourceManager.Credentials.Ports.GenerateHash do
   @doc "Delegates to #{__MODULE__}.execute/2 command"
   @callback execute(secret :: map() | String.t(), algorithm :: algorithms()) :: String.t()
 
-  @doc "Delegates execution to hash secret command"
+  @doc "Delegates execution to generate hash command"
   @spec execute(secret :: String.t(), algorithm :: algorithms()) :: String.t()
   def execute(secret, algorithm \\ :argon2), do: implementation().execute(secret, algorithm)
 
