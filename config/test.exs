@@ -28,4 +28,5 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 # Authenticator
 ################
 
+config :authenticator, Authenticator.Application, children: [Authenticator.Repo]
 config :authenticator, Authenticator.Repo, pool: Ecto.Adapters.SQL.Sandbox

@@ -3,14 +3,14 @@ defmodule Authenticator.Application do
 
   use Application
 
-  alias Authenticator.Repo
-
   @doc false
   def start(_type, _args) do
     Supervisor.start_link(children(), strategy: :one_for_one, name: Authenticator.Supervisor)
   end
 
   defp children do
-    [Repo]
+    :authenticator
+    |> Application.get_env(__MODULE__, [])
+    |> Keyword.get(:children)
   end
 end
