@@ -21,7 +21,7 @@ defmodule ResourceManager.Factory do
       name: "my-application-name#{System.unique_integer()}",
       description: "It's a test application",
       grant_flows: ["resource_owner"],
-      secret: gen_hashed_password(Ecto.UUID.generate())
+      secret: gen_hashed_password(Ecto.UUID.generate(), :bcrypt)
     }
   end
 

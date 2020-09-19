@@ -30,7 +30,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
         scopes: ctx.scopes
       }
 
-      expect(GenerateHashMock, :execute, fn secret, :argon2 ->
+      expect(GenerateHashMock, :execute, fn secret, :bcrypt ->
         assert is_binary(secret)
         gen_hashed_password(Ecto.UUID.generate())
       end)

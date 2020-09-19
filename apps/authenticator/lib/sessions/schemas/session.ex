@@ -28,7 +28,7 @@ defmodule Authenticator.Sessions.Schemas.Session do
 
   @possible_statuses ~w(active expired invalidated refreshed)
   @possible_subject_types ~w(user application)
-  @possible_grant_flows ~w(resource_owner)
+  @possible_grant_flows ~w(resource_owner refresh_token)
 
   @required_fields [:jti, :subject_id, :subject_type, :claims, :expires_at, :grant_flow]
   @optional_fields [:status]
