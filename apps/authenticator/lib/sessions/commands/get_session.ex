@@ -5,9 +5,9 @@ defmodule Authenticator.Sessions.Commands.GetSession do
 
   require Logger
 
+  alias Authenticator.Sessions
   alias Authenticator.Sessions.Commands.Inputs.GetSession
   alias Authenticator.Sessions.Schemas.Session
-  alias Authenticator.Sessions
 
   @typedoc "All possible responses"
   @type possible_responses :: {:ok, Session.t()} | {:error, :not_found}

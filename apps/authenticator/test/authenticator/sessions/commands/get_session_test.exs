@@ -1,10 +1,10 @@
 defmodule Authenticator.Sessions.Commands.GetSessionTest do
   use Authenticator.DataCase, async: true
 
+  alias Authenticator.Repo
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Commands.Inputs.GetSession, as: Input
   alias Authenticator.Sessions.Schemas.Session
-  alias Authenticator.Repo
 
   setup do
     {:ok, session: insert!(:session)}

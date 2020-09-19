@@ -110,7 +110,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       assert {:error, :unauthenticated} == ResourceOwner.execute(input)
     end
 
-    test "fails if client application is flow not enabled", ctx do
+    test "fails if client application flow is not enabled", ctx do
       app = RF.insert!(:client_application, grant_flows: [])
 
       input = %{

@@ -11,12 +11,11 @@ defmodule Authenticator.SignIn.RefreshToken do
 
   require Logger
 
-  alias Authenticator.Sessions
+  alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
-  alias Authenticator.Repo
   alias Ecto.Multi
 
   @typedoc "All possible responses"
