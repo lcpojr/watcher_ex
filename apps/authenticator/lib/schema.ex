@@ -9,8 +9,8 @@ defmodule Authenticator.Schema do
 
       import Ecto.{Changeset, Query}
 
-      alias Ecto.Queryable
       alias Authenticator.Repo
+      alias Ecto.Queryable
 
       @primary_key {:id, :binary_id, autogenerate: true}
       @foreign_key_type :binary_id

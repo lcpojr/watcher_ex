@@ -3,7 +3,7 @@ defmodule Authenticator.SignIn.Inputs.RefreshToken do
   Input schema to be used in Refresh Token flow.
   """
 
-  use ResourceManager.Input
+  use Authenticator.Input
 
   @typedoc "Refresh token flow input fields"
   @type t :: %__MODULE__{

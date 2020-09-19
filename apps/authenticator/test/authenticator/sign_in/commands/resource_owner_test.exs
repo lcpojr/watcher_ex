@@ -1,6 +1,7 @@
 defmodule Authenticator.SignIn.Commands.ResourceOwner do
   use Authenticator.DataCase, async: true
 
+  alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.ResourceOwner
 
@@ -46,12 +47,14 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => _,
+                "jti" => jti,
                 "nbf" => _,
                 "scope" => ^scopes,
                 "sub" => ^subject_id,
                 "typ" => "Bearer"
               }} = AccessToken.verify_and_validate(access_token)
+
+      assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
     test "succeeds and generates a refresh_token", ctx do
@@ -77,11 +80,12 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
                ResourceOwner.execute(input)
 
-      assert is_binary(access_token)
+      assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
 
       assert {:ok,
               %{
                 "aud" => ^client_id,
+                "ati" => ^jti,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
@@ -89,6 +93,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
                 "nbf" => _,
                 "typ" => "Bearer"
               }} = RefreshToken.verify_and_validate(refresh_token)
+
+      assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
     test "fails if client application do not exist", ctx do

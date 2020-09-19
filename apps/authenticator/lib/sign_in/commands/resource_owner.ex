@@ -16,6 +16,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   require Logger
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, VerifyHash}
+  alias Authenticator.Sessions
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
@@ -45,8 +46,9 @@ defmodule Authenticator.SignIn.ResourceOwner do
          {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
-         {:ok, access_token, _} <- generate_access_token(user, app, scope),
-         {:ok, refresh_token, _} <- generate_refresh_token(user, app, scope) do
+         {:ok, access_token, claims} <- generate_access_token(user, app, scope),
+         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
+         {:ok, _session} <- generate_session(claims) do
       {:ok, %{access_token: access_token, refresh_token: refresh_token}}
     else
       {:app, {:error, :not_found}} ->
@@ -135,18 +137,28 @@ defmodule Authenticator.SignIn.ResourceOwner do
     })
   end
 
-  defp generate_refresh_token(user, application, scope) do
+  defp generate_refresh_token(application, %{"aud" => aud, "azp" => azp, "jti" => jti}) do
     if "refresh_token" in application.grant_flows do
       RefreshToken.generate_and_sign(%{
-        "aud" => application.client_id,
-        "azp" => application.name,
-        "sub" => user.id,
-        "typ" => "Bearer",
-        "scope" => build_scope(user, application, scope)
+        "aud" => aud,
+        "azp" => azp,
+        "ati" => jti,
+        "typ" => "Bearer"
       })
     else
       Logger.info("Refresh token not enabled for application #{application.client_id}")
       {:ok, nil, nil}
     end
+  end
+
+  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do
+    Sessions.create(%{
+      jti: jti,
+      subject_id: sub,
+      subject_type: "user",
+      claims: claims,
+      expires_at: Sessions.convert_expiration(exp),
+      grant_flow: "resource_owner"
+    })
   end
 end

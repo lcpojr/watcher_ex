@@ -1,10 +1,12 @@
-defmodule Authenticator.Repo.Migrations.CreateTableAccessTokens do
+defmodule Authenticator.Repo.Migrations.CreateTableSessions do
   use Ecto.Migration
 
   def change do
-    create_if_not_exists table(:access_tokens, primary_key: false) do
+    create_if_not_exists table(:sessions, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :jti, :string, null: false
+      add :subject_id, :string, null: false
+      add :subject_type, :string, null: false
       add :claims, :map, null: false
       add :status, :string, null: false, default: "active"
       add :expires_at, :naive_datetime, null: false
@@ -13,6 +15,7 @@ defmodule Authenticator.Repo.Migrations.CreateTableAccessTokens do
       timestamps()
     end
 
-    create_if_not_exists unique_index(:access_tokens, [:jti])
+    create_if_not_exists unique_index(:sessions, [:jti])
+    create_if_not_exists index(:sessions, [:subject_id, :subject_type, :status])
   end
 end

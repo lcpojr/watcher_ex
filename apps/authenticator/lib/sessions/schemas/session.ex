@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Schemas.AccessToken do
+defmodule Authenticator.Sessions.Schemas.Session do
   @moduledoc """
   Access token sessions.
 
@@ -12,10 +12,12 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
 
   import Ecto.Changeset
 
-  @typedoc "AccessToken schema fields"
+  @typedoc "Session schema fields"
   @type t :: %__MODULE__{
           id: binary(),
           jti: String.t(),
+          subject_id: String.t(),
+          subject_type: String.t(),
           claims: map(),
           status: String.t(),
           expires_at: NaiveDateTime.t(),
@@ -24,12 +26,16 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~w(active expired invalidated)
+  @possible_statuses ~w(active expired invalidated refreshed)
+  @possible_subject_types ~w(user application)
+  @possible_grant_flows ~w(resource_owner)
 
-  @required_fields [:jti, :claims, :expires_at, :grant_flow]
+  @required_fields [:jti, :subject_id, :subject_type, :claims, :expires_at, :grant_flow]
   @optional_fields [:status]
-  schema "access_tokens" do
+  schema "sessions" do
     field :jti, :string
+    field :subject_id, :string
+    field :subject_type, :string
     field :claims, :map
     field :status, :string, default: "active"
     field :expires_at, :naive_datetime
@@ -42,6 +48,9 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
   def changeset_create(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_inclusion(:status, @possible_statuses)
+    |> validate_inclusion(:subject_type, @possible_subject_types)
+    |> validate_inclusion(:grant_flow, @possible_grant_flows)
     |> validate_required(@required_fields)
   end
 
@@ -54,4 +63,10 @@ defmodule Authenticator.Sessions.Schemas.AccessToken do
 
   @doc false
   def possible_statuses, do: @possible_statuses
+
+  @doc false
+  def possible_subject_types, do: @possible_subject_types
+
+  @doc false
+  def possible_grant_flows, do: @possible_grant_flows
 end
