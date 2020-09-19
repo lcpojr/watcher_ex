@@ -1,6 +1,6 @@
 defmodule Authenticator.SignIn.RefreshToken do
   @moduledoc """
-  Re authenticates the user identity using the Resource Token Flow.
+  Re authenticates the user identity using the Refresh Token Flow.
 
   This flow is used in order to exchange a refresh token in a new access token
   when the access token has expired.
@@ -125,7 +125,7 @@ defmodule Authenticator.SignIn.RefreshToken do
         subject_type: session.subject_type,
         claims: claims,
         expires_at: Sessions.convert_expiration(exp),
-        grant_flow: "resource_owner"
+        grant_flow: "refresh_token"
       })
     end)
     |> Repo.transaction()
