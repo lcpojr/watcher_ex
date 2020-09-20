@@ -14,7 +14,9 @@ defmodule Authenticator.Factory do
       claims: %{},
       status: "active",
       grant_flow: "resource_owner",
-      expires_at: default_expiration()
+      expires_at: default_expiration(),
+      inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+      updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     }
   end
 
@@ -45,8 +47,8 @@ defmodule Authenticator.Factory do
   @doc false
   def default_expiration do
     NaiveDateTime.utc_now()
-    |> NaiveDateTime.add(60 * 60 * 2, :second)
     |> NaiveDateTime.truncate(:second)
+    |> NaiveDateTime.add(60 * 60 * 24, :second)
   end
 
   @doc false

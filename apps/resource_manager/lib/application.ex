@@ -3,14 +3,14 @@ defmodule ResourceManager.Application do
 
   use Application
 
-  alias ResourceManager.Repo
-
   @doc false
   def start(_type, _args) do
     Supervisor.start_link(children(), strategy: :one_for_one, name: ResourceManager.Supervisor)
   end
 
   defp children do
-    [Repo]
+    :resource_manager
+    |> Application.get_env(__MODULE__, [])
+    |> Keyword.get(:children)
   end
 end

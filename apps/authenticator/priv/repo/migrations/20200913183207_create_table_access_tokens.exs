@@ -17,5 +17,6 @@ defmodule Authenticator.Repo.Migrations.CreateTableSessions do
 
     create_if_not_exists unique_index(:sessions, [:jti])
     create_if_not_exists index(:sessions, [:subject_id, :subject_type, :status])
+    create_if_not_exists index(:sessions, [:status, :expires_at])
   end
 end
