@@ -24,7 +24,7 @@ defmodule Authenticator.MixProject do
     ]
   end
 
-  # This makes sure your factory and any other modules in test/support are compiled
+  # This makes sure the factory and any other modules in test/support are compiled
   # when in the test environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]

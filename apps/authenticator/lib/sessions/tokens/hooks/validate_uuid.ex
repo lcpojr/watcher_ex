@@ -1,5 +1,7 @@
 defmodule Authenticator.Sessions.Tokens.Hooks.ValidateUUID do
-  @moduledoc false
+  @moduledoc """
+  Helper to validate if a given claim is a valid UUID.
+  """
 
   use Joken.Hooks
 
@@ -28,7 +30,7 @@ defmodule Authenticator.Sessions.Tokens.Hooks.ValidateUUID do
       end
     end)
     |> case do
-      [] -> {:count, result, input}
+      [] -> {:cont, result, input}
       keys -> {:halt, {:error, [message: "Invalid token", invalid_uuid: keys]}}
     end
   end

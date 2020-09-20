@@ -6,6 +6,7 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
   use Joken.Config
 
   add_hook Joken.Hooks.RequiredClaims, ~w(exp iat nbf iss azp aud jti typ)
+  add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(aud)
 
   # One month in seconds
   @max_expiration 30 * (24 * (60 * 60))
