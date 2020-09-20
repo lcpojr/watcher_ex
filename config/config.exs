@@ -1,6 +1,6 @@
 import Config
 
-config :logger, :console, format: "$metadata[$level] $time $message\n"
+config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
 
 # This is temporary and will change in the future
 # We don't want to expose the secret on configurations
@@ -19,7 +19,8 @@ config :resource_manager, ResourceManager.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  port: 5432
+  port: 5432,
+  pool_size: 10
 
 config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
   command: Authenticator.Crypto.Commands.GenerateHash
@@ -44,7 +45,8 @@ config :authenticator, Authenticator.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  port: 5432
+  port: 5432,
+  pool_size: 10
 
 ##########
 # Rest API
