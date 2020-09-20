@@ -18,6 +18,7 @@ defmodule WatcherEx.MixProject do
       source_url: @url,
       dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
+      elixirc_options: [warnings_as_errors: true],
       preferred_cli_env: preferred_cli_env(),
       aliases: aliases()
     ]
@@ -67,11 +68,8 @@ defmodule WatcherEx.MixProject do
   defp preferred_cli_env do
     [
       coveralls: :test,
-      "coveralls.detail": :test,
-      "coveralls.post": :test,
-      "coveralls.html": :test,
-      "ecto.test_setup": :test,
-      "ecto.test_reset": :test
+      test_setup: :test,
+      test_reset: :test
     ]
   end
 

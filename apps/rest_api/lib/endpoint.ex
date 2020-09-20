@@ -1,12 +1,6 @@
-defmodule RestApiWeb.Endpoint do
+defmodule RestApi.Endpoint do
   use Phoenix.Endpoint, otp_app: :rest_api
 
-  socket "/socket", RestApiWeb.UserSocket,
-    websocket: true,
-    longpoll: false
-
-  # Code reloading can be explicitly enabled under the
-  # :code_reloader configuration of your endpoint.
   if code_reloading? do
     plug Phoenix.CodeReloader
   end
@@ -21,5 +15,7 @@ defmodule RestApiWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug RestApiWeb.Router
+
+  # Routers
+  plug RestApi.Routers.Public
 end

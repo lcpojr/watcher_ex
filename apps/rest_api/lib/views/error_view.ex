@@ -1,5 +1,7 @@
-defmodule RestApiWeb.ErrorView do
-  use RestApiWeb, :view
+defmodule RestApi.ErrorView do
+  @moduledoc false
+
+  use RestApi.View
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

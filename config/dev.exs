@@ -1,35 +1,16 @@
 use Mix.Config
 
 ###################
-# RESOURCE MANAGER
+# Resource Manager
 ###################
 
-config :resource_manager, ecto_repos: [ResourceManager.Repo]
-
-config :resource_manager, ResourceManager.Application, children: [ResourceManager.Repo]
-
-config :resource_manager, ResourceManager.Repo,
-  database: "watcher_ex_#{Mix.env()}",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  port: 5432
+config :resource_manager, ResourceManager.Repo, show_sensitive_data_on_connection_error: true
 
 ################
 # Authenticator
 ################
 
-config :authenticator, ecto_repos: [Authenticator.Repo]
-
-config :authenticator, Authenticator.Application,
-  children: [Authenticator.Repo, Authenticator.Sessions.Manager]
-
-config :authenticator, Authenticator.Repo,
-  database: "watcher_ex_#{Mix.env()}",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  port: 5432
+config :authenticator, Authenticator.Repo, show_sensitive_data_on_connection_error: true
 
 ##########
 # Rest API

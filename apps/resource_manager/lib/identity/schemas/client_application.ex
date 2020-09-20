@@ -22,6 +22,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
           status: String.t(),
           protocol: String.t(),
           access_type: String.t(),
+          is_admin: boolean(),
           grant_flows: list(String.t()),
           public_key: PublicKey.t(),
           scopes: Scope.t(),
@@ -43,6 +44,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     field :status, :string, default: "active"
     field :protocol, :string, default: "openid-connect"
     field :access_type, :string, default: "confidential"
+    field :is_admin, :boolean, default: false
     field :grant_flows, {:array, :string}
     field :redirect_uri, :string
     field :secret, :string

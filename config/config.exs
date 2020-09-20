@@ -54,7 +54,7 @@ config :rest_api, RestApi.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: RestApi.ErrorView, accepts: ~w(json), layout: false]
 
-config :rest_api, RestApi.Application, children: [RestApiWeb.Telemetry, RestApiWeb.Endpoint]
+config :rest_api, RestApi.Application, children: [RestApi.Telemetry, RestApi.Endpoint]
 
 config :phoenix, :json_library, Jason
 

@@ -11,6 +11,7 @@ defmodule ResourceManager.Repo.Migrations.CreateClientApplicationsTable do
       add :status, :string, null: false, default: "active"
       add :protocol, :string, null: false, default: "openid-connect"
       add :access_type, :string, null: false, default: "confidential"
+      add :is_admin, :boolean, null: false, default: false
       add :grant_flows, {:array, :string}
       add :redirect_uri, :string
 

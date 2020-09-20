@@ -31,6 +31,11 @@ defmodule RestApi.MixProject do
 
   defp deps do
     [
+      # Umbrealla
+      {:resource_manager, in_umbrella: true},
+      {:authenticator, in_umbrella: true},
+
+      # Domain
       {:phoenix, "~> 1.5.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},

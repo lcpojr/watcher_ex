@@ -24,6 +24,7 @@ defmodule ResourceManager.Factory do
       description: "It's a test application",
       grant_flows: ["resource_owner"],
       status: "active",
+      is_admin: false,
       secret: gen_hashed_password(Ecto.UUID.generate(), :bcrypt)
     }
   end

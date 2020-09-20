@@ -13,7 +13,9 @@ config :pbkdf2_elixir, rounds: 1
 # RESOURCE MANAGER
 ###################
 
-config :resource_manager, ResourceManager.Repo, pool: Ecto.Adapters.SQL.Sandbox
+config :resource_manager, ResourceManager.Repo,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  show_sensitive_data_on_connection_error: true
 
 config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
   command: ResourceManager.Credentials.Ports.GenerateHashMock
@@ -29,7 +31,10 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 ################
 
 config :authenticator, Authenticator.Application, children: [Authenticator.Repo]
-config :authenticator, Authenticator.Repo, pool: Ecto.Adapters.SQL.Sandbox
+
+config :authenticator, Authenticator.Repo,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  show_sensitive_data_on_connection_error: true
 
 ##########
 # Rest API

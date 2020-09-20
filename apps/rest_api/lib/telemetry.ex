@@ -1,4 +1,4 @@
-defmodule RestApiWeb.Telemetry do
+defmodule RestApi.Telemetry do
   @moduledoc false
 
   use Supervisor
@@ -44,7 +44,7 @@ defmodule RestApiWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {RestApiWeb, :count_users, []}
+      # {RestApi, :count_users, []}
     ]
   end
 end
