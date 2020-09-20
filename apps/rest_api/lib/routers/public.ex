@@ -1,4 +1,6 @@
 defmodule RestApi.Routers.Public do
+  @moduledoc false
+
   use RestApi.Router
 
   pipeline :rest_api do
