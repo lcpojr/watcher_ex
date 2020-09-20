@@ -82,12 +82,12 @@ defmodule Authenticator.Sessions.Schemas.Session do
   defp custom_query(query, {:expired?, true}) do
     query
     |> where([c], c.status == ^"expired")
-    |> or_where([c], c.expires_at >= ^NaiveDateTime.utc_now())
+    |> or_where([c], c.expires_at < ^NaiveDateTime.utc_now())
   end
 
   defp custom_query(query, {:expired?, false}) do
     query
     |> where([c], c.status == ^"active")
-    |> where([c], c.expires_at < ^NaiveDateTime.utc_now())
+    |> where([c], c.expires_at > ^NaiveDateTime.utc_now())
   end
 end
