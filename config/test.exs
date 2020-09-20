@@ -30,3 +30,11 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 
 config :authenticator, Authenticator.Application, children: [Authenticator.Repo]
 config :authenticator, Authenticator.Repo, pool: Ecto.Adapters.SQL.Sandbox
+
+##########
+# Rest API
+##########
+
+config :rest_api, RestApi.Endpoint,
+  http: [port: 4002],
+  server: false
