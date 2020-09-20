@@ -6,10 +6,11 @@ defmodule ResourceManager.Repo.Migrations.CreateUsersTable do
       add :id, :uuid, primary_key: true
       add :username, :string, null: false
       add :status, :string, null: false, default: "active"
+      add :is_admin, :boolean, null: false, default: false
 
       timestamps()
     end
 
-    create_if_not_exists unique_index(:users, [:username])
+    create_if_not_exists unique_index(:users, [:username, :status])
   end
 end

@@ -19,6 +19,7 @@ defmodule ResourceManager.Identity.Schemas.User do
           username: String.t(),
           status: String.t(),
           password: Password.t(),
+          is_admin: boolean(),
           scopes: Scope.t(),
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
@@ -30,6 +31,7 @@ defmodule ResourceManager.Identity.Schemas.User do
   schema "users" do
     field :username, :string
     field :status, :string, default: "active"
+    field :is_admin, :boolean, default: false
 
     has_one :password, Password
     many_to_many :scopes, Scope, join_through: "users_scopes"

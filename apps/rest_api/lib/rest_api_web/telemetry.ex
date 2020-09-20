@@ -1,5 +1,8 @@
 defmodule RestApiWeb.Telemetry do
+  @moduledoc false
+
   use Supervisor
+
   import Telemetry.Metrics
 
   @default_unit {:native, :millisecond}

@@ -77,22 +77,11 @@ defmodule WatcherEx.MixProject do
 
   defp aliases do
     [
-      "ecto.setup": [
-        "ecto.create",
-        "ecto.migrate"
-      ],
-      "ecto.reset": [
-        "ecto.drop",
-        "ecto.setup"
-      ],
-      "ecto.test_setup": [
-        "ecto.create",
-        "ecto.migrate"
-      ],
-      "ecto.test_reset": [
-        "ecto.drop",
-        "ecto.test_setup"
-      ],
+      setup: ["ecto.create", "ecto.migrate"],
+      reset: ["ecto.drop", "setup"],
+      test_setup: ["ecto.create", "ecto.migrate"],
+      test_reset: ["ecto.drop", "test_setup"],
+      seed: ["run app/resource_manager/priv/repo/seeds.exs"],
       test: ["test"]
     ]
   end
