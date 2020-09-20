@@ -6,6 +6,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
   use Joken.Config
 
   add_hook Joken.Hooks.RequiredClaims, ~w(exp iat nbf iss aud azp jti sub typ scope)
+  add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(sub aud)
 
   @default_issuer "WatcherEx"
   @default_type "Bearer"
