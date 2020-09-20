@@ -78,16 +78,6 @@ defmodule Authenticator.Sessions.Schemas.Session do
 
   defp custom_query(query, {:created_after, date}), do: where(query, [c], c.inserted_at > ^date)
   defp custom_query(query, {:created_before, date}), do: where(query, [c], c.inserted_at < ^date)
-
-  defp custom_query(query, {:expired?, true}) do
-    query
-    |> where([c], c.status == ^"expired")
-    |> or_where([c], c.expires_at < ^NaiveDateTime.utc_now())
-  end
-
-  defp custom_query(query, {:expired?, false}) do
-    query
-    |> where([c], c.status == ^"active")
-    |> where([c], c.expires_at > ^NaiveDateTime.utc_now())
-  end
+  defp custom_query(query, {:expires_after, date}), do: where(query, [c], c.expires_at > ^date)
+  defp custom_query(query, {:expires_before, date}), do: where(query, [c], c.expires_at < ^date)
 end

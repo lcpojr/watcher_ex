@@ -90,18 +90,10 @@ defmodule Authenticator.Sessions.Manager do
   ##########
 
   defp update_sessions_status do
-    create_after =
-      NaiveDateTime.utc_now()
-      |> NaiveDateTime.add(@query_interval, :second)
+    now = NaiveDateTime.utc_now()
+    create_after = NaiveDateTime.add(now, @query_interval, :second)
 
-    ids =
-      [expired?: true, created_after: create_after]
-      |> Session.query()
-      |> Repo.all()
-      |> Enum.filter(&(&1.status == "active"))
-      |> Enum.map(& &1.id)
-
-    [ids: ids]
+    [status: "active", created_after: create_after, expires_before: now]
     |> Session.query()
     |> Repo.update_all(set: [status: "expired"])
     |> case do
