@@ -1,4 +1,4 @@
-defmodule RestApi.Router do
+defmodule RestAPI.Router do
   @moduledoc """
   Helpers to be used in routers.
   """

@@ -1,4 +1,4 @@
-defmodule RestApi.ErrorHelpers do
+defmodule RestAPI.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """

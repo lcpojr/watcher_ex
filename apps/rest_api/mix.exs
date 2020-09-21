@@ -1,4 +1,4 @@
-defmodule RestApi.MixProject do
+defmodule RestAPI.MixProject do
   use Mix.Project
 
   def project do
@@ -20,7 +20,7 @@ defmodule RestApi.MixProject do
 
   def application do
     [
-      mod: {RestApi.Application, []},
+      mod: {RestAPI.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

@@ -16,7 +16,7 @@ config :authenticator, Authenticator.Repo, show_sensitive_data_on_connection_err
 # Rest API
 ##########
 
-config :rest_api, RestApi.Endpoint,
+config :rest_api, RestAPI.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,

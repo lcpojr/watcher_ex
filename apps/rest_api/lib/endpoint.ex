@@ -1,4 +1,4 @@
-defmodule RestApi.Endpoint do
+defmodule RestAPI.Endpoint do
   @moduledoc false
 
   use Phoenix.Endpoint, otp_app: :rest_api
@@ -19,5 +19,5 @@ defmodule RestApi.Endpoint do
   plug Plug.Head
 
   # Routers
-  plug RestApi.Routers.Public
+  plug RestAPI.Routers.Public
 end

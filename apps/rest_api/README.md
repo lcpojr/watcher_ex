@@ -1,3 +1,3 @@
-# RestApi
+# RestAPI
 
 **TODO: Add description**

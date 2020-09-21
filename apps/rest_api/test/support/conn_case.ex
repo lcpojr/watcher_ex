@@ -1,4 +1,4 @@
-defmodule RestApi.ConnCase do
+defmodule RestAPI.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule RestApi.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use RestApi.ConnCase, async: true`, although
+  by setting `use RestAPI.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -22,12 +22,12 @@ defmodule RestApi.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import RestApi.ConnCase
+      import RestAPI.ConnCase
 
-      alias RestApi.Router.Helpers, as: Routes
+      alias RestAPI.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint RestApi.Endpoint
+      @endpoint RestAPI.Endpoint
     end
   end
 

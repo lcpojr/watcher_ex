@@ -1,5 +1,5 @@
-defmodule RestApi.Controllers.Token do
+defmodule RestAPI.Controllers.Token do
   @moduledoc false
 
-  use RestApi.Controller, :controller
+  use RestAPI.Controller, :controller
 end

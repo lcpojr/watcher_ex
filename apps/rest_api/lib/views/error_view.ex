@@ -1,7 +1,7 @@
-defmodule RestApi.ErrorView do
+defmodule RestAPI.ErrorView do
   @moduledoc false
 
-  use RestApi.View
+  use RestAPI.View
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

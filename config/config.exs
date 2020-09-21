@@ -1,17 +1,14 @@
 import Config
 
 config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
-
-# This is temporary and will change in the future
-# We don't want to expose the secret on configurations
 config :joken, default_signer: "secret"
+config :phoenix, :json_library, Jason
 
 ###################
 # RESOURCE MANAGER
 ###################
 
 config :resource_manager, ecto_repos: [ResourceManager.Repo]
-
 config :resource_manager, ResourceManager.Application, children: [ResourceManager.Repo]
 
 config :resource_manager, ResourceManager.Repo,
@@ -52,12 +49,10 @@ config :authenticator, Authenticator.Repo,
 # Rest API
 ##########
 
-config :rest_api, RestApi.Endpoint,
+config :rest_api, RestAPI.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: RestApi.ErrorView, accepts: ~w(json), layout: false]
+  render_errors: [view: RestAPI.ErrorView, accepts: ~w(json), layout: false]
 
-config :rest_api, RestApi.Application, children: [RestApi.Telemetry, RestApi.Endpoint]
-
-config :phoenix, :json_library, Jason
+config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
 
 import_config "#{Mix.env()}.exs"
