@@ -1,17 +1,14 @@
 import Config
 
-config :logger, :console, format: "$metadata[$level] $time $message\n"
-
-# This is temporary and will change in the future
-# We don't want to expose the secret on configurations
+config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
 config :joken, default_signer: "secret"
+config :phoenix, :json_library, Jason
 
 ###################
 # RESOURCE MANAGER
 ###################
 
 config :resource_manager, ecto_repos: [ResourceManager.Repo]
-
 config :resource_manager, ResourceManager.Application, children: [ResourceManager.Repo]
 
 config :resource_manager, ResourceManager.Repo,
@@ -19,7 +16,8 @@ config :resource_manager, ResourceManager.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  port: 5432
+  port: 5432,
+  pool_size: 10
 
 config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
   command: Authenticator.Crypto.Commands.GenerateHash
@@ -44,6 +42,17 @@ config :authenticator, Authenticator.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  port: 5432
+  port: 5432,
+  pool_size: 10
+
+##########
+# Rest API
+##########
+
+config :rest_api, RestAPI.Endpoint,
+  url: [host: "localhost"],
+  render_errors: [view: RestAPI.ErrorView, accepts: ~w(json), layout: false]
+
+config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
 
 import_config "#{Mix.env()}.exs"

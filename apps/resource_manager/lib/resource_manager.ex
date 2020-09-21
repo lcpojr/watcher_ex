@@ -1,6 +1,6 @@
 defmodule ResourceManager do
   @moduledoc """
-  Application to deal's with request's to the resource server.
+  Application to deal with request's to the resource server.
   """
 
   alias ResourceManager.Identity.Commands.{CreateIdentity, GetIdentity}

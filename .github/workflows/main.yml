@@ -158,7 +158,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
   
       - name: Setup Database
-        run: mix ecto.setup
+        run: mix setup
 
       - name: Run tests
         run: mix coveralls.github

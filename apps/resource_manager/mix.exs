@@ -37,7 +37,7 @@ defmodule ResourceManager.MixProject do
       {:pbkdf2_elixir, "~> 1.2"},
 
       # Database
-      {:postgrex, "~> 0.15", only: [:dev, :test], runtime: false},
+      {:postgrex, "~> 0.15"},
       {:ecto_sql, "~> 3.4"},
 
       # Tools

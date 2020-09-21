@@ -111,7 +111,7 @@ defmodule Authenticator.Sessions.Manager do
     interval = schedule_interval()
     date_to_schedule = schedule_to(interval)
 
-    Process.send_after(__MODULE__, :query, interval)
+    Process.send_after(__MODULE__, :query, :timer.seconds(interval))
 
     # Updating state
     %{state | scheduled_to: date_to_schedule}

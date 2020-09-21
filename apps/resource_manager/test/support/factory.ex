@@ -11,7 +11,9 @@ defmodule ResourceManager.Factory do
   @doc false
   def build(:user) do
     %User{
-      username: "my-test-username#{System.unique_integer()}"
+      username: "my-test-username#{System.unique_integer()}",
+      status: "active",
+      is_admin: false
     }
   end
 
@@ -21,6 +23,8 @@ defmodule ResourceManager.Factory do
       name: "my-application-name#{System.unique_integer()}",
       description: "It's a test application",
       grant_flows: ["resource_owner"],
+      status: "active",
+      is_admin: false,
       secret: gen_hashed_password(Ecto.UUID.generate(), :bcrypt)
     }
   end

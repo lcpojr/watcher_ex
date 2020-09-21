@@ -18,6 +18,7 @@ defmodule WatcherEx.MixProject do
       source_url: @url,
       dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
+      elixirc_options: [warnings_as_errors: true],
       preferred_cli_env: preferred_cli_env(),
       aliases: aliases()
     ]
@@ -67,32 +68,18 @@ defmodule WatcherEx.MixProject do
   defp preferred_cli_env do
     [
       coveralls: :test,
-      "coveralls.detail": :test,
-      "coveralls.post": :test,
-      "coveralls.html": :test,
-      "ecto.test_setup": :test,
-      "ecto.test_reset": :test
+      test_setup: :test,
+      test_reset: :test
     ]
   end
 
   defp aliases do
     [
-      "ecto.setup": [
-        "ecto.create",
-        "ecto.migrate"
-      ],
-      "ecto.reset": [
-        "ecto.drop",
-        "ecto.setup"
-      ],
-      "ecto.test_setup": [
-        "ecto.create",
-        "ecto.migrate"
-      ],
-      "ecto.test_reset": [
-        "ecto.drop",
-        "ecto.test_setup"
-      ],
+      setup: ["ecto.create", "ecto.migrate"],
+      reset: ["ecto.drop", "setup"],
+      test_setup: ["ecto.create", "ecto.migrate"],
+      test_reset: ["ecto.drop", "test_setup"],
+      seed: ["run app/resource_manager/priv/repo/seeds.exs"],
       test: ["test"]
     ]
   end
