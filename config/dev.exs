@@ -23,4 +23,31 @@ config :rest_api, RestAPI.Endpoint,
   check_origin: false,
   watchers: []
 
+########
+# Admin
+########
+
+config :admin, Admin.Endpoint,
+  http: [port: 4001],
+  debug_errors: true,
+  code_reloader: true,
+  check_origin: false,
+  live_reload: [
+    patterns: [
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/admin/(live|views)/.*(ex)$",
+      ~r"lib/admin/templates/.*(eex)$"
+    ]
+  ],
+  watchers: [
+    node: [
+      "node_modules/webpack/bin/webpack.js",
+      "--mode",
+      "development",
+      "--watch-stdin",
+      cd: Path.expand("../apps/admin/assets", __DIR__)
+    ]
+  ]
+
 config :logger, level: :debug

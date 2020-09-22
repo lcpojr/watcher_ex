@@ -45,3 +45,9 @@ config :rest_api, RestAPI.Endpoint,
   server: false
 
 config :rest_api, RestAPI.Ports.Authenticator, domain: RestAPI.Ports.AuthenticatorMock
+
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :admin, Admin.Endpoint,
+  http: [port: 4003],
+  server: false

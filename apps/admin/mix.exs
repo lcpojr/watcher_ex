@@ -1,9 +1,9 @@
-defmodule RestAPI.MixProject do
+defmodule Admin.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :rest_api,
+      app: :admin,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -11,16 +11,19 @@ defmodule RestAPI.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
     ]
   end
 
+  # Configuration for the OTP application.
+  #
+  # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {RestAPI.Application, []},
+      mod: {Admin.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -38,26 +41,20 @@ defmodule RestAPI.MixProject do
 
       # Domain
       {:phoenix, "~> 1.5.5"},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix_live_dashboard, "~> 0.2"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
+      {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"},
-
-      # Validations
-      {:ecto_sql, "~> 3.4"},
-
-      # Tools
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.13", only: :test},
-      {:mox, "~> 0.5", only: :test}
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 
   defp aliases do
     [
-      setup: ["deps.get"]
+      setup: ["deps.get", "cmd npm install --prefix assets"]
     ]
   end
 end

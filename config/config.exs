@@ -1,5 +1,15 @@
 import Config
 
+config :admin,
+  generators: [context_app: false]
+
+# Configures the endpoint
+config :admin, Admin.Endpoint,
+  url: [host: "localhost"],
+  secret_key_base: "5GgoTrY5c84wVWiKTwovJGWo3gc66GtAe24c6hpFhN/grWsAiICHS5k9izw1HXGE",
+  render_errors: [view: Admin.ErrorView, accepts: ~w(html json), layout: false],
+  live_view: [signing_salt: "zbl8sDUG"]
+
 config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
 config :joken, default_signer: "secret"
 config :phoenix, :json_library, Jason
@@ -56,5 +66,17 @@ config :rest_api, RestAPI.Endpoint,
 
 config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
 config :rest_api, RestAPI.Ports.Authenticator, domain: Authenticator
+
+
+########
+# Admin
+########
+
+config :admin, Admin.Endpoint,
+  url: [host: "localhost"],
+  pubsub_server: Admin.PubSub,
+  render_errors: [view: Admin.ErrorView, accepts: ~w(json), layout: false]
+
+config :admin, Admin.Application, children: [Admin.Telemetry, Admin.Endpoint]
 
 import_config "#{Mix.env()}.exs"
