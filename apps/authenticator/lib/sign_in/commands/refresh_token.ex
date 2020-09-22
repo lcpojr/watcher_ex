@@ -85,7 +85,16 @@ defmodule Authenticator.SignIn.RefreshToken do
     end
   end
 
-  def execute(%{refresh_token: _, grant_type: "refresh_token"} = params) do
+  def execute(%{"grant_type" => "refresh_token"} = params) do
+    params
+    |> Input.cast_and_apply()
+    |> case do
+      {:ok, %Input{} = input} -> execute(input)
+      error -> error
+    end
+  end
+
+  def execute(%{grant_type: "refresh_token"} = params) do
     params
     |> Input.cast_and_apply()
     |> case do

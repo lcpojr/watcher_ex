@@ -79,7 +79,7 @@ defmodule WatcherEx.MixProject do
       reset: ["ecto.drop", "setup"],
       test_setup: ["ecto.create", "ecto.migrate"],
       test_reset: ["ecto.drop", "test_setup"],
-      seed: ["run app/resource_manager/priv/repo/seeds.exs"],
+      seed: ["run apps/resource_manager/priv/repo/seeds.exs"],
       test: ["test"]
     ]
   end

@@ -109,6 +109,15 @@ defmodule Authenticator.SignIn.ResourceOwner do
     end
   end
 
+  def execute(%{"grant_type" => "password"} = params) do
+    params
+    |> Input.cast_and_apply()
+    |> case do
+      {:ok, %Input{} = input} -> execute(input)
+      error -> error
+    end
+  end
+
   def execute(%{grant_type: "password"} = params) do
     params
     |> Input.cast_and_apply()
