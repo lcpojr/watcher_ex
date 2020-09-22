@@ -1,6 +1,7 @@
 defmodule RestAPI.Controllers.TokensTest do
   use RestAPI.ConnCase, async: true
 
+  alias Authenticator.SignIn.Inputs.{RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
   describe "POST /api/v1/auth/protocol/openid-connect/token" do
@@ -46,7 +47,7 @@ defmodule RestAPI.Controllers.TokensTest do
 
     test "fails in Resource Owner Flow if params are invalid", %{conn: conn, url: url} do
       expect(AuthenticatorMock, :sign_in_resource_owner, fn input when is_map(input) ->
-        Authenticator.SignIn.Inputs.ResourceOwner.cast_and_apply(input)
+        ResourceOwner.cast_and_apply(input)
       end)
 
       assert %{
@@ -63,7 +64,7 @@ defmodule RestAPI.Controllers.TokensTest do
 
     test "fails in Refresh Token Flow if params are invalid", %{conn: conn, url: url} do
       expect(AuthenticatorMock, :sign_in_refresh_token, fn input when is_map(input) ->
-        Authenticator.SignIn.Inputs.RefreshToken.cast_and_apply(input)
+        RefreshToken.cast_and_apply(input)
       end)
 
       assert %{"refresh_token" => ["can't be blank"]} ==
