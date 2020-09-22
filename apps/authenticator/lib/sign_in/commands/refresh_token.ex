@@ -18,9 +18,17 @@ defmodule Authenticator.SignIn.RefreshToken do
   alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
   alias Ecto.Multi
 
+  @typedoc "Token parameters to be sent on responses"
+  @type token_params :: %{
+          access_token: String.t(),
+          refresh_token: String.t(),
+          expires_at: NaiveDateTime.t(),
+          scope: String.t()
+        }
+
   @typedoc "All possible responses"
   @type possible_responses ::
-          {:ok, %{access_token: String.t(), refresh_token: String.t()}}
+          {:ok, token_params()}
           | {:error, Ecto.Changeset.t() | :anauthenticated}
 
   @doc "Sign in an user identity by RefreshToken flow"
@@ -37,7 +45,7 @@ defmodule Authenticator.SignIn.RefreshToken do
          {:ok, access_token, claims} <- generate_access_token(session.claims),
          {:ok, refresh_token, _} <- generate_refresh_token(claims),
          {:ok, _session} <- generate_session(session, claims) do
-      {:ok, %{access_token: access_token, refresh_token: refresh_token}}
+      {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:token, {:error, reason}} ->
         Logger.info("Failed to validate refresh token", error: inspect(reason))
@@ -138,5 +146,14 @@ defmodule Authenticator.SignIn.RefreshToken do
         Logger.error("Failed to generate a session in step #{inspect(step)}", reason: reason)
         {:error, reason}
     end
+  end
+
+  defp parse_response(access_token, refresh_token, %{"exp" => exp, "scope" => scope}) do
+    %{
+      access_token: access_token,
+      refresh_token: refresh_token,
+      expires_at: Sessions.convert_expiration(exp),
+      scope: scope
+    }
   end
 end

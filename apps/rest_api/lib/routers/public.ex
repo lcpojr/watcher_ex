@@ -10,6 +10,6 @@ defmodule RestAPI.Routers.Public do
   scope "/api/v1", RestAPI.Controllers do
     pipe_through :rest_api
 
-    post "/auth/protocol/openid-connect/token", Token, :sign_in
+    post "/auth/protocol/openid-connect/token", Tokens, :sign_in
   end
 end
