@@ -3,7 +3,7 @@ defmodule RestAPI.Controllers.Tokens do
 
   use RestAPI.Controller, :controller
 
-  alias RestAPI.Ports.SignIn
+  alias RestAPI.Ports.Authenticator
   alias RestAPI.Views.Tokens
 
   action_fallback RestAPI.Controllers.Fallback
@@ -18,7 +18,7 @@ defmodule RestAPI.Controllers.Tokens do
   @spec sign_in(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def sign_in(conn, %{"grant_type" => "password"} = params) do
     params
-    |> SignIn.sign_in_resource_owner()
+    |> Authenticator.sign_in_resource_owner()
     |> case do
       {:ok, response} ->
         conn
@@ -33,7 +33,7 @@ defmodule RestAPI.Controllers.Tokens do
 
   def sign_in(conn, %{"grant_type" => "refresh_token"} = params) do
     params
-    |> SignIn.sign_in_refresh_token()
+    |> Authenticator.sign_in_refresh_token()
     |> case do
       {:ok, response} ->
         conn

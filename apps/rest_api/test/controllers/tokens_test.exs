@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.TokensTest do
   use RestAPI.ConnCase, async: true
 
-  alias RestAPI.Ports.SignInMock
+  alias RestAPI.Ports.AuthenticatorMock
 
   describe "POST /api/v1/auth/protocol/openid-connect/token" do
     setup do
@@ -18,7 +18,7 @@ defmodule RestAPI.Controllers.TokensTest do
         "client_secret" => "w3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"
       }
 
-      expect(SignInMock, :sign_in_resource_owner, fn _input ->
+      expect(AuthenticatorMock, :sign_in_resource_owner, fn _input ->
         {:ok, success_payload()}
       end)
 
@@ -34,7 +34,7 @@ defmodule RestAPI.Controllers.TokensTest do
         "grant_type" => "refresh_token"
       }
 
-      expect(SignInMock, :sign_in_refresh_token, fn _input ->
+      expect(AuthenticatorMock, :sign_in_refresh_token, fn _input ->
         {:ok, success_payload()}
       end)
 
@@ -42,6 +42,34 @@ defmodule RestAPI.Controllers.TokensTest do
                conn
                |> post(url, params)
                |> json_response(200)
+    end
+
+    test "fails in Resource Owner Flow if params are invalid", %{conn: conn, url: url} do
+      expect(AuthenticatorMock, :sign_in_resource_owner, fn input when is_map(input) ->
+        Authenticator.SignIn.Inputs.ResourceOwner.cast_and_apply(input)
+      end)
+
+      assert %{
+               "scope" => ["can't be blank"],
+               "client_id" => ["can't be blank"],
+               "client_secret" => ["can't be blank"],
+               "password" => ["can't be blank"],
+               "username" => ["can't be blank"]
+             } ==
+               conn
+               |> post(url, %{"grant_type" => "password"})
+               |> json_response(400)
+    end
+
+    test "fails in Refresh Token Flow if params are invalid", %{conn: conn, url: url} do
+      expect(AuthenticatorMock, :sign_in_refresh_token, fn input when is_map(input) ->
+        Authenticator.SignIn.Inputs.RefreshToken.cast_and_apply(input)
+      end)
+
+      assert %{"refresh_token" => ["can't be blank"]} ==
+               conn
+               |> post(url, %{"grant_type" => "refresh_token"})
+               |> json_response(400)
     end
   end
 

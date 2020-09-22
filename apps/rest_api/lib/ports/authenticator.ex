@@ -1,6 +1,6 @@
-defmodule RestAPI.Ports.SignIn do
+defmodule RestAPI.Ports.Authenticator do
   @moduledoc """
-  Port to access Authenticator sign in command.
+  Port to access Authenticator domain commands.
   """
 
   @typedoc "Token parameters to be sent on responses"

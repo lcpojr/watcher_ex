@@ -16,7 +16,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
     {:ok, user: user, app: app, scopes: scopes}
   end
 
-  describe "#{RefreshToken}.execute/1" do
+  describe "#{Command}.execute/1" do
     test "succeeds and generates both tokens", ctx do
       subject_id = ctx.user.id
       client_id = ctx.app.client_id
@@ -143,6 +143,13 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %Session{jti: ^jti, status: "active"} = Repo.get_by(Session, jti: jti)
+    end
+
+    test "fails if params are invalid" do
+      assert {:error,
+              %Ecto.Changeset{
+                errors: [refresh_token: {"can't be blank", [validation: :required]}]
+              }} = Command.execute(%{grant_type: "refresh_token"})
     end
 
     test "fails if session does not exist", ctx do

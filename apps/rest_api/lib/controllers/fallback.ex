@@ -7,6 +7,13 @@ defmodule RestAPI.Controllers.Fallback do
 
   @doc "Calls the correct fallback and renders it's response"
   @spec call(conn :: Plug.Conn.t(), error :: tuple()) :: Plug.Conn.t()
+  def call(conn, {:error, :invalid_params}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(Default)
+    |> render("400.json")
+  end
+
   def call(conn, {:error, :unauthorized}) do
     conn
     |> put_status(:forbidden)
@@ -26,6 +33,13 @@ defmodule RestAPI.Controllers.Fallback do
     |> put_status(:not_found)
     |> put_view(Default)
     |> render("404.json")
+  end
+
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(Default)
+    |> render("changeset.json", response: changeset)
   end
 
   def call(conn, {:error, _unknown_error}) do

@@ -41,4 +41,4 @@ config :rest_api, RestAPI.Endpoint,
   http: [port: 4002],
   server: false
 
-config :rest_api, RestAPI.Ports.SignIn, domain: RestAPI.Ports.SignInMock
+config :rest_api, RestAPI.Ports.Authenticator, domain: RestAPI.Ports.AuthenticatorMock

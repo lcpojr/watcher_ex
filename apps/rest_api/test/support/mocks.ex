@@ -1,6 +1,6 @@
 for module <- [
-      # Sign In ports domain
-      RestAPI.Ports.SignIn
+      # Authenticator domain
+      RestAPI.Ports.Authenticator
     ] do
   Mox.defmock(:"#{module}Mock", for: module)
 end

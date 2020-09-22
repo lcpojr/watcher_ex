@@ -54,6 +54,6 @@ config :rest_api, RestAPI.Endpoint,
   render_errors: [view: RestAPI.Views.Errors.Default, accepts: ~w(json), layout: false]
 
 config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
-config :rest_api, RestAPI.Ports.SignIn, domain: Authenticator
+config :rest_api, RestAPI.Ports.Authenticator, domain: Authenticator
 
 import_config "#{Mix.env()}.exs"

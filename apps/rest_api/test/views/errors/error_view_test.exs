@@ -5,6 +5,14 @@ defmodule RestAPI.RestAPI.Views.Errors.DefaultTest do
 
   alias RestAPI.Views.Errors.Default
 
+  test "renders 400.json" do
+    assert %{
+             status: 400,
+             error: "bad_request",
+             detail: "The given parameters are invalid"
+           } == render(Default, "400.json", [])
+  end
+
   test "renders 401.json" do
     assert %{
              status: 401,

@@ -3,6 +3,14 @@ defmodule RestAPI.Views.Errors.Default do
 
   use RestAPI.View
 
+  def render("400.json", _assigns) do
+    %{
+      status: 400,
+      error: "bad_request",
+      detail: "The given parameters are invalid"
+    }
+  end
+
   def render("401.json", _assigns) do
     %{
       status: 401,
@@ -33,6 +41,10 @@ defmodule RestAPI.Views.Errors.Default do
       error: "internal_server_error",
       detail: "Internal Server Error"
     }
+  end
+
+  def render("changeset.json", %{response: response}) do
+    Ecto.Changeset.traverse_errors(response, &translate_error/1)
   end
 
   def template_not_found(_template, _assigns) do
