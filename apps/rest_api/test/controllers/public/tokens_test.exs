@@ -1,4 +1,4 @@
-defmodule RestAPI.Controllers.TokensTest do
+defmodule RestAPI.Controllers.Public.TokensTest do
   use RestAPI.ConnCase, async: true
 
   alias Authenticator.SignIn.Inputs.{RefreshToken, ResourceOwner}

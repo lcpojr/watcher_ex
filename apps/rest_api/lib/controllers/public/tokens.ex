@@ -1,4 +1,4 @@
-defmodule RestAPI.Controllers.Tokens do
+defmodule RestAPI.Controllers.Public.Tokens do
   @moduledoc false
 
   use RestAPI.Controller, :controller

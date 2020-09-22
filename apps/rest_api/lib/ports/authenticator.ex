@@ -25,6 +25,9 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Delegates to Authenticator.get_session/1"
   @callback get_session(input :: map()) :: possible_responses()
 
+  @doc "Delegates to Authenticator.logout_session/1"
+  @callback logout_session(input :: map()) :: {:ok, session :: struct()}
+
   @doc "Authenticates the subject using Resource Owner Flow"
   @spec sign_in_resource_owner(input :: map()) :: possible_responses()
   def sign_in_resource_owner(input), do: implementation().sign_in_resource_owner(input)
@@ -36,6 +39,10 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Get's a session by the given input filters"
   @spec get_session(input :: map()) :: possible_responses()
   def get_session(input), do: implementation().get_session(input)
+
+  @doc "Invalidates a session with the given parameters"
+  @spec logout_session(input :: map()) :: {:ok, session :: struct()}
+  def logout_session(input), do: implementation().logout_session(input)
 
   defp implementation do
     :rest_api
