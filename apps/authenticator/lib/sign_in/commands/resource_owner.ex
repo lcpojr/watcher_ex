@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @moduledoc """
   Authenticates the user identity using the Resource Owner Flow.
 
@@ -21,18 +21,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
 
-  @typedoc "Token parameters to be sent on responses"
-  @type token_params :: %{
-          access_token: String.t(),
-          refresh_token: String.t(),
-          expires_at: NaiveDateTime.t(),
-          scope: String.t()
-        }
-
-  @typedoc "All possible responses"
-  @type possible_responses ::
-          {:ok, token_params()}
-          | {:error, Ecto.Changeset.t() | :anauthenticated}
+  @behaviour Authenticator.SignIn.Commands.Behaviour
 
   @doc """
   Sign in an user identity by ResouceOnwer flow.
@@ -43,7 +32,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   If we fail in some step before verifying user password we have to fake it's verification
   to avoid exposing identity existance and time attacks.
   """
-  @spec execute(input :: Input.t() | map()) :: possible_responses()
+  @impl true
   def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
     with {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},

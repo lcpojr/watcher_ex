@@ -23,6 +23,7 @@ defmodule RestAPI.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import RestAPI.ConnCase
+      import Mox
 
       alias RestAPI.Router.Helpers, as: Routes
 

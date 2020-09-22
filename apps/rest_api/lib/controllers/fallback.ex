@@ -7,14 +7,14 @@ defmodule RestAPI.Controllers.Fallback do
 
   @doc "Calls the correct fallback and renders it's response"
   @spec call(conn :: Plug.Conn.t(), error :: tuple()) :: Plug.Conn.t()
-  def call(conn, {:error, :unauthenticated}) do
+  def call(conn, {:error, :unauthorized}) do
     conn
     |> put_status(:forbidden)
     |> put_view(Default)
     |> render("401.json")
   end
 
-  def call(conn, {:error, :unauthorized}) do
+  def call(conn, {:error, :unauthenticated}) do
     conn
     |> put_status(:unauthorized)
     |> put_view(Default)

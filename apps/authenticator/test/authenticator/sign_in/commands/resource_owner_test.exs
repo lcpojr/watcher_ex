@@ -1,9 +1,9 @@
-defmodule Authenticator.SignIn.Commands.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.ResourceOwner
+  alias Authenticator.SignIn.Commands.ResourceOwner
 
   setup do
     scopes = RF.insert_list!(:scope, 3)

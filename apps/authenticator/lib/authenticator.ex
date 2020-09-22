@@ -5,7 +5,7 @@ defmodule Authenticator do
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, GenerateHash, VerifyHash}
   alias Authenticator.Sessions.Commands.GetSession
-  alias Authenticator.SignIn.{RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Commands.{RefreshToken, ResourceOwner}
 
   @doc "Delegates to #{ResourceOwner}.execute/1"
   defdelegate sign_in_resource_owner(input), to: ResourceOwner, as: :execute

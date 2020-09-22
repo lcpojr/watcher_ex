@@ -3,7 +3,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.RefreshToken, as: Command
+  alias Authenticator.SignIn.Commands.RefreshToken, as: Command
 
   setup do
     scopes = RF.insert_list!(:scope, 3)
@@ -235,6 +235,43 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
     test "fails if client application flow is not enabled", ctx do
       app = RF.insert!(:client_application, grant_flows: ["resource_owner"])
+
+      Enum.each(
+        ctx.scopes,
+        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
+      )
+
+      access_token_claims = %{
+        "aud" => app.client_id,
+        "azp" => app.name,
+        "sub" => ctx.user.id,
+        "typ" => "Bearer",
+        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+      }
+
+      {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
+
+      insert!(:session, jti: jti, subject_id: ctx.user.id, subject_type: "user", claims: claims)
+
+      refresh_token_claims = %{
+        "aud" => app.client_id,
+        "azp" => app.name,
+        "typ" => "Bearer",
+        "ati" => jti
+      }
+
+      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+    end
+
+    test "fails if client application protocol is not openid-connect", ctx do
+      app =
+        RF.insert!(:client_application,
+          protocol: "saml",
+          grant_flows: ["resource_owner", "refresh_token"]
+        )
 
       Enum.each(
         ctx.scopes,

@@ -40,3 +40,5 @@ config :authenticator, Authenticator.Repo,
 config :rest_api, RestAPI.Endpoint,
   http: [port: 4002],
   server: false
+
+config :rest_api, RestAPI.Ports.SignIn, domain: RestAPI.Ports.SignInMock

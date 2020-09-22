@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.RefreshToken do
+defmodule Authenticator.SignIn.Commands.RefreshToken do
   @moduledoc """
   Re authenticates the user identity using the Refresh Token Flow.
 
@@ -18,27 +18,22 @@ defmodule Authenticator.SignIn.RefreshToken do
   alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
   alias Ecto.Multi
 
-  @typedoc "Token parameters to be sent on responses"
-  @type token_params :: %{
-          access_token: String.t(),
-          refresh_token: String.t(),
-          expires_at: NaiveDateTime.t(),
-          scope: String.t()
-        }
+  @behaviour Authenticator.SignIn.Commands.Behaviour
 
-  @typedoc "All possible responses"
-  @type possible_responses ::
-          {:ok, token_params()}
-          | {:error, Ecto.Changeset.t() | :anauthenticated}
+  @doc """
+  Sign in an user identity by RefreshToken flow.
 
-  @doc "Sign in an user identity by RefreshToken flow"
-  @spec execute(input :: Input.t() | map()) :: possible_responses()
+  The application has to be active and using openid-connect protocol.
+  If the session was invalidated the flow will fail.
+  """
+  @impl true
   def execute(%Input{refresh_token: token}) do
     with {:token, {:ok, claims}} <- {:token, RefreshToken.verify_and_validate(token)},
          {:session, {:ok, session}} <- {:session, GetSession.execute(%{jti: claims["ati"]})},
          {:valid?, true} <- {:valid?, session.status not in ["invalidated", "refreshed"]},
          {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: claims["aud"]})},
          {:flow_enabled?, true} <- {:flow_enabled?, "refresh_token" in app.grant_flows},
+         {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:subject, {:ok, subject}} <- {:subject, get_subject(session)},
          {:sub_active?, true} <- {:sub_active?, subject.status == "active"},
@@ -65,6 +60,10 @@ defmodule Authenticator.SignIn.RefreshToken do
 
       {:flow_enabled?, false} ->
         Logger.info("Client application refresh_token flow not enabled")
+        {:error, :unauthenticated}
+
+      {:valid_protocol?, false} ->
+        Logger.info("Client application protocol is not openid-connect")
         {:error, :unauthenticated}
 
       {:app_active?, false} ->

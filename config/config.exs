@@ -51,8 +51,9 @@ config :authenticator, Authenticator.Repo,
 
 config :rest_api, RestAPI.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: RestAPI.ErrorView, accepts: ~w(json), layout: false]
+  render_errors: [view: RestAPI.Views.Errors.Default, accepts: ~w(json), layout: false]
 
 config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
+config :rest_api, RestAPI.Ports.SignIn, domain: Authenticator
 
 import_config "#{Mix.env()}.exs"
