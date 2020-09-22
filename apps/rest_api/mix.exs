@@ -40,7 +40,17 @@ defmodule RestAPI.MixProject do
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+
+      # Validations
+      {:ecto_sql, "~> 3.4"},
+
+      # Tools
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.13", only: :test},
+      {:mox, "~> 0.5", only: :test}
     ]
   end
 

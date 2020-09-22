@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.RefreshToken do
+defmodule Authenticator.SignIn.Commands.RefreshToken do
   @moduledoc """
   Re authenticates the user identity using the Refresh Token Flow.
 
@@ -18,26 +18,29 @@ defmodule Authenticator.SignIn.RefreshToken do
   alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
   alias Ecto.Multi
 
-  @typedoc "All possible responses"
-  @type possible_responses ::
-          {:ok, %{access_token: String.t(), refresh_token: String.t()}}
-          | {:error, Ecto.Changeset.t() | :anauthenticated}
+  @behaviour Authenticator.SignIn.Commands.Behaviour
 
-  @doc "Sign in an user identity by RefreshToken flow"
-  @spec execute(input :: Input.t() | map()) :: possible_responses()
+  @doc """
+  Sign in an user identity by RefreshToken flow.
+
+  The application has to be active and using openid-connect protocol.
+  If the session was invalidated the flow will fail.
+  """
+  @impl true
   def execute(%Input{refresh_token: token}) do
     with {:token, {:ok, claims}} <- {:token, RefreshToken.verify_and_validate(token)},
          {:session, {:ok, session}} <- {:session, GetSession.execute(%{jti: claims["ati"]})},
          {:valid?, true} <- {:valid?, session.status not in ["invalidated", "refreshed"]},
          {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: claims["aud"]})},
          {:flow_enabled?, true} <- {:flow_enabled?, "refresh_token" in app.grant_flows},
+         {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:subject, {:ok, subject}} <- {:subject, get_subject(session)},
          {:sub_active?, true} <- {:sub_active?, subject.status == "active"},
          {:ok, access_token, claims} <- generate_access_token(session.claims),
          {:ok, refresh_token, _} <- generate_refresh_token(claims),
          {:ok, _session} <- generate_session(session, claims) do
-      {:ok, %{access_token: access_token, refresh_token: refresh_token}}
+      {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:token, {:error, reason}} ->
         Logger.info("Failed to validate refresh token", error: inspect(reason))
@@ -59,6 +62,10 @@ defmodule Authenticator.SignIn.RefreshToken do
         Logger.info("Client application refresh_token flow not enabled")
         {:error, :unauthenticated}
 
+      {:valid_protocol?, false} ->
+        Logger.info("Client application protocol is not openid-connect")
+        {:error, :unauthenticated}
+
       {:app_active?, false} ->
         Logger.info("Client application is not active")
         {:error, :unauthenticated}
@@ -77,7 +84,16 @@ defmodule Authenticator.SignIn.RefreshToken do
     end
   end
 
-  def execute(%{refresh_token: _, grant_type: "refresh_token"} = params) do
+  def execute(%{"grant_type" => "refresh_token"} = params) do
+    params
+    |> Input.cast_and_apply()
+    |> case do
+      {:ok, %Input{} = input} -> execute(input)
+      error -> error
+    end
+  end
+
+  def execute(%{grant_type: "refresh_token"} = params) do
     params
     |> Input.cast_and_apply()
     |> case do
@@ -138,5 +154,14 @@ defmodule Authenticator.SignIn.RefreshToken do
         Logger.error("Failed to generate a session in step #{inspect(step)}", reason: reason)
         {:error, reason}
     end
+  end
+
+  defp parse_response(access_token, refresh_token, %{"exp" => exp, "scope" => scope}) do
+    %{
+      access_token: access_token,
+      refresh_token: refresh_token,
+      expires_at: Sessions.convert_expiration(exp),
+      scope: scope
+    }
   end
 end

@@ -1,9 +1,9 @@
-defmodule Authenticator.SignIn.Commands.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.ResourceOwner
+  alias Authenticator.SignIn.Commands.ResourceOwner, as: Command
 
   setup do
     scopes = RF.insert_list!(:scope, 3)
@@ -21,7 +21,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     {:ok, user: user, app: app, password: password, scopes: scopes}
   end
 
-  describe "#{ResourceOwner}.execute/1" do
+  describe "#{Command}.execute/1" do
     test "succeeds and generates an access_token", ctx do
       subject_id = ctx.user.id
       client_id = ctx.app.client_id
@@ -37,8 +37,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.secret
       }
 
-      assert {:ok, %{access_token: access_token, refresh_token: nil}} =
-               ResourceOwner.execute(input)
+      assert {:ok, %{access_token: access_token, refresh_token: nil}} = Command.execute(input)
 
       assert {:ok,
               %{
@@ -78,7 +77,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       }
 
       assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
-               ResourceOwner.execute(input)
+               Command.execute(input)
 
       assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
 
@@ -97,6 +96,19 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
+    test "fails if params are invalid" do
+      assert {:error,
+              %Ecto.Changeset{
+                errors: [
+                  username: {"can't be blank", [validation: :required]},
+                  password: {"can't be blank", [validation: :required]},
+                  client_id: {"can't be blank", [validation: :required]},
+                  client_secret: {"can't be blank", [validation: :required]},
+                  scope: {"can't be blank", [validation: :required]}
+                ]
+              }} = Command.execute(%{grant_type: "password"})
+    end
+
     test "fails if client application do not exist", ctx do
       input = %{
         username: ctx.user.username,
@@ -107,7 +119,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.secret
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if client application flow is not enabled", ctx do
@@ -122,7 +134,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: app.client_id
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if client application is inactive", ctx do
@@ -137,7 +149,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: app.client_id
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if client application secret do not match credential", ctx do
@@ -150,7 +162,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: Ecto.UUID.generate()
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if client application is not confidential", ctx do
@@ -165,7 +177,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: app.client_id
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if client application protocol is not openid-connect", ctx do
@@ -180,7 +192,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: app.client_id
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if user do not exist", ctx do
@@ -193,7 +205,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.secret
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if user is inactive", ctx do
@@ -208,7 +220,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.client_id
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
 
     test "fails if user password do not match credential", ctx do
@@ -221,7 +233,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         client_secret: ctx.app.secret
       }
 
-      assert {:error, :unauthenticated} == ResourceOwner.execute(input)
+      assert {:error, :unauthenticated} == Command.execute(input)
     end
   end
 end

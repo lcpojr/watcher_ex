@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @moduledoc """
   Authenticates the user identity using the Resource Owner Flow.
 
@@ -21,10 +21,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
 
-  @typedoc "All possible responses"
-  @type possible_responses ::
-          {:ok, %{access_token: String.t(), refresh_token: String.t()}}
-          | {:error, Ecto.Changeset.t() | :anauthenticated}
+  @behaviour Authenticator.SignIn.Commands.Behaviour
 
   @doc """
   Sign in an user identity by ResouceOnwer flow.
@@ -35,7 +32,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
   If we fail in some step before verifying user password we have to fake it's verification
   to avoid exposing identity existance and time attacks.
   """
-  @spec execute(input :: Input.t() | map()) :: possible_responses()
+  @impl true
   def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
     with {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
@@ -49,7 +46,7 @@ defmodule Authenticator.SignIn.ResourceOwner do
          {:ok, access_token, claims} <- generate_access_token(user, app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
          {:ok, _session} <- generate_session(claims) do
-      {:ok, %{access_token: access_token, refresh_token: refresh_token}}
+      {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
         Logger.info("Client application #{client_id} not found")
@@ -98,6 +95,15 @@ defmodule Authenticator.SignIn.ResourceOwner do
       error ->
         Logger.error("Failed to run command becuase of unknow error", error: inspect(error))
         error
+    end
+  end
+
+  def execute(%{"grant_type" => "password"} = params) do
+    params
+    |> Input.cast_and_apply()
+    |> case do
+      {:ok, %Input{} = input} -> execute(input)
+      error -> error
     end
   end
 
@@ -160,5 +166,14 @@ defmodule Authenticator.SignIn.ResourceOwner do
       expires_at: Sessions.convert_expiration(exp),
       grant_flow: "resource_owner"
     })
+  end
+
+  defp parse_response(access_token, refresh_token, %{"exp" => exp, "scope" => scope}) do
+    %{
+      access_token: access_token,
+      refresh_token: refresh_token,
+      expires_at: Sessions.convert_expiration(exp),
+      scope: scope
+    }
   end
 end

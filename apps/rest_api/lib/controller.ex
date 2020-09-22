@@ -8,6 +8,7 @@ defmodule RestAPI.Controller do
       use Phoenix.Controller, namespace: RestAPI
 
       import Plug.Conn
+
       alias RestAPI.Router.Helpers, as: Routes
     end
   end

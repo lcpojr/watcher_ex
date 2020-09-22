@@ -11,7 +11,7 @@ defmodule RestAPI.View do
         only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
 
       import Phoenix.View
-      import RestAPI.ErrorHelpers
+      import RestAPI.Views.Errors.Helpers
 
       alias RestAPI.Router.Helpers, as: Routes
     end
