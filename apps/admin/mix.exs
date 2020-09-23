@@ -36,8 +36,7 @@ defmodule Admin.MixProject do
   defp deps do
     [
       # Umbrealla
-      {:resource_manager, in_umbrella: true},
-      {:authenticator, in_umbrella: true},
+      {:rest_api, in_umbrella: true},
 
       # Domain
       {:phoenix, "~> 1.5.5"},
