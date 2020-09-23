@@ -14,9 +14,7 @@ defmodule RestAPI.Controllers.Public.Sessions do
     |> Map.get(:private)
     |> Map.get(:session)
     |> Commands.logout_session()
-    |> case do
-      {:ok, _response} -> send_resp(conn, :no_content, "")
-      {:error, _reason} = error -> error
-    end
+
+    send_resp(conn, :no_content, "")
   end
 end

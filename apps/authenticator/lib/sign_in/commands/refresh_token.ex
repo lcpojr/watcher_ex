@@ -11,8 +11,8 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
 
   require Logger
 
-  alias Authenticator.{Repo, Sessions}
   alias Authenticator.Ports.ResourceManager, as: Port
+  alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
