@@ -23,7 +23,7 @@ defmodule RestAPI.Controllers.Public.TokensTest do
         {:ok, success_payload()}
       end)
 
-      assert %{"access_token" => _, "refresh_token" => _, "scope" => _, "expires_at" => _} =
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
                |> post(url, params)
                |> json_response(200)
@@ -39,7 +39,7 @@ defmodule RestAPI.Controllers.Public.TokensTest do
         {:ok, success_payload()}
       end)
 
-      assert %{"access_token" => _, "refresh_token" => _, "scope" => _, "expires_at" => _} =
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
                |> post(url, params)
                |> json_response(200)
@@ -78,8 +78,8 @@ defmodule RestAPI.Controllers.Public.TokensTest do
     %{
       access_token: "access_token",
       refresh_token: "refresh_token",
-      scope: "admin:read",
-      expires_at: NaiveDateTime.utc_now()
+      token_type: "Bearer",
+      expires_in: 100_000
     }
   end
 end

@@ -1,4 +1,4 @@
-defmodule RestAPI.Views.Tokens do
+defmodule RestAPI.Views.Public.Tokens do
   @moduledoc false
 
   use RestAPI.View
@@ -7,8 +7,8 @@ defmodule RestAPI.Views.Tokens do
     %{
       access_token: response.access_token,
       refresh_token: response.refresh_token,
-      expires_at: response.expires_at,
-      scope: response.scope
+      expires_in: response.expires_in,
+      token_type: response.token_type
     }
   end
 end

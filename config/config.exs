@@ -33,6 +33,7 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 ################
 
 config :authenticator, ecto_repos: [Authenticator.Repo]
+config :authenticator, Authenticator.Ports.ResourceManager, domain: ResourceManager
 
 config :authenticator, Authenticator.Application,
   children: [Authenticator.Repo, Authenticator.Sessions.Manager]

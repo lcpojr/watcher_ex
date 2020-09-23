@@ -29,6 +29,9 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 
 config :authenticator, Authenticator.Application, children: [Authenticator.Repo]
 
+config :authenticator, Authenticator.Ports.ResourceManager,
+  domain: Authenticator.Ports.ResourceManagerMock
+
 config :authenticator, Authenticator.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   show_sensitive_data_on_connection_error: true

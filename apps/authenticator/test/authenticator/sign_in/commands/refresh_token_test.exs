@@ -1,34 +1,28 @@
 defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
   use Authenticator.DataCase, async: true
 
+  alias Authenticator.Ports.ResourceManagerMock
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.Commands.RefreshToken, as: Command
+  alias Authenticator.SignIn.Commands.RefreshToken, as: Commands
 
-  setup do
-    scopes = RF.insert_list!(:scope, 3)
-    user = RF.insert!(:user)
-    app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+  describe "#{Commands}.execute/1" do
+    test "succeeds and generates both tokens" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
 
-    Enum.each(scopes, &RF.insert!(:user_scope, scope: &1, user: user))
-    Enum.each(scopes, &RF.insert!(:client_application_scope, scope: &1, client_application: app))
-
-    {:ok, user: user, app: app, scopes: scopes}
-  end
-
-  describe "#{Command}.execute/1" do
-    test "succeeds and generates both tokens", ctx do
-      subject_id = ctx.user.id
-      client_id = ctx.app.client_id
-      client_name = ctx.app.name
-      scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+      subject_id = user.id
+      client_id = app.client_id
+      client_name = app.name
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       access_token_claims = %{
         "aud" => client_id,
-        "azp" => ctx.app.name,
+        "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
-        "scope" => scopes
+        "scope" => scope
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
@@ -37,15 +31,30 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       refresh_token_claims = %{
         "aud" => client_id,
-        "azp" => ctx.app.name,
+        "azp" => app.name,
         "typ" => "Bearer",
         "ati" => jti
       }
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
-      assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{id: id} ->
+        assert user.id == id
+        {:ok, user}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: refresh_token,
+                expires_in: 7_200_000,
+                token_type: typ
+              }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
 
       assert %Session{jti: ^jti, status: "refreshed"} = Repo.get_by(Session, jti: jti)
 
@@ -58,9 +67,9 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => jti,
                 "nbf" => _,
-                "scope" => ^scopes,
+                "scope" => ^scope,
                 "sub" => ^subject_id,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
       assert {:ok,
@@ -72,24 +81,28 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => _,
                 "nbf" => _,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %Session{jti: ^jti, status: "active"} = Repo.get_by(Session, jti: jti)
     end
 
-    test "succeeds even if session is expired", ctx do
-      subject_id = ctx.user.id
-      client_id = ctx.app.client_id
-      client_name = ctx.app.name
-      scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+    test "succeeds even if session is expired" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+
+      subject_id = user.id
+      client_id = app.client_id
+      client_name = app.name
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       access_token_claims = %{
         "aud" => client_id,
-        "azp" => ctx.app.name,
+        "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
-        "scope" => scopes
+        "scope" => scope
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
@@ -104,15 +117,30 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       refresh_token_claims = %{
         "aud" => client_id,
-        "azp" => ctx.app.name,
+        "azp" => app.name,
         "typ" => "Bearer",
         "ati" => jti
       }
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
-      assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{id: id} ->
+        assert user.id == id
+        {:ok, user}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: refresh_token,
+                expires_in: 7_200_000,
+                token_type: typ
+              }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
 
       assert %Session{jti: ^jti, status: "refreshed"} = Repo.get_by(Session, jti: jti)
 
@@ -125,9 +153,9 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => jti,
                 "nbf" => _,
-                "scope" => ^scopes,
+                "scope" => ^scope,
                 "sub" => ^subject_id,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
       assert {:ok,
@@ -139,7 +167,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => _,
                 "nbf" => _,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %Session{jti: ^jti, status: "active"} = Repo.get_by(Session, jti: jti)
@@ -149,23 +177,26 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       assert {:error,
               %Ecto.Changeset{
                 errors: [refresh_token: {"can't be blank", [validation: :required]}]
-              }} = Command.execute(%{grant_type: "refresh_token"})
+              }} = Commands.execute(%{grant_type: "refresh_token"})
     end
 
-    test "fails if session does not exist", ctx do
+    test "fails if session does not exist" do
+      app_id = Ecto.UUID.generate()
+      user_id = Ecto.UUID.generate()
+
       access_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
-        "sub" => ctx.user.id,
+        "aud" => app_id,
+        "azp" => "My application",
+        "sub" => user_id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => "admin:read"
       }
 
       {:ok, _token, %{"jti" => jti}} = build_access_token(access_token_claims)
 
       refresh_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app_id,
+        "azp" => "My application",
         "typ" => "Bearer",
         "ati" => jti
       }
@@ -173,31 +204,34 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if session was invalidated", ctx do
+    test "fails if session was invalidated" do
+      app_id = Ecto.UUID.generate()
+      user_id = Ecto.UUID.generate()
+
       access_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
-        "sub" => ctx.user.id,
+        "aud" => app_id,
+        "azp" => "My application",
+        "sub" => user_id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => "admin:read"
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
       insert!(:session,
         jti: jti,
-        subject_id: ctx.user.id,
+        subject_id: user_id,
         subject_type: "user",
         claims: claims,
         status: "invalidated"
       )
 
       refresh_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app_id,
+        "azp" => "My application",
         "typ" => "Bearer",
         "ati" => jti
       }
@@ -205,31 +239,34 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if session already refreshed", ctx do
+    test "fails if session already refreshed" do
+      app_id = Ecto.UUID.generate()
+      user_id = Ecto.UUID.generate()
+
       access_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
-        "sub" => ctx.user.id,
+        "aud" => app_id,
+        "azp" => "My application",
+        "sub" => user_id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => "admin:read"
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
       insert!(:session,
         jti: jti,
-        subject_id: ctx.user.id,
+        subject_id: user_id,
         subject_type: "user",
         claims: claims,
         status: "refreshed"
       )
 
       refresh_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app_id,
+        "azp" => "My application",
         "typ" => "Bearer",
         "ati" => jti
       }
@@ -237,28 +274,25 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if client application flow is not enabled", ctx do
+    test "fails if client application flow is not enabled" do
+      user = RF.insert!(:user)
       app = RF.insert!(:client_application, grant_flows: ["resource_owner"])
-
-      Enum.each(
-        ctx.scopes,
-        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
-      )
+      scopes = RF.insert_list!(:scope, 3)
 
       access_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
-        "sub" => ctx.user.id,
+        "sub" => user.id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: ctx.user.id, subject_type: "user", claims: claims)
+      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
 
       refresh_token_claims = %{
         "aud" => app.client_id,
@@ -269,33 +303,34 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if client application protocol is not openid-connect", ctx do
+    test "fails if client application protocol is not openid-connect" do
+      user = RF.insert!(:user)
+
       app =
         RF.insert!(:client_application,
           protocol: "saml",
           grant_flows: ["resource_owner", "refresh_token"]
         )
 
-      Enum.each(
-        ctx.scopes,
-        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
-      )
+      scopes = RF.insert_list!(:scope, 3)
 
       access_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
-        "sub" => ctx.user.id,
+        "sub" => user.id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: ctx.user.id, subject_type: "user", claims: claims)
+      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
 
       refresh_token_claims = %{
         "aud" => app.client_id,
@@ -306,33 +341,34 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if client application is inactive", ctx do
+    test "fails if client application is inactive" do
+      user = RF.insert!(:user)
+
       app =
         RF.insert!(:client_application,
           status: "blocked",
           grant_flows: ["resource_owner", "refresh_token"]
         )
 
-      Enum.each(
-        ctx.scopes,
-        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
-      )
+      scopes = RF.insert_list!(:scope, 3)
 
       access_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
-        "sub" => ctx.user.id,
+        "sub" => user.id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: ctx.user.id, subject_type: "user", claims: claims)
+      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
 
       refresh_token_claims = %{
         "aud" => app.client_id,
@@ -343,19 +379,24 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if subject does not exist", ctx do
+    test "fails if subject does not exist" do
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+      scopes = RF.insert_list!(:scope, 3)
+
       subject_id = Ecto.UUID.generate()
 
       access_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app.client_id,
+        "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
@@ -368,27 +409,32 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       )
 
       refresh_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app.client_id,
+        "azp" => app.name,
         "typ" => "Bearer",
         "ati" => jti
       }
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:error, :not_found} end)
+
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if subject is inactive", ctx do
+    test "fails if subject is inactive" do
       user = RF.insert!(:user, status: "blocked")
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+      scopes = RF.insert_list!(:scope, 3)
 
       access_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app.client_id,
+        "azp" => app.name,
         "sub" => user.id,
         "typ" => "Bearer",
-        "scope" => ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
@@ -401,16 +447,19 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       )
 
       refresh_token_claims = %{
-        "aud" => ctx.app.client_id,
-        "azp" => ctx.app.name,
+        "aud" => app.client_id,
+        "azp" => app.name,
         "typ" => "Bearer",
         "ati" => jti
       }
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, user} end)
+
       assert {:error, :unauthenticated} ==
-               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
   end
 end

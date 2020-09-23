@@ -1,43 +1,50 @@
 defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
   use Authenticator.DataCase, async: true
 
+  alias Authenticator.Ports.ResourceManagerMock
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Commands.ResourceOwner, as: Command
 
-  setup do
-    scopes = RF.insert_list!(:scope, 3)
-
-    user = RF.insert!(:user)
-    app = RF.insert!(:client_application)
-
-    Enum.each(scopes, &RF.insert!(:user_scope, scope: &1, user: user))
-    Enum.each(scopes, &RF.insert!(:client_application_scope, scope: &1, client_application: app))
-
-    password = "MyPassw@rd234"
-    hash = RF.gen_hashed_password(password)
-    RF.insert!(:password, user: user, password_hash: hash)
-
-    {:ok, user: user, app: app, password: password, scopes: scopes}
-  end
-
   describe "#{Command}.execute/1" do
-    test "succeeds and generates an access_token", ctx do
-      subject_id = ctx.user.id
-      client_id = ctx.app.client_id
-      client_name = ctx.app.name
-      scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+    test "succeeds and generates an access_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application)
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      subject_id = user.id
+      client_id = app.client_id
+      client_name = app.name
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: user.username,
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: scopes,
+        scope: scope,
         client_id: client_id,
-        client_secret: ctx.app.secret
+        client_secret: app.secret
       }
 
-      assert {:ok, %{access_token: access_token, refresh_token: nil}} = Command.execute(input)
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
+        assert user.username == username
+        {:ok, %{user | password: password, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: nil,
+                expires_in: 7_200_000,
+                token_type: typ
+              }} = Command.execute(input)
 
       assert {:ok,
               %{
@@ -48,36 +55,50 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 "iss" => "WatcherEx",
                 "jti" => jti,
                 "nbf" => _,
-                "scope" => ^scopes,
+                "scope" => ^scope,
                 "sub" => ^subject_id,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
-    test "succeeds and generates a refresh_token", ctx do
+    test "succeeds and generates a refresh_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
       app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
-
-      Enum.each(
-        ctx.scopes,
-        &RF.insert!(:client_application_scope, scope: &1, client_application: app)
-      )
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
 
       client_id = app.client_id
-      scopes = ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: user.username,
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: scopes,
+        scope: scope,
         client_id: client_id,
         client_secret: app.secret
       }
 
-      assert {:ok, %{access_token: access_token, refresh_token: refresh_token}} =
-               Command.execute(input)
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
+        assert user.username == username
+        {:ok, %{user | password: password, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: refresh_token,
+                expires_in: 7_200_000,
+                token_type: typ
+              }} = Command.execute(input)
 
       assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
 
@@ -90,7 +111,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 "iss" => "WatcherEx",
                 "jti" => _,
                 "nbf" => _,
-                "typ" => "Bearer"
+                "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %Session{jti: ^jti} = Repo.one(Session)
@@ -109,129 +130,166 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
               }} = Command.execute(%{grant_type: "password"})
     end
 
-    test "fails if client application do not exist", ctx do
+    test "fails if client application do not exist" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: ctx.app.secret
+        client_secret: "my-secret"
       }
+
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:error, :not_found} end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application flow is not enabled", ctx do
-      app = RF.insert!(:client_application, grant_flows: [])
-
+    test "fails if client application flow is not enabled" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: app.client_id,
-        client_secret: app.client_id
+        scope: "admin:read",
+        client_id: Ecto.UUID.generate(),
+        client_secret: "my-secret"
       }
+
+      expect(ResourceManagerMock, :get_identity, fn _ ->
+        {:ok, RF.insert!(:client_application, grant_flows: [])}
+      end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application is inactive", ctx do
-      app = RF.insert!(:client_application, status: "blocked")
-
+    test "fails if client application is inactive" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: app.client_id,
-        client_secret: app.client_id
+        scope: "admin:read",
+        client_id: Ecto.UUID.generate(),
+        client_secret: "my-secret"
       }
+
+      expect(ResourceManagerMock, :get_identity, fn _ ->
+        {:ok, RF.insert!(:client_application, status: "blocked")}
+      end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application secret do not match credential", ctx do
+    test "fails if client application secret do not match credential" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: ctx.app.client_id,
+        scope: "admin:read",
+        client_id: Ecto.UUID.generate(),
         client_secret: Ecto.UUID.generate()
       }
 
+      expect(ResourceManagerMock, :get_identity, fn _ ->
+        {:ok, RF.insert!(:client_application, secret: "another-secret")}
+      end)
+
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application is not confidential", ctx do
-      app = RF.insert!(:client_application, access_type: "public")
-
+    test "fails if client application is not confidential" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: app.client_id,
-        client_secret: app.client_id
+        scope: "admin:read",
+        client_id: Ecto.UUID.generate(),
+        client_secret: "my-secret"
       }
 
+      expect(ResourceManagerMock, :get_identity, fn _ ->
+        {:ok, RF.insert!(:client_application, access_type: "public")}
+      end)
+
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application protocol is not openid-connect", ctx do
-      app = RF.insert!(:client_application, protocol: "saml")
-
+    test "fails if client application protocol is not openid-connect" do
       input = %{
-        username: ctx.user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: app.client_id,
-        client_secret: app.client_id
+        scope: "admin:read",
+        client_id: Ecto.UUID.generate(),
+        client_secret: "my-secret"
       }
 
+      expect(ResourceManagerMock, :get_identity, fn _ ->
+        {:ok, RF.insert!(:client_application, protocol: "saml")}
+      end)
+
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if user do not exist", ctx do
+    test "fails if user do not exist" do
+      app = RF.insert!(:client_application)
+
       input = %{
         username: Ecto.UUID.generate(),
-        password: ctx.password,
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: ctx.app.client_id,
-        client_secret: ctx.app.secret
+        scope: "admin:read",
+        client_id: app.client_id,
+        client_secret: app.secret
       }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: _} -> {:error, :not_found} end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if user is inactive", ctx do
-      user = RF.insert!(:user, status: "blocked")
+    test "fails if user is inactive" do
+      app = RF.insert!(:client_application)
 
       input = %{
-        username: user.username,
-        password: ctx.password,
+        username: "my-username",
+        password: "MyPassw@rd234",
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: ctx.app.client_id,
-        client_secret: ctx.app.client_id
+        scope: "admin:read",
+        client_id: app.client_id,
+        client_secret: app.secret
       }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: _} ->
+        {:ok, RF.insert!(:user, status: "blocked")}
+      end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if user password do not match credential", ctx do
+    test "fails if user password do not match credential" do
+      app = RF.insert!(:client_application)
+
       input = %{
-        username: ctx.user.username,
+        username: "my-username",
         password: Ecto.UUID.generate(),
         grant_type: "password",
-        scope: ctx.scopes |> Enum.map(& &1.name) |> Enum.join(" "),
-        client_id: ctx.app.client_id,
-        client_secret: ctx.app.secret
+        scope: "admin:read",
+        client_id: app.client_id,
+        client_secret: app.secret
       }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: _} ->
+        user = RF.insert!(:user, status: "blocked")
+        hash = RF.gen_hashed_password("AnotherPassword")
+        password = RF.insert!(:password, user: user, password_hash: hash)
+        {:ok, %{user | password: password}}
+      end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
