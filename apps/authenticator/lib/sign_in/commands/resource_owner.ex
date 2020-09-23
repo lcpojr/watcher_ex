@@ -16,6 +16,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   require Logger
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, VerifyHash}
+  alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.Sessions
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
@@ -34,13 +35,13 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   """
   @impl true
   def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
-    with {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: client_id})},
+    with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:secret_matches?, true} <- {:secret_matches?, app.secret == input.client_secret},
          {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
-         {:user, {:ok, user}} <- {:user, ResourceManager.get_identity(%{username: username})},
+         {:user, {:ok, user}} <- {:user, Port.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
          {:ok, access_token, claims} <- generate_access_token(user, app, scope),
@@ -168,12 +169,12 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp parse_response(access_token, refresh_token, %{"exp" => exp, "scope" => scope}) do
+  defp parse_response(access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}) do
     %{
       access_token: access_token,
       refresh_token: refresh_token,
-      expires_at: Sessions.convert_expiration(exp),
-      scope: scope
+      expires_in: ttl,
+      token_type: typ
     }
   end
 end

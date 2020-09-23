@@ -3,7 +3,7 @@ defmodule RestAPI.Controllers.Public.Sessions do
 
   use RestAPI.Controller, :controller
 
-  alias RestAPI.Ports.Authenticator
+  alias RestAPI.Ports.Authenticator, as: Commands
 
   action_fallback RestAPI.Controllers.Fallback
 
@@ -13,10 +13,8 @@ defmodule RestAPI.Controllers.Public.Sessions do
     conn
     |> Map.get(:private)
     |> Map.get(:session)
-    |> Authenticator.logout_session()
-    |> case do
-      {:ok, _response} -> send_resp(conn, :no_content, "")
-      {:error, _reason} = error -> error
-    end
+    |> Commands.logout_session()
+
+    send_resp(conn, :no_content, "")
   end
 end

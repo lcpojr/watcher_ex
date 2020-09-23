@@ -11,6 +11,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
 
   require Logger
 
+  alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Schemas.Session
@@ -31,7 +32,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     with {:token, {:ok, claims}} <- {:token, RefreshToken.verify_and_validate(token)},
          {:session, {:ok, session}} <- {:session, GetSession.execute(%{jti: claims["ati"]})},
          {:valid?, true} <- {:valid?, session.status not in ["invalidated", "refreshed"]},
-         {:app, {:ok, app}} <- {:app, ResourceManager.get_identity(%{client_id: claims["aud"]})},
+         {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: claims["aud"]})},
          {:flow_enabled?, true} <- {:flow_enabled?, "refresh_token" in app.grant_flows},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
@@ -105,10 +106,10 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   def execute(_any), do: {:error, :invalid_params}
 
   defp get_subject(%{subject_id: subject_id, subject_type: "user"}),
-    do: ResourceManager.get_identity(%{username: nil, id: subject_id})
+    do: Port.get_identity(%{username: nil, id: subject_id})
 
   defp get_subject(%{subject_id: subject_id, subject_type: "application"}),
-    do: ResourceManager.get_identity(%{client_id: nil, id: subject_id})
+    do: Port.get_identity(%{client_id: nil, id: subject_id})
 
   defp generate_access_token(%{"aud" => aud, "azp" => azp, "sub" => sub, "scope" => scope}) do
     AccessToken.generate_and_sign(%{
@@ -156,12 +157,12 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     end
   end
 
-  defp parse_response(access_token, refresh_token, %{"exp" => exp, "scope" => scope}) do
+  defp parse_response(access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}) do
     %{
       access_token: access_token,
       refresh_token: refresh_token,
-      expires_at: Sessions.convert_expiration(exp),
-      scope: scope
+      expires_in: ttl,
+      token_type: typ
     }
   end
 end
