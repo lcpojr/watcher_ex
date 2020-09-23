@@ -1,5 +1,8 @@
 defmodule Admin.Telemetry do
+  @moduledoc false
+
   use Supervisor
+
   import Telemetry.Metrics
 
   @unit {:native, :millisecond}
