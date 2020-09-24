@@ -8,7 +8,9 @@ defmodule Authenticator.Sessions.Manager do
   require Logger
 
   alias Authenticator.Repo
+  alias Authenticator.Sessions.Cache
   alias Authenticator.Sessions.Schemas.Session
+  alias Ecto.Multi
 
   @typedoc "Session manager supervisor state"
   @type state :: %{
@@ -35,9 +37,9 @@ defmodule Authenticator.Sessions.Manager do
   @spec check(process_id :: pid() | __MODULE__) :: state()
   def check(pid \\ __MODULE__), do: GenServer.call(pid, :check)
 
-  @doc "Executes the status management"
-  @spec execute() :: :ok | {:error, :update_failed}
-  def execute, do: update_sessions_status()
+  @doc "Update session statuses and save on cache"
+  @spec execute() :: :ok | {:error, :update_failed | :failed_to_cache}
+  def execute, do: manage_sessions()
 
   #########
   # SERVER
@@ -45,7 +47,7 @@ defmodule Authenticator.Sessions.Manager do
 
   @impl true
   def init(_args) do
-    Logger.info("Session Manager started")
+    Logger.info("Session manager started")
 
     state = %{
       started_at: NaiveDateTime.utc_now(),
@@ -58,7 +60,7 @@ defmodule Authenticator.Sessions.Manager do
 
   @impl true
   def handle_continue(:schedule_work, state) do
-    Logger.info("Session Manager scheduling job.")
+    Logger.info("Session manager scheduling job.")
 
     state = schedule_work(state)
 
@@ -68,16 +70,10 @@ defmodule Authenticator.Sessions.Manager do
   @impl true
   def handle_call(:check, _from, state), do: {:reply, state, state}
 
-  def handle_call(:execute, _from, state) do
-    # Runs update sessions manually
-    update_sessions_status()
-
-    {:reply, state, state}
-  end
-
   @impl true
-  def handle_info(:query, state) do
-    update_sessions_status()
+  def handle_info(:manage, state) do
+    # Updating session statuses and adding active ones to cache
+    manage_sessions()
 
     # Updating state
     state = %{state | updated_at: NaiveDateTime.utc_now()}
@@ -89,6 +85,26 @@ defmodule Authenticator.Sessions.Manager do
   # Helpers
   ##########
 
+  defp manage_sessions do
+    Multi.new()
+    |> Multi.run(:update_statuses, fn _repo, _changes ->
+      update_sessions_status()
+    end)
+    |> Multi.run(:update_cache, fn _repo, _changes ->
+      set_active_sessions_cache()
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, _response} ->
+        Logger.info("Succeeds in managing sessions")
+        :ok
+
+      {:error, step, err, _changes} ->
+        Logger.error("Failed to manage sessions in step #{inspect(step)}", reason: err)
+        {:error, err}
+    end
+  end
+
   defp update_sessions_status do
     now = NaiveDateTime.utc_now()
     create_after = NaiveDateTime.add(now, @query_interval, :second)
@@ -98,8 +114,8 @@ defmodule Authenticator.Sessions.Manager do
     |> Repo.update_all(set: [status: "expired"])
     |> case do
       {count, _} ->
-        Logger.debug("Session Manager expired #{inspect(count)} sessions")
-        :ok
+        Logger.debug("Session manager expired #{inspect(count)} sessions")
+        {:ok, count}
 
       error ->
         Logger.error("Session manager failed to expire sessions", error: inspect(error))
@@ -107,11 +123,48 @@ defmodule Authenticator.Sessions.Manager do
     end
   end
 
+  defp set_active_sessions_cache do
+    today = Date.utc_today()
+    {:ok, create_after} = NaiveDateTime.new(today, ~T[00:00:00])
+
+    # Getting all active sessions today
+    sessions_to_cache =
+      [status: "active", created_after: create_after]
+      |> Session.query()
+      |> Repo.all()
+      |> Enum.map(&build_cache/1)
+
+    # Cleanup the cache
+    Cache.flush()
+
+    # Set up active sessions on cache
+    sessions_to_cache
+    |> Cache.set_many()
+    |> case do
+      :ok ->
+        Logger.debug("Session manager cached sessions with success")
+        {:ok, :cache_updated}
+
+      {:error, keys} ->
+        Logger.error("Session manager failed to cache sessions", keys: inspect(keys))
+        {:error, :failed_to_cache}
+    end
+  end
+
+  defp build_cache(%Session{jti: jti, claims: %{"exp" => exp}} = session) do
+    %Nebulex.Object{
+      key: jti,
+      value: session,
+      version: 1,
+      expire_at: exp
+    }
+  end
+
   defp schedule_work(state) do
     interval = schedule_interval()
     date_to_schedule = schedule_to(interval)
 
-    Process.send_after(__MODULE__, :query, :timer.seconds(interval))
+    Process.send_after(__MODULE__, :manage, :timer.seconds(interval))
 
     # Updating state
     %{state | scheduled_to: date_to_schedule}

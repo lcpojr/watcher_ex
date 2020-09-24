@@ -27,7 +27,8 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 # Authenticator
 ################
 
-config :authenticator, Authenticator.Application, children: [Authenticator.Repo]
+config :authenticator, Authenticator.Application,
+  children: [Authenticator.Repo, Authenticator.Sessions.Cache]
 
 config :authenticator, Authenticator.Ports.ResourceManager,
   domain: Authenticator.Ports.ResourceManagerMock

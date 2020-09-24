@@ -27,5 +27,10 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
     test "fails if session does not exist" do
       assert {:error, :not_found} = GetSession.execute(%Input{id: Ecto.UUID.generate()})
     end
+
+    test "fails if parameters are empty" do
+      assert {:error, %{errors: [jti: {"All input fields are empty", []}]}} =
+               GetSession.execute(%{})
+    end
   end
 end

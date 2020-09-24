@@ -9,6 +9,7 @@ defmodule Authenticator.Sessions.Commands.Inputs.GetSession do
 
   @typedoc "Get user input fields"
   @type t :: %__MODULE__{
+          id: String.t(),
           jti: String.t(),
           subject_id: String.t(),
           subject_type: String.t(),
@@ -33,5 +34,10 @@ defmodule Authenticator.Sessions.Commands.Inputs.GetSession do
     |> validate_inclusion(:status, Session.possible_statuses())
     |> validate_inclusion(:subject_type, Session.possible_subject_types())
     |> validate_inclusion(:grant_flow, Session.possible_grant_flows())
+    |> validate_emptiness()
   end
+
+  defp validate_emptiness(%{valid?: false} = changeset), do: changeset
+  defp validate_emptiness(%{valid?: true, changes: c} = set) when map_size(c) > 0, do: set
+  defp validate_emptiness(changeset), do: add_error(changeset, :jti, "All input fields are empty")
 end
