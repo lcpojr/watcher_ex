@@ -34,9 +34,14 @@ config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
 
 config :authenticator, ecto_repos: [Authenticator.Repo]
 config :authenticator, Authenticator.Ports.ResourceManager, domain: ResourceManager
+config :authenticator, Authenticator.Sessions.Cache, n_shards: 2, gc_interval: 3600
 
 config :authenticator, Authenticator.Application,
-  children: [Authenticator.Repo, Authenticator.Sessions.Manager]
+  children: [
+    Authenticator.Repo,
+    Authenticator.Sessions.Cache,
+    Authenticator.Sessions.Manager
+  ]
 
 config :authenticator, Authenticator.Repo,
   database: "watcher_ex_#{Mix.env()}",

@@ -7,11 +7,25 @@ defmodule Authenticator.Factory do
 
   @doc false
   def build(:session) do
+    jti = Ecto.UUID.generate()
+
     %Session{
-      jti: Ecto.UUID.generate(),
+      jti: jti,
       subject_id: Ecto.UUID.generate(),
       subject_type: "user",
-      claims: %{},
+      claims: %{
+        "aud" => "2e455bb1-0604-4812-9756-36f7ab23b8d9",
+        "azp" => "admin",
+        "exp" => :os.system_time(:millisecond),
+        "iat" => 1_600_976_621,
+        "iss" => "WatcherEx",
+        "jti" => jti,
+        "nbf" => :os.system_time(:millisecond),
+        "scope" => "admin:read admin:write",
+        "sub" => "7f5eb9dc-b550-4586-91dc-3c701eb3b9bc",
+        "ttl" => 7200,
+        "typ" => "Bearer"
+      },
       status: "active",
       grant_flow: "resource_owner",
       expires_at: default_expiration(),

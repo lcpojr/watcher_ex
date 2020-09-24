@@ -40,6 +40,7 @@ defmodule Authenticator.MixProject do
       {:pbkdf2_elixir, "~> 1.2"},
       {:joken, "~> 2.2"},
       {:jason, "~> 1.2"},
+      {:nebulex, "~> 1.2"},
 
       # Database
       {:postgrex, "~> 0.15"},

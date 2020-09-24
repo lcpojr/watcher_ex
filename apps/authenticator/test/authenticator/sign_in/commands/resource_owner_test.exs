@@ -42,7 +42,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
               %{
                 access_token: access_token,
                 refresh_token: nil,
-                expires_in: 7_200_000,
+                expires_in: 7200,
                 token_type: typ
               }} = Command.execute(input)
 
@@ -96,7 +96,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
               %{
                 access_token: access_token,
                 refresh_token: refresh_token,
-                expires_in: 7_200_000,
+                expires_in: 7200,
                 token_type: typ
               }} = Command.execute(input)
 

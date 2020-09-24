@@ -7,7 +7,7 @@ defmodule Authenticator.Sessions do
   @spec convert_expiration(expiration :: integer()) :: NaiveDateTime.t()
   def convert_expiration(expiration) do
     expiration
-    |> DateTime.from_unix!(:millisecond)
+    |> DateTime.from_unix!(:second)
     |> DateTime.to_naive()
   end
 end

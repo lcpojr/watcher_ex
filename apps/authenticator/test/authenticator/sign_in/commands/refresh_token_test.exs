@@ -52,7 +52,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
               %{
                 access_token: access_token,
                 refresh_token: refresh_token,
-                expires_in: 7_200_000,
+                expires_in: 7200,
                 token_type: typ
               }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
 
@@ -138,7 +138,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
               %{
                 access_token: access_token,
                 refresh_token: refresh_token,
-                expires_in: 7_200_000,
+                expires_in: 7200,
                 token_type: typ
               }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
 
