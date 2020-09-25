@@ -16,7 +16,7 @@ defmodule RestAPI.Controllers.Public.Tokens do
     - Refresh Token (Authenticates using an refresh token);
   """
   @spec sign_in(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
-  def sign_in(%Plug.Conn{} = conn, %{"grant_type" => "password"} = params) do
+  def sign_in(conn, %{"grant_type" => "password"} = params) do
     params
     |> Commands.sign_in_resource_owner()
     |> case do
@@ -31,7 +31,7 @@ defmodule RestAPI.Controllers.Public.Tokens do
     end
   end
 
-  def sign_in(%Plug.Conn{} = conn, %{"grant_type" => "refresh_token"} = params) do
+  def sign_in(conn, %{"grant_type" => "refresh_token"} = params) do
     params
     |> Commands.sign_in_refresh_token()
     |> case do

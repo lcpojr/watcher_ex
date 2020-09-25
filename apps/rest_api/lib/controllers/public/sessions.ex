@@ -9,7 +9,7 @@ defmodule RestAPI.Controllers.Public.Sessions do
 
   @doc "Logout the authenticated subject session."
   @spec logout(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
-  def logout(%Plug.Conn{private: %{session: session}} = conn, _params) do
+  def logout(%{private: %{session: session}} = conn, _params) do
     session.jti
     |> Commands.logout_session()
     |> case do
@@ -21,7 +21,7 @@ defmodule RestAPI.Controllers.Public.Sessions do
 
   @doc "Logout subject authenticated sessions."
   @spec logout_all_sessions(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
-  def logout_all_sessions(%Plug.Conn{private: %{session: session}} = conn, _params) do
+  def logout_all_sessions(%{private: %{session: session}} = conn, _params) do
     session.subject_id
     |> Commands.logout_all_sessions(session.subject_type)
     |> case do
