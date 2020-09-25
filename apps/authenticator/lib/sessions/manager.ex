@@ -38,7 +38,7 @@ defmodule Authenticator.Sessions.Manager do
   def check(pid \\ __MODULE__), do: GenServer.call(pid, :check)
 
   @doc "Update session statuses and save on cache"
-  @spec execute() :: :ok | {:error, :update_failed | :failed_to_cache}
+  @spec execute() :: {:ok, :managed} | {:error, :update_failed | :failed_to_cache}
   def execute, do: manage_sessions()
 
   #########
@@ -97,7 +97,7 @@ defmodule Authenticator.Sessions.Manager do
     |> case do
       {:ok, _response} ->
         Logger.info("Succeeds in managing sessions")
-        :ok
+        {:ok, :sessions_updated}
 
       {:error, step, err, _changes} ->
         Logger.error("Failed to manage sessions in step #{inspect(step)}", reason: err)
@@ -113,7 +113,7 @@ defmodule Authenticator.Sessions.Manager do
     |> Session.query()
     |> Repo.update_all(set: [status: "expired"])
     |> case do
-      {count, _} ->
+      {count, _} when is_integer(count) ->
         Logger.debug("Session manager expired #{inspect(count)} sessions")
         {:ok, count}
 

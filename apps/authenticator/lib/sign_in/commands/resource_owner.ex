@@ -140,6 +140,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       "azp" => application.name,
       "sub" => user.id,
       "typ" => "Bearer",
+      "identity" => "user",
       "scope" => build_scope(user, application, scope)
     })
   end

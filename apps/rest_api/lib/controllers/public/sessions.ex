@@ -9,12 +9,24 @@ defmodule RestAPI.Controllers.Public.Sessions do
 
   @doc "Logout the authenticated subject session."
   @spec logout(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
-  def logout(conn, _params) do
-    conn
-    |> Map.get(:private)
-    |> Map.get(:session)
+  def logout(%Plug.Conn{private: %{session: session}} = conn, _params) do
+    session.jti
     |> Commands.logout_session()
+    |> case do
+      {:ok, _count} -> send_resp(conn, :no_content, "")
+      {:error, :invalid_status} -> send_resp(conn, :no_content, "")
+      {:error, _reason} = error -> error
+    end
+  end
 
-    send_resp(conn, :no_content, "")
+  @doc "Logout subject authenticated sessions."
+  @spec logout_all_sessions(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
+  def logout_all_sessions(%Plug.Conn{private: %{session: session}} = conn, _params) do
+    session.subject_id
+    |> Commands.logout_all_sessions(session.subject_type)
+    |> case do
+      {:ok, _count} -> send_resp(conn, :no_content, "")
+      {:error, _reason} = error -> error
+    end
   end
 end

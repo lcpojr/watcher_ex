@@ -22,6 +22,7 @@ defmodule RestAPI.Routers.Public do
       pipe_through :authenticated
 
       post "/logout", Sessions, :logout
+      post "/logout-all-sessions", Sessions, :logout_all_sessions
     end
   end
 end

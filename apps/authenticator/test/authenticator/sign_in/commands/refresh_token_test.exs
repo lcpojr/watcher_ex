@@ -68,6 +68,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "jti" => jti,
                 "nbf" => _,
                 "scope" => ^scope,
+                "identity" => "user",
                 "sub" => ^subject_id,
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
@@ -153,6 +154,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => jti,
                 "nbf" => _,
+                "identity" => "user",
                 "scope" => ^scope,
                 "sub" => ^subject_id,
                 "typ" => ^typ
