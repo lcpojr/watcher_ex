@@ -3,8 +3,8 @@ defmodule RestAPI.Controllers.Public.SessionsTest do
 
   alias RestAPI.Ports.AuthenticatorMock
 
-  @logout_endpoint "/api/v1/sessions/logout"
-  @logout_all_endpoint "/api/v1/sessions/logout-all-sessions"
+  @logout_endpoint "api/v1/auth/protocol/openid-connect/logout"
+  @logout_all_endpoint "api/v1/auth/protocol/openid-connect/logout-all-sessions"
 
   describe "POST #{@logout_endpoint}" do
     setup do
