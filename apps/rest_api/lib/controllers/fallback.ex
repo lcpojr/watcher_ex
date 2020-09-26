@@ -16,14 +16,14 @@ defmodule RestAPI.Controllers.Fallback do
 
   def call(conn, {:error, :unauthorized}) do
     conn
-    |> put_status(:forbidden)
+    |> put_status(:unauthorized)
     |> put_view(Default)
     |> render("401.json")
   end
 
   def call(conn, {:error, :unauthenticated}) do
     conn
-    |> put_status(:unauthorized)
+    |> put_status(:forbidden)
     |> put_view(Default)
     |> render("403.json")
   end

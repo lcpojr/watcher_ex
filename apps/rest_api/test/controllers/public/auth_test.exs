@@ -51,12 +51,14 @@ defmodule RestAPI.Controllers.Public.AuthTest do
       end)
 
       assert %{
-               "scope" => ["can't be blank"],
-               "client_id" => ["can't be blank"],
-               "client_secret" => ["can't be blank"],
-               "password" => ["can't be blank"],
-               "username" => ["can't be blank"]
-             } ==
+               "response" => %{
+                 "scope" => ["can't be blank"],
+                 "client_id" => ["can't be blank"],
+                 "client_secret" => ["can't be blank"],
+                 "password" => ["can't be blank"],
+                 "username" => ["can't be blank"]
+               }
+             } =
                conn
                |> post(@token_endpoint, %{"grant_type" => "password"})
                |> json_response(400)
@@ -67,7 +69,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         RefreshToken.cast_and_apply(input)
       end)
 
-      assert %{"refresh_token" => ["can't be blank"]} ==
+      assert %{"response" => %{"refresh_token" => ["can't be blank"]}} =
                conn
                |> post(@token_endpoint, %{"grant_type" => "refresh_token"})
                |> json_response(400)

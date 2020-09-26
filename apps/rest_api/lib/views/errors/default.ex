@@ -44,7 +44,12 @@ defmodule RestAPI.Views.Errors.Default do
   end
 
   def render("changeset.json", %{response: response}) do
-    Ecto.Changeset.traverse_errors(response, &translate_error/1)
+    %{
+      status: 400,
+      detail: "The given params are invalid",
+      response: Ecto.Changeset.traverse_errors(response, &translate_error/1),
+      error: "bad_request"
+    }
   end
 
   def template_not_found(_template, _assigns) do
