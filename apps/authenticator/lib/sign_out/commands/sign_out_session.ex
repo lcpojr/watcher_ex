@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Commands.LogoutSession do
+defmodule Authenticator.Sessions.Commands.SignOutSession do
   @moduledoc """
   Invalidates the given session.
   """
@@ -6,8 +6,8 @@ defmodule Authenticator.Sessions.Commands.LogoutSession do
   require Logger
 
   alias Authenticator.{Repo, Sessions}
-  alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Cache
+  alias Authenticator.Sessions.Schemas.Session
   alias Ecto.Multi
 
   @typedoc "All possible responses"
@@ -15,7 +15,7 @@ defmodule Authenticator.Sessions.Commands.LogoutSession do
           {:ok, Session.t()}
           | {:error, Ecto.Changeset.t() | :delete_cache_failed | :not_active | :not_active}
 
-  @doc "Logout the given session by invalidating it's status"
+  @doc "Sign out the given session by invalidating it's status"
   @spec execute(session_or_jti :: Session.t() | String.t()) :: possible_responses()
   def execute(%Session{status: "active"} = session) do
     Multi.new()

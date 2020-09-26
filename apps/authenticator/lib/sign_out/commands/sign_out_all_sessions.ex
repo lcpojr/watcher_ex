@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Commands.LogoutAllSessions do
+defmodule Authenticator.Sessions.Commands.SignOutAllSessions do
   @moduledoc """
   Invalidates all subject sessions.
   """
@@ -10,7 +10,7 @@ defmodule Authenticator.Sessions.Commands.LogoutAllSessions do
   alias Authenticator.Sessions.Schemas.Session
   alias Ecto.Multi
 
-  @doc "Logout the given session by invalidating it's status"
+  @doc "Sign out all subject active sessions by invalidating it's status"
   @spec execute(subject_id :: String.t(), subject_type :: String.t()) :: {:ok, count :: integer()}
   def execute(subject_id, subject_type) when is_binary(subject_id) and is_binary(subject_type) do
     Multi.new()
@@ -33,11 +33,11 @@ defmodule Authenticator.Sessions.Commands.LogoutAllSessions do
         {:error, :not_active}
 
       {:ok, %{invalidate: count}} ->
-        Logger.info("Succeeds in logouting #{inspect(count)} sessions")
+        Logger.info("Succeeds in signing out #{inspect(count)} sessions")
         {:ok, count}
 
       {:error, step, err, _changes} ->
-        Logger.error("Failed to logout sessions in step #{inspect(step)}", reason: err)
+        Logger.error("Failed to signing out sessions in step #{inspect(step)}", reason: err)
         {:error, err}
     end
   end

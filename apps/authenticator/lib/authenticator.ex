@@ -5,7 +5,7 @@ defmodule Authenticator do
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, GenerateHash, VerifyHash}
   alias Authenticator.Sessions.Tokens.AccessToken
-  alias Authenticator.Sessions.Commands.{GetSession, LogoutAllSessions, LogoutSession}
+  alias Authenticator.Sessions.Commands.{GetSession, SignOutAllSessions, SignOutSession}
   alias Authenticator.SignIn.Commands.{RefreshToken, ResourceOwner}
 
   @doc "Delegates to #{ResourceOwner}.execute/1"
@@ -17,11 +17,16 @@ defmodule Authenticator do
   @doc "Delegates to #{GetSession}.execute/1"
   defdelegate get_session(input), to: GetSession, as: :execute
 
-  @doc "Delegates to #{LogoutSession}.execute/1"
-  defdelegate logout_session(session), to: LogoutSession, as: :execute
+  @doc "Delegates to #{AccessToken}.verify_and_validate/1"
+  defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
 
-  @doc "Delegates to #{LogoutAllSessions}.execute/2"
-  defdelegate logout_all_sessions(subject_id, subject_type), to: LogoutAllSessions, as: :execute
+  @doc "Delegates to #{SignOutSession}.execute/1"
+  defdelegate sign_out_session(session_or_jti), to: SignOutSession, as: :execute
+
+  @doc "Delegates to #{SignOutAllSessions}.execute/2"
+  defdelegate sign_out_all_sessions(subject_id, subject_type),
+    to: SignOutAllSessions,
+    as: :execute
 
   @doc "Delegates to #{FakeVerifyHash}.execute/1"
   defdelegate fake_verify_hash(algorithm), to: FakeVerifyHash, as: :execute
@@ -34,7 +39,4 @@ defmodule Authenticator do
 
   @doc "Delegates to #{VerifyHash}.execute/3"
   defdelegate verify_hash(value, hash, algorithm), to: VerifyHash, as: :execute
-
-  @doc "Delegates to #{AccessToken}.verify_and_validate/1"
-  defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
 end

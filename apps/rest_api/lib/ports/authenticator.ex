@@ -31,13 +31,13 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Delegates to Authenticator.validate_access_token/1"
   @callback validate_access_token(token :: String.t()) :: {:ok, map()} | {:error, Keyword.t()}
 
-  @doc "Delegates to Authenticator.logout_session/1"
-  @callback logout_session(session_or_jti :: struct() | String.t()) ::
-              {:ok, struct()} | possible_logout_failures()
+  @doc "Delegates to Authenticator.sign_out_session/1"
+  @callback sign_out_session(session_or_jti :: struct() | String.t()) ::
+              {:ok, session :: struct()} | possible_logout_failures()
 
-  @doc "Delegates to Authenticator.logout_all_sessions/2"
-  @callback logout_all_sessions(subject :: String.t(), type :: String.t()) ::
-              {:ok, integer()} | possible_logout_failures()
+  @doc "Delegates to Authenticator.sign_out_all_sessions/2"
+  @callback sign_out_all_sessions(subject_id :: String.t(), subject_type :: String.t()) ::
+              {:ok, count :: integer()} | possible_logout_failures()
 
   @doc "Authenticates the subject using Resource Owner Flow"
   @spec sign_in_resource_owner(input :: map()) :: possible_sign_in_responses()
@@ -56,13 +56,13 @@ defmodule RestAPI.Ports.Authenticator do
   def get_session(input), do: implementation().get_session(input)
 
   @doc "Invalidates a given session"
-  @spec logout_session(session_or_jti :: map()) :: {:ok, struct()} | possible_logout_failures()
-  def logout_session(session_or_jti), do: implementation().logout_session(session_or_jti)
+  @spec sign_out_session(session_or_jti :: map()) :: {:ok, struct()} | possible_logout_failures()
+  def sign_out_session(session_or_jti), do: implementation().sign_out_session(session_or_jti)
 
   @doc "Invalidates all subject sessions"
-  @spec logout_all_sessions(sub :: String.t(), type :: String.t()) ::
-          {:ok, integer()} | possible_logout_failures()
-  def logout_all_sessions(sub, type), do: implementation().logout_all_sessions(sub, type)
+  @spec sign_out_all_sessions(subject_id :: String.t(), subject_type :: String.t()) ::
+          {:ok, count :: integer()} | possible_logout_failures()
+  def sign_out_all_sessions(sub, type), do: implementation().sign_out_all_sessions(sub, type)
 
   defp implementation do
     :rest_api
