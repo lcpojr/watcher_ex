@@ -1,4 +1,4 @@
-defmodule RestAPI.RestAPI.Controllers.FallbackTest do
+defmodule RestAPI.Controllers.FallbackTest do
   use RestAPI.ConnCase, async: true
 
   alias ResourceManager.Identity.Commands.Inputs.CreateUser
