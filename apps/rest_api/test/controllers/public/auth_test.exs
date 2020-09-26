@@ -122,12 +122,12 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:ok, %{}}
       end)
@@ -138,18 +138,18 @@ defmodule RestAPI.Controllers.Public.AuthTest do
              |> response(204)
     end
 
-    test "fails if sesions not active", %{conn: conn, access_token: access_token, claims: claims} do
+    test "fails if sessions not active", %{conn: conn, access_token: access_token, claims: claims} do
       expect(AuthenticatorMock, :validate_access_token, fn token ->
         assert access_token == token
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:error, :not_active}
       end)
@@ -166,12 +166,12 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:error, :not_found}
       end)
@@ -193,7 +193,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -219,7 +219,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -245,7 +245,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -265,6 +265,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
   defp default_claims do
     %{
+      "jti" => "03eds74a-c291-4b5f",
       "aud" => "02eff74a-c291-4b5f-a02f-4f92d8daf693",
       "azp" => "my-application",
       "sub" => "272459ce-7356-4460-b461-1ecf0ebf7c4e",

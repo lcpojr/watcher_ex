@@ -20,7 +20,7 @@ defmodule RestAPI.Plugs.Authentication do
     with {:header, [access_token | _]} <- {:header, get_req_header(conn, "authorization")},
          {:bearer, "Bearer " <> access_token} <- {:bearer, access_token},
          {:token, {:ok, claims}} <- {:token, Authenticator.validate_access_token(access_token)},
-         {:session, {:ok, session}} <- {:session, Authenticator.get_session(claims["jti"])} do
+         {:session, {:ok, session}} <- {:session, Authenticator.get_session(claims)} do
       put_private(conn, :session, build_payload(session))
     else
       {:header, []} ->

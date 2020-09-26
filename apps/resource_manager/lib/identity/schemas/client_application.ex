@@ -63,9 +63,9 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     |> validate_length(:name, min: 1, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
     |> validate_inclusion(:protocol, @possible_protocols)
-    |> validate_inclusion(:grant_flows, @possible_grant_flows)
     |> validate_inclusion(:access_type, @possible_access_types)
     |> unique_constraint(:name)
+    |> validate_grant_flows()
     |> generate_secret()
   end
 
@@ -83,10 +83,21 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
     |> validate_length(:name, min: 1, max: 150)
     |> validate_inclusion(:status, @possible_statuses)
     |> validate_inclusion(:protocol, @possible_protocols)
-    |> validate_inclusion(:grant_flows, @possible_grant_flows)
     |> validate_inclusion(:access_type, @possible_access_types)
     |> unique_constraint(:name)
+    |> validate_grant_flows()
   end
+
+  defp validate_grant_flows(%{valid?: true, changes: %{grant_flows: flows}} = changeset) do
+    if Enum.all?(flows, &(&1 in @possible_grant_flows)) do
+      changeset
+    else
+      opts = [validation: :subset, enum: @possible_grant_flows]
+      add_error(changeset, :grant_flows, "is invalid", opts)
+    end
+  end
+
+  defp validate_grant_flows(changeset), do: changeset
 
   @doc false
   def possible_statuses, do: @possible_statuses

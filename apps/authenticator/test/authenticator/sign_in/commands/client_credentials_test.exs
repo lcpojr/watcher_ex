@@ -46,7 +46,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                 "jti" => jti,
                 "nbf" => _,
                 "scope" => ^scope,
-                "identity" => "user",
+                "identity" => "application",
                 "sub" => ^subject_id,
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)

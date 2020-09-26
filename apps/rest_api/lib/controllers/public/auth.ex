@@ -47,7 +47,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   @doc "Logout the authenticated subject session."
   @spec sign_out(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def sign_out(%{private: %{session: session}} = conn, _params) do
-    session.jti
+    session
     |> Commands.sign_out_session()
     |> parse_sign_out_response(conn)
   end

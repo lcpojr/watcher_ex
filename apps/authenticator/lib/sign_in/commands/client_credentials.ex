@@ -109,7 +109,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
       "azp" => application.name,
       "sub" => application.id,
       "typ" => "Bearer",
-      "identity" => "user",
+      "identity" => "application",
       "scope" => build_scope(application, scope)
     })
   end
