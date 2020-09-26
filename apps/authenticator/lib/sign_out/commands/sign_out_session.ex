@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Commands.SignOutSession do
+defmodule Authenticator.SignOut.Commands.SignOutSession do
   @moduledoc """
   Invalidates the given session.
   """
@@ -52,5 +52,5 @@ defmodule Authenticator.Sessions.Commands.SignOutSession do
     end
   end
 
-  def execute(_any), do: {:error, :invalid_params}
+  def execute(_), do: {:error, :invalid_params}
 end

@@ -3,5 +3,10 @@
         "treat_no_relevant_lines_as_covered": true,
         "output_dir": "cover/",
         "minimum_coverage": 90
-    }
+    },
+    "skip_files": [
+        "apps/authenticator/lib/application.ex",
+        "apps/resource_manager/lib/application.ex",
+        "apps/rest_api/lib/application.ex"
+    ]
 }

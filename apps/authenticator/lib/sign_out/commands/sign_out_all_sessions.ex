@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Commands.SignOutAllSessions do
+defmodule Authenticator.SignOut.Commands.SignOutAllSessions do
   @moduledoc """
   Invalidates all subject sessions.
   """
@@ -41,4 +41,6 @@ defmodule Authenticator.Sessions.Commands.SignOutAllSessions do
         {:error, err}
     end
   end
+
+  def execute(_, _), do: {:error, :invalid_params}
 end
