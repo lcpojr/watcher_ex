@@ -1,24 +1,21 @@
-defmodule Authenticator.SignIn.Commands.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.ClientCredentials do
   @moduledoc """
-  Authenticates the user identity using the Resource Owner Flow.
+  Authenticates the client application identity using the Client Credentials Flow.
 
-  With the resource owner password credentials grant type, the user provides their
-  username and password directly and we uses it to authenticates then.
+  With the client credentials grant type, the client application provides their
+  secret (or client assertion) directly and we use it to authenticate before generating
+  the access token.
 
-  The Client application should pass their secret in order to be authorized to exchange
-  the credentials for an access_token.
-
-  This grant type should only be enabled on the authorization server if other flows are not viable and
-  should also only be used if the identity owner trusts in the application.
+  This flow is used in machine-to-machine authentication and when the application already
+  has user's permission or it's not required to access an specific data.
   """
 
   require Logger
 
-  alias Authenticator.Crypto.Commands.{FakeVerifyHash, VerifyHash}
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.Sessions
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
+  alias Authenticator.SignIn.Inputs.ClientCredentials, as: Input
   alias ResourceManager.Permissions.Scopes
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
@@ -26,70 +23,45 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @doc """
   Sign in an user identity by ResouceOnwer flow.
 
-  The application has to be active, using openid-connect protocol and with access_type
-  confidential in order to use this flow.
+  The application has to be active, using openid-connect protocol in order to use this flow.
 
   If we fail in some step before verifying user password we have to fake it's verification
   to avoid exposing identity existance and time attacks.
   """
   @impl true
-  def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
+  def execute(%Input{client_id: client_id, scope: scope} = input) do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
-         {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
+         {:flow_enabled?, true} <- {:flow_enabled?, "client_credentials" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:secret_matches?, true} <- {:secret_matches?, app.secret == input.client_secret},
-         {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
-         {:user, {:ok, user}} <- {:user, Port.get_identity(%{username: username})},
-         {:user_active?, true} <- {:user_active?, user.status == "active"},
-         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
-         {:ok, access_token, claims} <- generate_access_token(user, app, scope),
+         {:ok, access_token, claims} <- generate_access_token(app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
          {:ok, _session} <- generate_session(claims) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
         Logger.info("Client application #{client_id} not found")
-        FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
       {:flow_enabled?, false} ->
-        Logger.info("Client application #{client_id} resource_owner flow not enabled")
-        FakeVerifyHash.execute(:argon2)
+        Logger.info("Client application #{client_id} client_credentials flow not enabled")
         {:error, :unauthenticated}
 
       {:app_active?, false} ->
         Logger.info("Client application #{client_id} is not active")
-        FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
       {:secret_matches?, false} ->
         Logger.info("Client application #{client_id} secret do not match any credential")
-        FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
       {:confidential?, false} ->
         Logger.info("Client application #{client_id} is not confidential")
-        FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
       {:valid_protocol?, false} ->
         Logger.info("Client application #{client_id} protocol is not openid-connect")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
-      {:user, {:error, :not_found}} ->
-        Logger.info("User #{username} not found")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
-      {:user_active?, false} ->
-        Logger.info("User #{username} is not active")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
-      {:pass_matches?, false} ->
-        Logger.info("User #{username} password do not match any credential")
         {:error, :unauthenticated}
 
       error ->
@@ -98,7 +70,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  def execute(%{"grant_type" => "password"} = params) do
+  def execute(%{"grant_type" => "client_credentials"} = params) do
     params
     |> Input.cast_and_apply()
     |> case do
@@ -107,7 +79,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  def execute(%{grant_type: "password"} = params) do
+  def execute(%{grant_type: "client_credentials"} = params) do
     params
     |> Input.cast_and_apply()
     |> case do
@@ -118,14 +90,12 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
   def execute(_any), do: {:error, :invalid_params}
 
-  defp build_scope(user, application, scopes) do
-    user_scopes = Enum.map(user.scopes, & &1.name)
+  defp build_scope(application, scopes) do
     app_scopes = Enum.map(application.scopes, & &1.name)
 
     scopes
     |> Scopes.convert_to_list()
     |> Enum.filter(&(&1 in app_scopes))
-    |> Enum.filter(&(&1 in user_scopes))
     |> Scopes.convert_to_string()
     |> case do
       "" -> nil
@@ -133,14 +103,14 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp generate_access_token(user, application, scope) do
+  defp generate_access_token(application, scope) do
     AccessToken.generate_and_sign(%{
       "aud" => application.client_id,
       "azp" => application.name,
-      "sub" => user.id,
+      "sub" => application.id,
       "typ" => "Bearer",
       "identity" => "user",
-      "scope" => build_scope(user, application, scope)
+      "scope" => build_scope(application, scope)
     })
   end
 
@@ -162,10 +132,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     Sessions.create(%{
       jti: jti,
       subject_id: sub,
-      subject_type: "user",
+      subject_type: "application",
       claims: claims,
       expires_at: Sessions.convert_expiration(exp),
-      grant_flow: "resource_owner"
+      grant_flow: "client_credentials"
     })
   end
 
