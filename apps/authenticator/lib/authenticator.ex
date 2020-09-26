@@ -4,8 +4,8 @@ defmodule Authenticator do
   """
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, GenerateHash, VerifyHash}
-  alias Authenticator.Sessions.Tokens.AccessToken
   alias Authenticator.Sessions.Commands.GetSession
+  alias Authenticator.Sessions.Tokens.AccessToken
   alias Authenticator.SignIn.Commands.{RefreshToken, ResourceOwner}
   alias Authenticator.SignOut.Commands.{SignOutAllSessions, SignOutSession}
 

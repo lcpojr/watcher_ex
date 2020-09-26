@@ -1,8 +1,8 @@
 defmodule RestAPI.RestAPI.Controllers.FallbackTest do
   use RestAPI.ConnCase, async: true
 
-  alias RestAPI.Controllers.Fallback
   alias ResourceManager.Identity.Commands.Inputs.CreateUser
+  alias RestAPI.Controllers.Fallback
 
   test "handles bad request responses", %{conn: conn} do
     assert %{
