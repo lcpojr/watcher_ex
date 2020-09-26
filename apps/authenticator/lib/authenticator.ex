@@ -4,6 +4,7 @@ defmodule Authenticator do
   """
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, GenerateHash, VerifyHash}
+  alias Authenticator.Sessions.Tokens.AccessToken
   alias Authenticator.Sessions.Commands.{GetSession, LogoutAllSessions, LogoutSession}
   alias Authenticator.SignIn.Commands.{RefreshToken, ResourceOwner}
 
@@ -33,4 +34,7 @@ defmodule Authenticator do
 
   @doc "Delegates to #{VerifyHash}.execute/3"
   defdelegate verify_hash(value, hash, algorithm), to: VerifyHash, as: :execute
+
+  @doc "Delegates to #{AccessToken}.verify_and_validate/1"
+  defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
 end

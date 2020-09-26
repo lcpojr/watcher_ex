@@ -13,7 +13,7 @@ defmodule Authenticator.Sessions.Commands.LogoutSession do
   @typedoc "All possible responses"
   @type possible_responses ::
           {:ok, Session.t()}
-          | {:error, Ecto.Changeset.t() | :delete_cache_failed | :invalid_status}
+          | {:error, Ecto.Changeset.t() | :delete_cache_failed | :not_active | :not_active}
 
   @doc "Logout the given session by invalidating it's status"
   @spec execute(session_or_jti :: Session.t() | String.t()) :: possible_responses()
@@ -46,11 +46,11 @@ defmodule Authenticator.Sessions.Commands.LogoutSession do
     [jti: jti]
     |> Sessions.get_by()
     |> case do
-      %Session{} = session -> execute(session)
-      nil -> {:error, :not_found}
+      %Session{status: "active"} = session -> execute(session)
+      %Session{} -> {:error, :not_active}
+      _any -> {:error, :not_found}
     end
   end
 
-  def execute(%Session{status: status}) when status != "active", do: {:error, :invalid_status}
   def execute(_any), do: {:error, :invalid_params}
 end

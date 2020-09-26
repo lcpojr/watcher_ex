@@ -4,12 +4,10 @@ defmodule RestAPI.Controllers.Public.TokensTest do
   alias Authenticator.SignIn.Inputs.{RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
-  describe "POST /api/v1/auth/protocol/openid-connect/token" do
-    setup do
-      {:ok, url: "/api/v1/auth/protocol/openid-connect/token"}
-    end
+  @sign_in_endpoint "/api/v1/auth/protocol/openid-connect/token"
 
-    test "suceeds in Resource Owner Flow if params are valid", %{conn: conn, url: url} do
+  describe "POST #{@sign_in_endpoint}" do
+    test "suceeds in Resource Owner Flow if params are valid", %{conn: conn} do
       params = %{
         "username" => "my-username",
         "password" => "my-password",
@@ -25,11 +23,11 @@ defmodule RestAPI.Controllers.Public.TokensTest do
 
       assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
-               |> post(url, params)
+               |> post(@sign_in_endpoint, params)
                |> json_response(200)
     end
 
-    test "suceeds in Refresh Token Flow if params are valid", %{conn: conn, url: url} do
+    test "suceeds in Refresh Token Flow if params are valid", %{conn: conn} do
       params = %{
         "refresh_token" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
         "grant_type" => "refresh_token"
@@ -41,11 +39,11 @@ defmodule RestAPI.Controllers.Public.TokensTest do
 
       assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
-               |> post(url, params)
+               |> post(@sign_in_endpoint, params)
                |> json_response(200)
     end
 
-    test "fails in Resource Owner Flow if params are invalid", %{conn: conn, url: url} do
+    test "fails in Resource Owner Flow if params are invalid", %{conn: conn} do
       expect(AuthenticatorMock, :sign_in_resource_owner, fn input when is_map(input) ->
         ResourceOwner.cast_and_apply(input)
       end)
@@ -58,18 +56,18 @@ defmodule RestAPI.Controllers.Public.TokensTest do
                "username" => ["can't be blank"]
              } ==
                conn
-               |> post(url, %{"grant_type" => "password"})
+               |> post(@sign_in_endpoint, %{"grant_type" => "password"})
                |> json_response(400)
     end
 
-    test "fails in Refresh Token Flow if params are invalid", %{conn: conn, url: url} do
+    test "fails in Refresh Token Flow if params are invalid", %{conn: conn} do
       expect(AuthenticatorMock, :sign_in_refresh_token, fn input when is_map(input) ->
         RefreshToken.cast_and_apply(input)
       end)
 
       assert %{"refresh_token" => ["can't be blank"]} ==
                conn
-               |> post(url, %{"grant_type" => "refresh_token"})
+               |> post(@sign_in_endpoint, %{"grant_type" => "refresh_token"})
                |> json_response(400)
     end
   end

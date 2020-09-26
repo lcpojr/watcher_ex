@@ -7,9 +7,8 @@ defmodule RestAPI.Plugs.Authentication do
 
   import Plug.Conn
 
-  alias Authenticator.Sessions.Commands.GetSession
-  alias Authenticator.Sessions.Tokens.AccessToken
   alias RestAPI.Controllers.Fallback
+  alias RestAPI.Ports.Authenticator
 
   @behaviour Plug
 
@@ -20,8 +19,8 @@ defmodule RestAPI.Plugs.Authentication do
   def call(%Plug.Conn{} = conn, _opts) do
     with {:header, [access_token | _]} <- {:header, get_req_header(conn, "authorization")},
          {:bearer, "Bearer " <> access_token} <- {:bearer, access_token},
-         {:token, {:ok, claims}} <- {:token, AccessToken.verify_and_validate(access_token)},
-         {:session, {:ok, session}} <- {:session, find_session(claims)} do
+         {:token, {:ok, claims}} <- {:token, Authenticator.validate_access_token(access_token)},
+         {:session, {:ok, session}} <- {:session, Authenticator.get_session(claims["jti"])} do
       put_private(conn, :session, build_payload(session))
     else
       {:header, []} ->
@@ -45,8 +44,6 @@ defmodule RestAPI.Plugs.Authentication do
         Fallback.call(conn, error)
     end
   end
-
-  defp find_session(%{"jti" => jti}), do: GetSession.execute(%{jti: jti})
 
   defp build_payload(session) when is_map(session) do
     %{

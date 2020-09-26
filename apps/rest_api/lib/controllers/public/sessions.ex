@@ -14,8 +14,8 @@ defmodule RestAPI.Controllers.Public.Sessions do
     |> Commands.logout_session()
     |> case do
       {:ok, _count} -> send_resp(conn, :no_content, "")
-      {:error, :invalid_status} -> send_resp(conn, :no_content, "")
-      {:error, _reason} = error -> error
+      {:error, :not_active} -> send_resp(conn, :forbidden, "")
+      {:error, :not_found} -> send_resp(conn, :not_found, "")
     end
   end
 
@@ -26,7 +26,8 @@ defmodule RestAPI.Controllers.Public.Sessions do
     |> Commands.logout_all_sessions(session.subject_type)
     |> case do
       {:ok, _count} -> send_resp(conn, :no_content, "")
-      {:error, _reason} = error -> error
+      {:error, :not_active} -> send_resp(conn, :forbidden, "")
+      {:error, :not_found} -> send_resp(conn, :not_found, "")
     end
   end
 end
