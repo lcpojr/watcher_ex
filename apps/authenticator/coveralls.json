@@ -1,0 +1,19 @@
+{
+    "coverage_options": {
+        "treat_no_relevant_lines_as_covered": true,
+        "output_dir": "cover/",
+        "minimum_coverage": 80
+    },
+    "skip_files": [
+        "test/support/data_case.ex",
+        "test/support/factory.ex",
+        "lib/sign_in/commands/behaviour.ex",
+        "lib/sessions/cache.ex",
+        "lib/authenticator.ex",
+        "lib/application.ex",
+        "lib/schema.ex",
+        "lib/repo.ex",
+        "lib/domain.ex",
+        "lib/input.ex"
+    ]
+}

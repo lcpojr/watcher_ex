@@ -72,4 +72,24 @@ defmodule ResourceManager.Permissions.ScopesTest do
       end
     end
   end
+
+  describe "#{Scopes}.convert_to_list/1" do
+    test "succeed and return a list of scopes" do
+      assert ["admin:read", "admin:write"] == Scopes.convert_to_list("admin:read admin:write")
+    end
+
+    test "succeed even if empty" do
+      assert [] == Scopes.convert_to_list("")
+    end
+  end
+
+  describe "#{Scopes}.convert_to_string/1" do
+    test "succeed and return a scope string" do
+      assert "admin:read admin:write" == Scopes.convert_to_string(["admin:read", "admin:write"])
+    end
+
+    test "succeed even if empty" do
+      assert "" == Scopes.convert_to_string([])
+    end
+  end
 end

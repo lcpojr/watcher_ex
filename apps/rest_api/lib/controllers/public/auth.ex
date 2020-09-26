@@ -4,7 +4,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   use RestAPI.Controller, :controller
 
   alias RestAPI.Ports.Authenticator, as: Commands
-  alias RestAPI.Views.Public.Tokens
+  alias RestAPI.Views.Public.SignIn
 
   action_fallback RestAPI.Controllers.Fallback
 
@@ -23,7 +23,7 @@ defmodule RestAPI.Controllers.Public.Auth do
       {:ok, response} ->
         conn
         |> put_status(:ok)
-        |> put_view(Tokens)
+        |> put_view(SignIn)
         |> render("sign_in.json", response: response)
 
       {:error, _reason} = error ->
@@ -38,7 +38,7 @@ defmodule RestAPI.Controllers.Public.Auth do
       {:ok, response} ->
         conn
         |> put_status(:ok)
-        |> put_view(Tokens)
+        |> put_view(SignIn)
         |> render("sign_in.json", response: response)
 
       {:error, _reason} = error ->
