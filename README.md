@@ -1,4 +1,4 @@
-# WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/Continuous%20Integration/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
+# WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
 
 **TODO: Add description**
 
