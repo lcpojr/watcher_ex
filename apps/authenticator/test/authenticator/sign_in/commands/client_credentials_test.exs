@@ -62,10 +62,10 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
       scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        grant_type: "client_credentials",
-        scope: scope,
-        client_id: client_id,
-        client_secret: app.secret
+        "grant_type" => "client_credentials",
+        "scope" => scope,
+        "client_id" => client_id,
+        "client_secret" => app.secret
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -99,6 +99,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
     end
 
     test "fails if params are invalid" do
+      assert {:error, :invalid_params} == Command.execute(%{})
+
       assert {:error,
               %Ecto.Changeset{
                 errors: [

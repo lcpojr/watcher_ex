@@ -4,9 +4,9 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
   alias Authenticator.Ports.ResourceManagerMock
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.Commands.RefreshToken, as: Commands
+  alias Authenticator.SignIn.Commands.RefreshToken, as: Command
 
-  describe "#{Commands}.execute/1" do
+  describe "#{Command}.execute/1" do
     test "succeeds and generates both tokens" do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
@@ -55,7 +55,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 refresh_token: refresh_token,
                 expires_in: 7200,
                 token_type: typ
-              }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+              }} = Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
 
       assert %Session{jti: ^jti, status: "refreshed"} = Repo.get_by(Session, jti: jti)
 
@@ -143,7 +143,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 refresh_token: refresh_token,
                 expires_in: 7200,
                 token_type: typ
-              }} = Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+              }} = Command.execute(%{"refresh_token" => token, "grant_type" => "refresh_token"})
 
       assert %Session{jti: ^jti, status: "refreshed"} = Repo.get_by(Session, jti: jti)
 
@@ -178,10 +178,12 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
     end
 
     test "fails if params are invalid" do
+      assert {:error, :invalid_params} == Command.execute(%{})
+
       assert {:error,
               %Ecto.Changeset{
                 errors: [refresh_token: {"can't be blank", [validation: :required]}]
-              }} = Commands.execute(%{grant_type: "refresh_token"})
+              }} = Command.execute(%{grant_type: "refresh_token"})
     end
 
     test "fails if session does not exist" do
@@ -208,7 +210,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if session was invalidated" do
@@ -244,7 +246,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if session already refreshed" do
@@ -280,7 +282,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if client application flow is not enabled" do
@@ -313,7 +315,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if client application protocol is not openid-connect" do
@@ -352,7 +354,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if client application is inactive" do
@@ -391,7 +393,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if subject does not exist" do
@@ -431,7 +433,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       expect(ResourceManagerMock, :get_identity, fn _ -> {:error, :not_found} end)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if subject is inactive" do
@@ -470,7 +472,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, user} end)
 
       assert {:error, :unauthenticated} ==
-               Commands.execute(%{refresh_token: token, grant_type: "refresh_token"})
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
   end
 end

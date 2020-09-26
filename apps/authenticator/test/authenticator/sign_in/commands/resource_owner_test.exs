@@ -75,12 +75,12 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        username: user.username,
-        password: "MyPassw@rd234",
-        grant_type: "password",
-        scope: scope,
-        client_id: client_id,
-        client_secret: app.secret
+        "username" => user.username,
+        "password" => "MyPassw@rd234",
+        "grant_type" => "password",
+        "scope" => scope,
+        "client_id" => client_id,
+        "client_secret" => app.secret
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -119,6 +119,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     end
 
     test "fails if params are invalid" do
+      assert {:error, :invalid_params} == Command.execute(%{})
+
       assert {:error,
               %Ecto.Changeset{
                 errors: [
