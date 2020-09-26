@@ -45,7 +45,7 @@ jobs:
           mix deps.get
 
       - name: Compile code
-        run: mix compile
+        run: mix compile --warnings-as-errors
   
   quality:
     name: Code Quality
