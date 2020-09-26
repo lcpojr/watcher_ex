@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.Public.AuthTest do
   use RestAPI.ConnCase, async: true
 
-  alias Authenticator.SignIn.Inputs.{RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
   @token_endpoint "/api/v1/auth/protocol/openid-connect/token"
@@ -45,6 +45,24 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> json_response(200)
     end
 
+    test "suceeds in Client Credentials Flow if params are valid", %{conn: conn} do
+      params = %{
+        "grant_type" => "client_credentials",
+        "scope" => "admin:read admin:write",
+        "client_id" => "2e455bb1-0604-4812-9756-36f7ab23b8d9",
+        "client_secret" => "w3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"
+      }
+
+      expect(AuthenticatorMock, :sign_in_client_credentials, fn _input ->
+        {:ok, success_payload()}
+      end)
+
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
+               conn
+               |> post(@token_endpoint, params)
+               |> json_response(200)
+    end
+
     test "fails in Resource Owner Flow if params are invalid", %{conn: conn} do
       expect(AuthenticatorMock, :sign_in_resource_owner, fn input when is_map(input) ->
         ResourceOwner.cast_and_apply(input)
@@ -72,6 +90,23 @@ defmodule RestAPI.Controllers.Public.AuthTest do
       assert %{"response" => %{"refresh_token" => ["can't be blank"]}} =
                conn
                |> post(@token_endpoint, %{"grant_type" => "refresh_token"})
+               |> json_response(400)
+    end
+
+    test "fails in Client Credentials Flow if params are invalid", %{conn: conn} do
+      expect(AuthenticatorMock, :sign_in_client_credentials, fn input when is_map(input) ->
+        ClientCredentials.cast_and_apply(input)
+      end)
+
+      assert %{
+               "response" => %{
+                 "scope" => ["can't be blank"],
+                 "client_id" => ["can't be blank"],
+                 "client_secret" => ["can't be blank"]
+               }
+             } =
+               conn
+               |> post(@token_endpoint, %{"grant_type" => "client_credentials"})
                |> json_response(400)
     end
   end

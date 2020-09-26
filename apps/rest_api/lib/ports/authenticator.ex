@@ -25,6 +25,9 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Delegates to Authenticator.sign_in_refresh_token/1"
   @callback sign_in_refresh_token(input :: map()) :: possible_sign_in_responses()
 
+  @doc "Delegates to Authenticator.sign_in_client_credentials/1"
+  @callback sign_in_client_credentials(input :: map()) :: possible_sign_in_responses()
+
   @doc "Delegates to Authenticator.get_session/1"
   @callback get_session(input :: map()) :: struct()
 
@@ -46,6 +49,10 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Authenticates the subject using Refresh Token Flow"
   @spec sign_in_refresh_token(input :: map()) :: possible_sign_in_responses()
   def sign_in_refresh_token(input), do: implementation().sign_in_refresh_token(input)
+
+  @doc "Authenticates the subject using Client Credentials Flow"
+  @spec sign_in_client_credentials(input :: map()) :: possible_sign_in_responses()
+  def sign_in_client_credentials(input), do: implementation().sign_in_client_credentials(input)
 
   @doc "Validates a given access token and it's claims"
   @spec validate_access_token(access_token :: String.t()) :: {:ok, map()} | {:error, Keyword.t()}
