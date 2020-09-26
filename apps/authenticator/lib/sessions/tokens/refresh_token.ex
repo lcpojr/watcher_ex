@@ -26,7 +26,6 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
   end
 
   defp gen_ttl, do: @max_expiration
-  defp gen_exp, do: timestamp() + @max_expiration
-  defp valid_expiration?(exp), do: exp >= timestamp() && exp <= timestamp() + @max_expiration
-  defp timestamp, do: Joken.current_time()
+  defp gen_exp, do: Joken.current_time() + @max_expiration
+  defp valid_expiration?(exp), do: exp > Joken.current_time()
 end

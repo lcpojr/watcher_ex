@@ -56,6 +56,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 "jti" => jti,
                 "nbf" => _,
                 "scope" => ^scope,
+                "identity" => "user",
                 "sub" => ^subject_id,
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)

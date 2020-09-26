@@ -29,6 +29,8 @@ defmodule Authenticator.Sessions.Manager do
   # CLIENT
   #########
 
+  # coveralls-ignore-start
+
   @doc "Starts the `GenServer"
   @spec start_link(args :: keyword()) :: {:ok, pid()} | :ignore | {:error, keyword()}
   def start_link(args \\ []), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -37,13 +39,17 @@ defmodule Authenticator.Sessions.Manager do
   @spec check(process_id :: pid() | __MODULE__) :: state()
   def check(pid \\ __MODULE__), do: GenServer.call(pid, :check)
 
+  # coveralls-ignore-stop
+
   @doc "Update session statuses and save on cache"
-  @spec execute() :: :ok | {:error, :update_failed | :failed_to_cache}
+  @spec execute() :: {:ok, :managed} | {:error, :update_failed | :failed_to_cache}
   def execute, do: manage_sessions()
 
   #########
   # SERVER
   #########
+
+  # coveralls-ignore-start
 
   @impl true
   def init(_args) do
@@ -81,6 +87,8 @@ defmodule Authenticator.Sessions.Manager do
     {:noreply, state, {:continue, :schedule_work}}
   end
 
+  # coveralls-ignore-stop
+
   ##########
   # Helpers
   ##########
@@ -97,7 +105,7 @@ defmodule Authenticator.Sessions.Manager do
     |> case do
       {:ok, _response} ->
         Logger.info("Succeeds in managing sessions")
-        :ok
+        {:ok, :sessions_updated}
 
       {:error, step, err, _changes} ->
         Logger.error("Failed to manage sessions in step #{inspect(step)}", reason: err)
@@ -113,7 +121,7 @@ defmodule Authenticator.Sessions.Manager do
     |> Session.query()
     |> Repo.update_all(set: [status: "expired"])
     |> case do
-      {count, _} ->
+      {count, _} when is_integer(count) ->
         Logger.debug("Session manager expired #{inspect(count)} sessions")
         {:ok, count}
 
@@ -160,6 +168,8 @@ defmodule Authenticator.Sessions.Manager do
     }
   end
 
+  # coveralls-ignore-start
+
   defp schedule_work(state) do
     interval = schedule_interval()
     date_to_schedule = schedule_to(interval)
@@ -178,4 +188,6 @@ defmodule Authenticator.Sessions.Manager do
 
   defp schedule_interval, do: Keyword.get(config(), :schedule_interval, @schedule_interval)
   defp config, do: Application.get_env(:authenticator, __MODULE__, [])
+
+  # coveralls-ignore-stop
 end

@@ -16,12 +16,15 @@ defmodule RestAPI.Routers.Public do
   scope "/api/v1", RestAPI.Controllers.Public do
     pipe_through :rest_api
 
-    post "/auth/protocol/openid-connect/token", Tokens, :sign_in
+    scope "/auth/protocol/openid-connect" do
+      post "/token", Auth, :sign_in
 
-    scope "/sessions" do
-      pipe_through :authenticated
+      scope "/" do
+        pipe_through :authenticated
 
-      post "/logout", Sessions, :logout
+        post "/logout", Auth, :sign_out
+        post "/logout-all-sessions", Auth, :sign_out_all_sessions
+      end
     end
   end
 end

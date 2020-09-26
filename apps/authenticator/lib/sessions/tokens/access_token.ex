@@ -13,6 +13,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
 
   @default_issuer "WatcherEx"
   @default_type "Bearer"
+  @identity_types ~w(user application)
 
   @impl true
   def token_config do
@@ -24,11 +25,11 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
     |> add_claim("azp", & &1, &is_binary/1)
     |> add_claim("sub", & &1, &is_binary/1)
     |> add_claim("typ", nil, fn value, _, _ -> value == @default_type end)
+    |> add_claim("identity", & &1, fn value, _, _ -> value in @identity_types end)
     |> add_claim("scope", nil, &is_binary/1)
   end
 
   defp gen_ttl, do: @max_expiration
-  defp gen_exp, do: timestamp() + @max_expiration
-  defp valid_expiration?(exp), do: exp >= timestamp() && exp <= timestamp() + @max_expiration
-  defp timestamp, do: Joken.current_time()
+  defp gen_exp, do: Joken.current_time() + @max_expiration
+  defp valid_expiration?(exp), do: exp >= Joken.current_time()
 end

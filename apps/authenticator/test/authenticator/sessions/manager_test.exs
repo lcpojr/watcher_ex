@@ -23,7 +23,7 @@ defmodule Authenticator.Sessions.ManagerTest do
             |> NaiveDateTime.truncate(:second)
         )
 
-      assert :ok == Manager.execute()
+      assert {:ok, :sessions_updated} == Manager.execute()
       assert %Session{status: "expired"} = Repo.get(Session, session.id)
       assert %Session{status: "active"} = Repo.get(Session, ctx.active_session.id)
     end
@@ -55,7 +55,7 @@ defmodule Authenticator.Sessions.ManagerTest do
             |> NaiveDateTime.truncate(:second)
         )
 
-      assert :ok == Manager.execute()
+      assert {:ok, :sessions_updated} == Manager.execute()
       assert %Session{status: "refreshed"} = Repo.get(Session, refreshed_session.id)
       assert %Session{status: "invalidated"} = Repo.get(Session, invalidated_session.id)
       assert %Session{status: "active"} = Repo.get(Session, ctx.active_session.id)

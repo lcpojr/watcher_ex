@@ -111,12 +111,19 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   defp get_subject(%{subject_id: subject_id, subject_type: "application"}),
     do: Port.get_identity(%{client_id: nil, id: subject_id})
 
-  defp generate_access_token(%{"aud" => aud, "azp" => azp, "sub" => sub, "scope" => scope}) do
+  defp generate_access_token(%{
+         "aud" => aud,
+         "azp" => azp,
+         "sub" => sub,
+         "scope" => scope,
+         "identity" => identity
+       }) do
     AccessToken.generate_and_sign(%{
       "aud" => aud,
       "azp" => azp,
       "sub" => sub,
       "typ" => "Bearer",
+      "identity" => identity,
       "scope" => scope
     })
   end

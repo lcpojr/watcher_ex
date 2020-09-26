@@ -1,0 +1,17 @@
+{
+    "coverage_options": {
+        "treat_no_relevant_lines_as_covered": true,
+        "output_dir": "cover/",
+        "minimum_coverage": 80
+    },
+    "skip_files": [
+        "test/support/conn_case.ex",
+        "lib/application.ex",
+        "lib/controller.ex",
+        "lib/telemetry.ex",
+        "lib/rest_api.ex",
+        "lib/endpoint.ex",
+        "lib/router.ex",
+        "lib/view.ex"
+    ]
+}

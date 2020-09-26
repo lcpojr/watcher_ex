@@ -27,7 +27,7 @@ defmodule Authenticator.Sessions.Commands.GetSession do
 
       %Session{} = session ->
         Logger.info("Session #{session.id} found on cache")
-        session
+        {:ok, session}
     end
   end
 

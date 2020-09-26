@@ -22,6 +22,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scope
       }
 
@@ -68,6 +69,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "jti" => jti,
                 "nbf" => _,
                 "scope" => ^scope,
+                "identity" => "user",
                 "sub" => ^subject_id,
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
@@ -102,6 +104,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scope
       }
 
@@ -153,6 +156,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "iss" => "WatcherEx",
                 "jti" => jti,
                 "nbf" => _,
+                "identity" => "user",
                 "scope" => ^scope,
                 "sub" => ^subject_id,
                 "typ" => ^typ
@@ -216,6 +220,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => "My application",
         "sub" => user_id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => "admin:read"
       }
 
@@ -251,6 +256,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => "My application",
         "sub" => user_id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => "admin:read"
       }
 
@@ -287,6 +293,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => user.id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
@@ -325,6 +332,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => user.id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
@@ -363,6 +371,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => user.id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
@@ -396,6 +405,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => subject_id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
@@ -434,6 +444,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "azp" => app.name,
         "sub" => user.id,
         "typ" => "Bearer",
+        "identity" => "user",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" ")
       }
 
