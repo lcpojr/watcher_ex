@@ -21,7 +21,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   @behaviour Authenticator.SignIn.Commands.Behaviour
 
   @doc """
-  Sign in an user identity by ResouceOnwer flow.
+  Sign in an client application identity by Client Credentials flow.
 
   The application has to be active, using openid-connect protocol in order to use this flow.
 
