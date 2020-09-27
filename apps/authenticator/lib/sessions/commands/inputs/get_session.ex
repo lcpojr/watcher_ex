@@ -38,6 +38,6 @@ defmodule Authenticator.Sessions.Commands.Inputs.GetSession do
   end
 
   defp validate_emptiness(%{valid?: false} = changeset), do: changeset
-  defp validate_emptiness(%{valid?: true, changes: c} = set) when map_size(c) > 0, do: set
+  defp validate_emptiness(%{changes: chg} = changeset) when map_size(chg) > 0, do: changeset
   defp validate_emptiness(changeset), do: add_error(changeset, :jti, "All input fields are empty")
 end

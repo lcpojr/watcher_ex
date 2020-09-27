@@ -72,7 +72,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
-                 "client_secret" => ["can't be blank"],
+                 "client_assertion" => ["can't be blank"],
+                 "client_assertion_type" => ["can't be blank"],
                  "password" => ["can't be blank"],
                  "username" => ["can't be blank"]
                }
@@ -102,7 +103,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
-                 "client_secret" => ["can't be blank"]
+                 "client_assertion" => ["can't be blank"],
+                 "client_assertion_type" => ["can't be blank"]
                }
              } =
                conn

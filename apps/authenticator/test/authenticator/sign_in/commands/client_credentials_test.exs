@@ -25,7 +25,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -70,7 +70,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -104,8 +104,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
       assert {:error,
               %Ecto.Changeset{
                 errors: [
+                  client_assertion_type: {"can't be blank", [validation: :required]},
+                  client_assertion: {"can't be blank", [validation: :required]},
                   client_id: {"can't be blank", [validation: :required]},
-                  client_secret: {"can't be blank", [validation: :required]},
                   scope: {"can't be blank", [validation: :required]}
                 ]
               }} = Command.execute(%{grant_type: "client_credentials"})

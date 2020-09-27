@@ -5,8 +5,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   With the resource owner password credentials grant type, the user provides their
   username and password directly and we uses it to authenticates then.
 
-  The Client application should pass their secret in order to be authorized to exchange
-  the credentials for an access_token.
+  The Client application should pass their secret (or client assertion) in order to be authorized
+  to exchange the credentials for an access_token.
+
+  When a public key is registered for the client application it should use the client assertion
+  because it's safer than pass the secret directly.
 
   This grant type should only be enabled on the authorization server if other flows are not viable and
   should also only be used if the identity owner trusts in the application.
@@ -17,7 +20,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, VerifyHash}
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.Sessions
-  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
   alias ResourceManager.Permissions.Scopes
 
@@ -37,7 +40,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
-         {:secret_matches?, true} <- {:secret_matches?, app.secret == input.client_secret},
+         {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, Port.get_identity(%{username: username})},
@@ -64,7 +67,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         {:error, :unauthenticated}
 
       {:secret_matches?, false} ->
-        Logger.info("Client application #{client_id} secret do not match any credential")
+        Logger.info("Client application #{client_id} credential didn't matches")
         FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
@@ -117,6 +120,24 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   end
 
   def execute(_any), do: {:error, :invalid_params}
+
+  defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
+       when is_binary(public_key) and is_binary(assertion) do
+    signer = Joken.Signer.create("RS256", %{"pem" => public_key})
+
+    assertion
+    |> ClientAssertion.verify_and_validate(signer, %{client_id: id})
+    |> case do
+      {:ok, _claims} -> true
+      {:error, _reason} -> false
+    end
+  end
+
+  defp secret_matches?(%{public_key: nil, secret: secret}, %{client_secret: client_secret})
+       when is_binary(secret) and is_binary(client_secret),
+       do: secret == client_secret
+
+  defp secret_matches?(_application, _input), do: false
 
   defp build_scope(user, application, scopes) do
     user_scopes = Enum.map(user.scopes, & &1.name)

@@ -6,6 +6,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   secret (or client assertion) directly and we use it to authenticate before generating
   the access token.
 
+  When a public key is registered for the client application it should use the client assertion
+  because it's safer than pass the secret directly.
+
   This flow is used in machine-to-machine authentication and when the application already
   has user's permission or it's not required to access an specific data.
   """
@@ -14,7 +17,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
 
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.Sessions
-  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Inputs.ClientCredentials, as: Input
   alias ResourceManager.Permissions.Scopes
 
@@ -33,7 +36,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "client_credentials" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
-         {:secret_matches?, true} <- {:secret_matches?, app.secret == input.client_secret},
+         {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:ok, access_token, claims} <- generate_access_token(app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
@@ -53,7 +56,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
         {:error, :unauthenticated}
 
       {:secret_matches?, false} ->
-        Logger.info("Client application #{client_id} secret do not match any credential")
+        Logger.info("Client application #{client_id} credential didn't matches")
         {:error, :unauthenticated}
 
       {:confidential?, false} ->
@@ -89,6 +92,24 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   end
 
   def execute(_any), do: {:error, :invalid_params}
+
+  defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
+       when is_binary(public_key) and is_binary(assertion) do
+    signer = Joken.Signer.create("RS256", %{"pem" => public_key})
+
+    assertion
+    |> ClientAssertion.verify_and_validate(signer, %{client_id: id})
+    |> case do
+      {:ok, _claims} -> true
+      {:error, _reason} -> false
+    end
+  end
+
+  defp secret_matches?(%{public_key: nil, secret: app_secret}, %{client_secret: input_secret})
+       when is_binary(app_secret) and is_binary(input_secret),
+       do: app_secret == input_secret
+
+  defp secret_matches?(_application, _input), do: false
 
   defp build_scope(application, scopes) do
     app_scopes = Enum.map(application.scopes, & &1.name)

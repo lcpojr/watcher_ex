@@ -30,7 +30,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
@@ -85,7 +85,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
@@ -124,10 +124,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       assert {:error,
               %Ecto.Changeset{
                 errors: [
+                  client_assertion_type: {"can't be blank", [validation: :required]},
+                  client_assertion: {"can't be blank", [validation: :required]},
                   username: {"can't be blank", [validation: :required]},
                   password: {"can't be blank", [validation: :required]},
                   client_id: {"can't be blank", [validation: :required]},
-                  client_secret: {"can't be blank", [validation: :required]},
                   scope: {"can't be blank", [validation: :required]}
                 ]
               }} = Command.execute(%{grant_type: "password"})
@@ -245,7 +246,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         client_secret: app.secret
       }
 
-      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil}}
+      end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: _} -> {:error, :not_found} end)
 
@@ -264,7 +268,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         client_secret: app.secret
       }
 
-      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil}}
+      end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: _} ->
         {:ok, RF.insert!(:user, status: "blocked")}
@@ -285,7 +292,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         client_secret: app.secret
       }
 
-      expect(ResourceManagerMock, :get_identity, fn %{client_id: _} -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil}}
+      end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: _} ->
         user = RF.insert!(:user, status: "blocked")
