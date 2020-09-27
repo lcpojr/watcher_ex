@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.Public.AuthTest do
   use RestAPI.ConnCase, async: true
 
-  alias Authenticator.SignIn.Inputs.{RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
   @token_endpoint "/api/v1/auth/protocol/openid-connect/token"
@@ -45,6 +45,24 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> json_response(200)
     end
 
+    test "suceeds in Client Credentials Flow if params are valid", %{conn: conn} do
+      params = %{
+        "grant_type" => "client_credentials",
+        "scope" => "admin:read admin:write",
+        "client_id" => "2e455bb1-0604-4812-9756-36f7ab23b8d9",
+        "client_secret" => "w3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"
+      }
+
+      expect(AuthenticatorMock, :sign_in_client_credentials, fn _input ->
+        {:ok, success_payload()}
+      end)
+
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
+               conn
+               |> post(@token_endpoint, params)
+               |> json_response(200)
+    end
+
     test "fails in Resource Owner Flow if params are invalid", %{conn: conn} do
       expect(AuthenticatorMock, :sign_in_resource_owner, fn input when is_map(input) ->
         ResourceOwner.cast_and_apply(input)
@@ -74,6 +92,23 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> post(@token_endpoint, %{"grant_type" => "refresh_token"})
                |> json_response(400)
     end
+
+    test "fails in Client Credentials Flow if params are invalid", %{conn: conn} do
+      expect(AuthenticatorMock, :sign_in_client_credentials, fn input when is_map(input) ->
+        ClientCredentials.cast_and_apply(input)
+      end)
+
+      assert %{
+               "response" => %{
+                 "scope" => ["can't be blank"],
+                 "client_id" => ["can't be blank"],
+                 "client_secret" => ["can't be blank"]
+               }
+             } =
+               conn
+               |> post(@token_endpoint, %{"grant_type" => "client_credentials"})
+               |> json_response(400)
+    end
   end
 
   describe "POST #{@logout_endpoint}" do
@@ -87,12 +122,12 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:ok, %{}}
       end)
@@ -103,18 +138,18 @@ defmodule RestAPI.Controllers.Public.AuthTest do
              |> response(204)
     end
 
-    test "fails if sesions not active", %{conn: conn, access_token: access_token, claims: claims} do
+    test "fails if sessions not active", %{conn: conn, access_token: access_token, claims: claims} do
       expect(AuthenticatorMock, :validate_access_token, fn token ->
         assert access_token == token
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:error, :not_active}
       end)
@@ -131,12 +166,12 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
         assert claims["jti"] == jti
         {:error, :not_found}
       end)
@@ -158,7 +193,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -184,7 +219,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -210,7 +245,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, claims}
       end)
 
-      expect(AuthenticatorMock, :get_session, fn jti ->
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
         assert claims["jti"] == jti
         {:ok, success_session(claims)}
       end)
@@ -230,6 +265,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
   defp default_claims do
     %{
+      "jti" => "03eds74a-c291-4b5f",
       "aud" => "02eff74a-c291-4b5f-a02f-4f92d8daf693",
       "azp" => "my-application",
       "sub" => "272459ce-7356-4460-b461-1ecf0ebf7c4e",

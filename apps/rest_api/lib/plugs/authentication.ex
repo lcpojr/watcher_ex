@@ -20,7 +20,7 @@ defmodule RestAPI.Plugs.Authentication do
     with {:header, [access_token | _]} <- {:header, get_req_header(conn, "authorization")},
          {:bearer, "Bearer " <> access_token} <- {:bearer, access_token},
          {:token, {:ok, claims}} <- {:token, Authenticator.validate_access_token(access_token)},
-         {:session, {:ok, session}} <- {:session, Authenticator.get_session(claims["jti"])} do
+         {:session, {:ok, session}} <- {:session, Authenticator.get_session(claims)} do
       put_private(conn, :session, build_payload(session))
     else
       {:header, []} ->
@@ -38,10 +38,6 @@ defmodule RestAPI.Plugs.Authentication do
       {:session, _any} ->
         Logger.info("Session was not found")
         Fallback.call(conn, {:error, :unauthenticated})
-
-      error ->
-        Logger.error("Failed to authenticate because of an unknow error")
-        Fallback.call(conn, error)
     end
   end
 

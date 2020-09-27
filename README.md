@@ -1,5 +1,7 @@
 # WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
 
+**This is a work in progress and every contribution is welcome :)**
+
 **TODO: Add description**
 
 ## Requirements
@@ -26,85 +28,24 @@ In order to prepare the application run:
 
 Now that you have everything configured you can just call `mix phx.server` to get all applications running. The service will be available at `localhost:4000`.
 
-### Making requests
+### Seeding the database
 
 You can run the seeds in order to create an user and application for tests by using `mix seed`.
-In order to gen you user and application data run on project iex (`iex -S mix phx.server`);
+To get the user and application data check out the database on `localhost:8181` or run the project with using (`iex -S mix phx.server`) and execute the commands bellow.
 
 ```elixir
+# Getting all user identities
+# The user password will be `admin`
 ResourceManager.Repo.all(ResourceManager.Identity.Schemas.User) |> ResourceManager.Repo.preload([:scopes])
+
+# Getting all client application identities
+# Check out for the client secret
 ResourceManager.Repo.all(ResourceManager.Identity.Schemas.ClientApplication) |> ResourceManager.Repo.preload([:scopes])
 ```
 
-**Sign in by Resource Owner Flow**
+### Making requests
 
-Request:
-
-```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
-    -H "Content-Type: application/json" \
-    -d '{"username":"admin", "password":"admin", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_secret": "$2b$12$BSrTLJnb0Vfuk1iiSzw3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"}'
-```
-
-Response (200):
-
-```json
-{
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDc5NzU2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJuYmYiOjE2MDA3OTAzNjcsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.LWniDC38j2kW8ER8kgDnVVJO0eOXWGNq0KqXooMl-5s",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMzM4MjM2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210OG5vbjRkZHQ5YzgwMDAxcTEiLCJuYmYiOjE2MDA3OTAzNjcsInR5cCI6IkJlYXJlciJ9.U010q6KUB04K8rIU9rVnW_AOI1q5XSXSGIYdL1moaOA",
-    "expires_in": 7200000,
-    "token_type": "Bearer"
-}
-```
-
-**Sign in by Refresh Token Flow**
-
-Request:
-
-```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
-    -H "Content-Type: application/json" \
-    -d '{"refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMzM4MjM2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210OG5vbjRkZHQ5YzgwMDAxcTEiLCJuYmYiOjE2MDA3OTAzNjcsInR5cCI6IkJlYXJlciJ9.U010q6KUB04K8rIU9rVnW_AOI1q5XSXSGIYdL1moaOA", "grant_type": "refresh_token"}'
-```
-
-Response (200):
-
-```json
-{
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDc5NzgwOSwiaWF0IjoxNjAwNzkwNjA5LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpZDUwYXRja3JiMzMyZWswMDAxczEiLCJuYmYiOjE2MDA3OTA2MDksInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.GnuyK5JTgg0PCeUtT79s847a3qPWgBjE8UqYoK1DG8o",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdGkiOiIyb3JpZDUwYXRja3JiMzMyZWswMDAxczEiLCJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMzM4MjYwOSwiaWF0IjoxNjAwNzkwNjA5LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpZDUwYXRpOHJ2MzMyZWswMDAxdDEiLCJuYmYiOjE2MDA3OTA2MDksInR5cCI6IkJlYXJlciJ9.HIL0AMMKJdYUibSXyYXfYGBEMIZsuudvFUHcF-VjXRg",
-    "expires_in": 7200000,
-    "token_type": "Bearer"
-}
-```
-
-**Sign out all active sessions**
-
-Request:
-
-```sh
-curl -X POST api/v1/auth/protocol/openid-connect/logout-all-sessions \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDgyMzMxNiwiaWF0IjoxNjAwODE2MTE2LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JqcmhuMHNxdDlncjk3ZXMwMDAzMDMiLCJuYmYiOjE2MDA4MTYxMTYsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.NxFH6MIOFGc54UR9EVLPFB0m-6b-YMyXhZrOuGxErdw"
-```
-
-Response (204)
-
-`No content`
-
-**Sign out the given session**
-
-Request:
-
-```sh
-curl -X POST api/v1/auth/protocol/openid-connect/logout \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDgyMzMxNiwiaWF0IjoxNjAwODE2MTE2LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JqcmhuMHNxdDlncjk3ZXMwMDAzMDMiLCJuYmYiOjE2MDA4MTYxMTYsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.NxFH6MIOFGc54UR9EVLPFB0m-6b-YMyXhZrOuGxErdw"
-```
-
-Response (204)
-
-`No content`
+Check out the rest api guide on the specific application `README.md`.
 
 ## Testing
 

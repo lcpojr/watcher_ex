@@ -23,7 +23,7 @@ Repo.transaction(fn ->
       name: "admin",
       description: "Admin test application",
       status: "active",
-      grant_flows: ["resource_owner", "refresh_token"],
+      grant_flows: ["resource_owner", "refresh_token", "client_credentials"],
       secret: Bcrypt.hash_pwd_salt("my-secret")
     })
 

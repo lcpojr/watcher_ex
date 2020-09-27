@@ -29,7 +29,7 @@ defmodule Authenticator.SignOut.Commands.SignOutAllSessions do
     |> Repo.transaction()
     |> case do
       {:ok, %{invalidate: 0}} ->
-        Logger.info("Succeeds on command but any active session was found")
+        Logger.info("Succeeds on command but none session was found")
         {:error, :not_active}
 
       {:ok, %{invalidate: count}} ->
