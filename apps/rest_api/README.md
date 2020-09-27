@@ -9,7 +9,26 @@ Follow the `Running it locally` guide on project `README.md` in order to know ho
 
 ### Sign in by Resource Owner Flow
 
-**Request**:
+**Request (Client assertions)**:
+
+To generate the client assertions follow the exemple bellow (in the project iex):
+
+```elixir
+signer = Joken.Signer.create("RS256", %{"pem" => "YOUR_PRIVATE_KEY_HERE"})
+
+Authenticator.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
+```
+
+Then you can try out the request using:
+
+```sh
+curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin", "password":"admin", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
+```
+
+
+**Request (Client secret)**:
 
 ```sh
 curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
@@ -51,7 +70,25 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
 
 ### Sign in by Client Credentials Flow
 
-**Request**:
+**Request (Client Assertions)**:
+
+To generate the client assertions follow the exemple bellow (in the project iex):
+
+```elixir
+signer = Joken.Signer.create("RS256", %{"pem" => "YOUR_PRIVATE_KEY_HERE"})
+
+Authenticator.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
+```
+
+Then you can try out the request using:
+
+```sh
+curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+    -H "Content-Type: application/json" \
+    -d '{"grant_type":"client_credentials", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
+```
+
+**Request (client secret)**:
 
 ```sh
 curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
