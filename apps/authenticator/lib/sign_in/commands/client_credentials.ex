@@ -6,8 +6,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   secret (or client assertion) directly and we use it to authenticate before generating
   the access token.
 
-  When a public key is registered for the client application it should use the client assertion
-  because it's safer than pass the secret directly.
+  When a public key is registered for the client application this flow will require that
+  an assertion is passed instead of the raw secret to avoid sending it on requests.
 
   This flow is used in machine-to-machine authentication and when the application already
   has user's permission or it's not required to access an specific data.
@@ -27,6 +27,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   Sign in an client application identity by Client Credentials flow.
 
   The application has to be active, using openid-connect protocol in order to use this flow.
+
+  When the client application has a public_key saved on database we force the use of
+  client_assertions on input to avoid passing it's secret open on requests.
 
   If we fail in some step before verifying user password we have to fake it's verification
   to avoid exposing identity existance and time attacks.
