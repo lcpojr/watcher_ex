@@ -10,7 +10,6 @@ on:
 env:
   MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  COVERALLS_REPO_TOKEN: xYvspE6dgKXm1lpVeYT2z4m0jr9FnAcv3
 
 jobs:
   build:
@@ -162,8 +161,5 @@ jobs:
         run: mix setup
 
       - name: Run tests
-        run: mix coveralls --umbrella
-
-      - name: Post Coverage
-        run: mix coveralls.post --branch ${GITHUB_REF##*/} 
+        run: mix coveralls.github --umbrella
 
