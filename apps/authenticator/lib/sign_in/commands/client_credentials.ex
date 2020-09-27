@@ -97,8 +97,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   def execute(_any), do: {:error, :invalid_params}
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
-       when is_binary(public_key) and is_binary(assertion) do
-    signer = Joken.Signer.create("RS256", %{"pem" => public_key})
+       when is_binary(assertion) do
+    signer = get_signer(public_key)
 
     assertion
     |> ClientAssertion.verify_and_validate(signer, %{client_id: id})
@@ -113,6 +113,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
        do: app_secret == input_secret
 
   defp secret_matches?(_application, _input), do: false
+
+  defp get_signer(%{value: pem, type: "rsa", format: "pem"}),
+    do: Joken.Signer.create("RS256", %{"pem" => pem})
 
   defp build_scope(application, scopes) do
     app_scopes = Enum.map(application.scopes, & &1.name)

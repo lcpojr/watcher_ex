@@ -16,7 +16,7 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
         }
 
   @possible_grant_type ~w(password)
-  @acceptable_assertion_type "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+  @acceptable_assertion_types ~w(urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 
   @required [:username, :password, :client_id, :scope, :grant_type]
   @optional [:client_secret, :client_assertion, :client_assertion_type]
@@ -49,10 +49,10 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
   end
 
   defp validate_assertion_type(%{changes: %{client_assertion_type: assertion_type}} = changeset) do
-    if assertion_type == @acceptable_assertion_type do
+    if assertion_type in @acceptable_assertion_types do
       changeset
     else
-      opts = [accepts: [@acceptable_assertion_type]]
+      opts = [enum: [@acceptable_assertion_types]]
       add_error(changeset, :client_assertion_type, "invalid assertion type", opts)
     end
   end

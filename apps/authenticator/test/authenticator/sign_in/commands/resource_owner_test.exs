@@ -3,7 +3,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
   alias Authenticator.Ports.ResourceManagerMock
   alias Authenticator.Sessions.Schemas.Session
-  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Commands.ResourceOwner, as: Command
 
   describe "#{Command}.execute/1" do
@@ -116,6 +116,100 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %Session{jti: ^jti} = Repo.one(Session)
+    end
+
+    test "succeeds using client_assertions and generates an access_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application)
+      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+
+      client_assertion =
+        ClientAssertion.generate_and_sign!(
+          %{"iss" => app.client_id, "aud" => "WatcherEx", "typ" => "Bearer"},
+          signer
+        )
+
+      input = %{
+        username: user.username,
+        password: "MyPassw@rd234",
+        grant_type: "password",
+        scope: scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        client_id: app.client_id,
+        client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        client_assertion: client_assertion
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: public_key, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
+        assert user.username == username
+        {:ok, %{user | password: password, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: nil,
+                expires_in: 7200,
+                token_type: _
+              }} = Command.execute(input)
+
+      assert is_binary(access_token)
+    end
+
+    test "succeeds using client_assertions and generates a refresh_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+
+      client_assertion =
+        ClientAssertion.generate_and_sign!(
+          %{"iss" => app.client_id, "aud" => "WatcherEx", "typ" => "Bearer"},
+          signer
+        )
+
+      input = %{
+        "username" => user.username,
+        "password" => "MyPassw@rd234",
+        "grant_type" => "password",
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        "client_id" => app.client_id,
+        "client_assertion_type" => "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        "client_assertion" => client_assertion
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: public_key, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
+        assert user.username == username
+        {:ok, %{user | password: password, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: _,
+                refresh_token: refresh_token,
+                expires_in: 7200,
+                token_type: _
+              }} = Command.execute(input)
+
+      assert is_binary(refresh_token)
     end
 
     test "fails if params are invalid" do

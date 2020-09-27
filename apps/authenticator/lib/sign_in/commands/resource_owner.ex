@@ -125,8 +125,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   def execute(_any), do: {:error, :invalid_params}
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
-       when is_binary(public_key) and is_binary(assertion) do
-    signer = Joken.Signer.create("RS256", %{"pem" => public_key})
+       when is_binary(assertion) do
+    signer = get_signer_context(public_key)
 
     assertion
     |> ClientAssertion.verify_and_validate(signer, %{client_id: id})
@@ -136,11 +136,14 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp secret_matches?(%{public_key: nil, secret: secret}, %{client_secret: client_secret})
-       when is_binary(secret) and is_binary(client_secret),
-       do: secret == client_secret
+  defp secret_matches?(%{public_key: nil, secret: app_secret}, %{client_secret: input_secret})
+       when is_binary(app_secret) and is_binary(input_secret),
+       do: app_secret == input_secret
 
   defp secret_matches?(_application, _input), do: false
+
+  defp get_signer_context(%{value: pem, type: "rsa", format: "pem"}),
+    do: Joken.Signer.create("RS256", %{"pem" => pem})
 
   defp build_scope(user, application, scopes) do
     user_scopes = Enum.map(user.scopes, & &1.name)
