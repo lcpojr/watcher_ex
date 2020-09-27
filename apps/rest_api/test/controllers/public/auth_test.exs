@@ -72,7 +72,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
-                 "client_secret" => ["can't be blank"],
+                 "client_assertion" => ["can't be blank"],
+                 "client_assertion_type" => ["can't be blank"],
                  "password" => ["can't be blank"],
                  "username" => ["can't be blank"]
                }
@@ -102,7 +103,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
-                 "client_secret" => ["can't be blank"]
+                 "client_assertion" => ["can't be blank"],
+                 "client_assertion_type" => ["can't be blank"]
                }
              } =
                conn
@@ -127,7 +129,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
+      expect(AuthenticatorMock, :sign_out_session, fn jti ->
         assert claims["jti"] == jti
         {:ok, %{}}
       end)
@@ -149,7 +151,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
+      expect(AuthenticatorMock, :sign_out_session, fn jti ->
         assert claims["jti"] == jti
         {:error, :not_active}
       end)
@@ -171,7 +173,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:ok, success_session(claims)}
       end)
 
-      expect(AuthenticatorMock, :sign_out_session, fn %{jti: jti} ->
+      expect(AuthenticatorMock, :sign_out_session, fn jti ->
         assert claims["jti"] == jti
         {:error, :not_found}
       end)

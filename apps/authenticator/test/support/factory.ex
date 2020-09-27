@@ -69,7 +69,7 @@ defmodule Authenticator.Factory do
   def get_priv_public_key do
     :authenticator
     |> :code.priv_dir()
-    |> Path.join("/keys/authenticator.pub")
+    |> Path.join("/keys/authenticator_key.pub")
     |> File.read!()
   end
 
@@ -77,7 +77,7 @@ defmodule Authenticator.Factory do
   def get_priv_private_key do
     :authenticator
     |> :code.priv_dir()
-    |> Path.join("/keys/authenticator.pem")
+    |> Path.join("/keys/authenticator_key.pem")
     |> File.read!()
   end
 end

@@ -9,7 +9,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
   add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(sub aud)
 
   # Two hours in seconds
-  @max_expiration 60 * 60 * 2
+  @max_exp 60 * 60 * 2
 
   @default_issuer "WatcherEx"
   @default_type "Bearer"
@@ -29,7 +29,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
     |> add_claim("scope", nil, &is_binary/1)
   end
 
-  defp gen_ttl, do: @max_expiration
-  defp gen_exp, do: Joken.current_time() + @max_expiration
-  defp valid_expiration?(exp), do: exp >= Joken.current_time()
+  defp gen_ttl, do: @max_exp
+  defp gen_exp, do: current_time() + @max_exp
+  defp valid_expiration?(exp), do: exp >= current_time() && exp <= current_time() + @max_exp
 end

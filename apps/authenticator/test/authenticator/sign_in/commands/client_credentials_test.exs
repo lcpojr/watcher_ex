@@ -3,7 +3,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
 
   alias Authenticator.Ports.ResourceManagerMock
   alias Authenticator.Sessions.Schemas.Session
-  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Commands.ClientCredentials, as: Command
 
   describe "#{Command}.execute/1" do
@@ -25,7 +25,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -70,7 +70,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
-        {:ok, %{app | scopes: scopes}}
+        {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -98,14 +98,89 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
+    test "succeeds using client_assertions and generates an access_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      app = RF.insert!(:client_application, grant_flows: ["client_credentials"])
+      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+
+      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+
+      client_assertion =
+        ClientAssertion.generate_and_sign!(
+          %{"iss" => app.client_id, "aud" => "WatcherEx", "typ" => "Bearer"},
+          signer
+        )
+
+      input = %{
+        grant_type: "client_credentials",
+        scope: scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        client_id: app.client_id,
+        client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        client_assertion: client_assertion
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: public_key, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: nil,
+                expires_in: 7200,
+                token_type: _
+              }} = Command.execute(input)
+
+      assert is_binary(access_token)
+    end
+
+    test "succeeds using client_assertions and generates a refresh_token" do
+      scopes = RF.insert_list!(:scope, 3)
+      app = RF.insert!(:client_application, grant_flows: ["client_credentials", "refresh_token"])
+      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+
+      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+
+      client_assertion =
+        ClientAssertion.generate_and_sign!(
+          %{"iss" => app.client_id, "aud" => "WatcherEx", "typ" => "Bearer"},
+          signer
+        )
+
+      input = %{
+        "grant_type" => "client_credentials",
+        "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" "),
+        "client_id" => app.client_id,
+        "client_assertion_type" => "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        "client_assertion" => client_assertion
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: public_key, scopes: scopes}}
+      end)
+
+      assert {:ok,
+              %{
+                access_token: _,
+                refresh_token: refresh_token,
+                expires_in: 7200,
+                token_type: _
+              }} = Command.execute(input)
+
+      assert is_binary(refresh_token)
+    end
+
     test "fails if params are invalid" do
       assert {:error, :invalid_params} == Command.execute(%{})
 
       assert {:error,
               %Ecto.Changeset{
                 errors: [
+                  client_assertion_type: {"can't be blank", [validation: :required]},
+                  client_assertion: {"can't be blank", [validation: :required]},
                   client_id: {"can't be blank", [validation: :required]},
-                  client_secret: {"can't be blank", [validation: :required]},
                   scope: {"can't be blank", [validation: :required]}
                 ]
               }} = Command.execute(%{grant_type: "client_credentials"})

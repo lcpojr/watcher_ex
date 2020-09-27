@@ -47,7 +47,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   @doc "Logout the authenticated subject session."
   @spec sign_out(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def sign_out(%{private: %{session: session}} = conn, _params) do
-    session
+    session.jti
     |> Commands.sign_out_session()
     |> parse_sign_out_response(conn)
   end
@@ -63,4 +63,5 @@ defmodule RestAPI.Controllers.Public.Auth do
   defp parse_sign_out_response({:ok, _any}, conn), do: send_resp(conn, :no_content, "")
   defp parse_sign_out_response({:error, :not_active}, conn), do: send_resp(conn, :forbidden, "")
   defp parse_sign_out_response({:error, :not_found}, conn), do: send_resp(conn, :not_found, "")
+  defp parse_sign_out_response({:error, _any} = error, _conn), do: error
 end
