@@ -28,7 +28,7 @@ In order to prepare the application run:
 
 Now that you have everything configured you can just call `mix phx.server` to get all applications running. The service will be available at `localhost:4000`.
 
-### Seeding the dabase
+### Seeding the database
 
 You can run the seeds in order to create an user and application for tests by using `mix seed`.
 To get the user and application data check out the database on `localhost:8181` or run the project with using (`iex -S mix phx.server`) and execute the commands bellow.

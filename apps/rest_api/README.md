@@ -1,6 +1,6 @@
 # RestAPI
 
-This application handles all requests on the resfull api.
+This application handles all requests on the restfull api.
 It exposes public and admin endpoints.
 
 ## Testing it locally
