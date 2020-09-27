@@ -38,10 +38,6 @@ defmodule RestAPI.Plugs.Authentication do
       {:session, _any} ->
         Logger.info("Session was not found")
         Fallback.call(conn, {:error, :unauthenticated})
-
-      error ->
-        Logger.error("Failed to authenticate because of an unknow error")
-        Fallback.call(conn, error)
     end
   end
 
