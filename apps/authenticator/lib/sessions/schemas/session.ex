@@ -75,7 +75,6 @@ defmodule Authenticator.Sessions.Schemas.Session do
   #################
 
   defp custom_query(query, {:ids, ids}), do: where(query, [c], c.id in ^ids)
-
   defp custom_query(query, {:created_after, date}), do: where(query, [c], c.inserted_at > ^date)
   defp custom_query(query, {:created_before, date}), do: where(query, [c], c.inserted_at < ^date)
   defp custom_query(query, {:expires_after, date}), do: where(query, [c], c.expires_at > ^date)
