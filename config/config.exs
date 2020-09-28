@@ -1,8 +1,10 @@
 import Config
 
 config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
-config :joken, default_signer: "secret"
 config :phoenix, :json_library, Jason
+
+# This is just for test purposes and should change in near future
+config :joken, default_signer: "secret"
 
 ###################
 # RESOURCE MANAGER
