@@ -31,7 +31,7 @@ defmodule ResourceManager.Identity.Schemas.ClientApplication do
         }
 
   @possible_statuses ~w(active inactive blocked)
-  @possible_protocols ~w(openid-connect saml)
+  @possible_protocols ~w(openid-connect)
   @possible_access_types ~w(confidential public bearer-only)
   @possible_grant_flows ~w(resource_owner implicit client_credentials refresh_token authorization_code)
 
