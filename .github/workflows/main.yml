@@ -161,4 +161,5 @@ jobs:
         run: mix setup
 
       - name: Run tests
-        run: mix coveralls.github
+        run: mix coveralls.github --umbrella
+
