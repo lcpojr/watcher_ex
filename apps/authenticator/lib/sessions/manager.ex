@@ -61,14 +61,19 @@ defmodule Authenticator.Sessions.Manager do
       scheduled_to: nil
     }
 
-    {:ok, state, {:continue, :schedule_work}}
+    {:ok, state, {:continue, :manage}}
   end
 
   @impl true
-  def handle_continue(:schedule_work, state) do
-    Logger.info("Session manager scheduling job.")
+  def handle_continue(:manage, state) do
+    # Updating session statuses and adding active ones to cache
+    manage_sessions()
 
+    # Scheduling next job
     state = schedule_work(state)
+
+    # Updating state
+    state = %{state | updated_at: NaiveDateTime.utc_now()}
 
     {:noreply, state}
   end
@@ -77,15 +82,7 @@ defmodule Authenticator.Sessions.Manager do
   def handle_call(:check, _from, state), do: {:reply, state, state}
 
   @impl true
-  def handle_info(:manage, state) do
-    # Updating session statuses and adding active ones to cache
-    manage_sessions()
-
-    # Updating state
-    state = %{state | updated_at: NaiveDateTime.utc_now()}
-
-    {:noreply, state, {:continue, :schedule_work}}
-  end
+  def handle_info(:manage, state), do: {:noreply, state, {:continue, :manage}}
 
   # coveralls-ignore-stop
 
@@ -104,7 +101,7 @@ defmodule Authenticator.Sessions.Manager do
     |> Repo.transaction()
     |> case do
       {:ok, _response} ->
-        Logger.info("Succeeds in managing sessions")
+        Logger.debug("Succeeds in managing sessions")
         {:ok, :sessions_updated}
 
       {:error, step, err, _changes} ->

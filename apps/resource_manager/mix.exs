@@ -36,6 +36,7 @@ defmodule ResourceManager.MixProject do
       {:argon2_elixir, "~> 2.0"},
       {:bcrypt_elixir, "~> 2.2"},
       {:pbkdf2_elixir, "~> 1.2"},
+      {:nebulex, "~> 1.2"},
 
       # Database
       {:postgrex, "~> 0.15"},
