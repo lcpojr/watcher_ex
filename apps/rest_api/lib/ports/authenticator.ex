@@ -42,6 +42,9 @@ defmodule RestAPI.Ports.Authenticator do
   @callback sign_out_all_sessions(subject_id :: String.t(), subject_type :: String.t()) ::
               {:ok, count :: integer()} | possible_logout_failures()
 
+  @doc "Delegates to Authenticator.generate_hash/2"
+  @callback generate_hash(password :: String.t(), algorithm :: atom()) :: String.t()
+
   @doc "Authenticates the subject using Resource Owner Flow"
   @spec sign_in_resource_owner(input :: map()) :: possible_sign_in_responses()
   def sign_in_resource_owner(input), do: implementation().sign_in_resource_owner(input)
@@ -70,6 +73,10 @@ defmodule RestAPI.Ports.Authenticator do
   @spec sign_out_all_sessions(subject_id :: String.t(), subject_type :: String.t()) ::
           {:ok, count :: integer()} | possible_logout_failures()
   def sign_out_all_sessions(sub, type), do: implementation().sign_out_all_sessions(sub, type)
+
+  @doc "Generate a hash using the given password and algorithm"
+  @spec generate_hash(password :: String.t(), algorithm :: atom()) :: String.t()
+  def generate_hash(password, algorithm), do: implementation().generate_hash(password, algorithm)
 
   defp implementation do
     :rest_api

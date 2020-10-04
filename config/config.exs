@@ -69,5 +69,6 @@ config :rest_api, RestAPI.Endpoint,
 
 config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.Endpoint]
 config :rest_api, RestAPI.Ports.Authenticator, domain: Authenticator
+config :rest_api, RestAPI.Ports.ResourceManager, domain: ResourceManager
 
 import_config "#{Mix.env()}.exs"

@@ -82,6 +82,15 @@ defmodule ResourceManager.Identity.Commands.CreateIdentity do
     end
   end
 
+  def execute(%{"username" => _, "password_hash" => _} = params) do
+    params
+    |> CreateUser.cast_and_apply()
+    |> case do
+      {:ok, %CreateUser{} = input} -> execute(input)
+      error -> error
+    end
+  end
+
   def execute(%{username: _, password_hash: _} = params) do
     params
     |> CreateUser.cast_and_apply()
