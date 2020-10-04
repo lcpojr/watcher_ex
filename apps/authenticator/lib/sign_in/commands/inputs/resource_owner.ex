@@ -18,7 +18,7 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
   @possible_grant_type ~w(password)
   @acceptable_assertion_types ~w(urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 
-  @required [:username, :password, :client_id, :scope, :grant_type]
+  @required [:username, :password, :client_id, :ip_address, :scope, :grant_type]
   @optional [:client_secret, :client_assertion, :client_assertion_type]
   embedded_schema do
     field :username, :string
@@ -26,6 +26,7 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
     field :grant_type, :string
     field :scope, :string
     field :client_id, :string
+    field :ip_address, :string
 
     # Application credentials
     field :client_secret, :string

@@ -16,9 +16,11 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   require Logger
 
   alias Authenticator.Ports.ResourceManager, as: Port
-  alias Authenticator.Sessions
+  alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
+  alias Authenticator.SignIn.ApplicationAttempts
   alias Authenticator.SignIn.Inputs.ClientCredentials, as: Input
+  alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
@@ -39,11 +41,11 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "client_credentials" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
-         {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
+         {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:ok, access_token, claims} <- generate_access_token(app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_session(claims) do
+         {:ok, _session} <- generate_and_save(input, claims) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
@@ -58,16 +60,13 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
         Logger.info("Client application #{client_id} is not active")
         {:error, :unauthenticated}
 
-      {:secret_matches?, false} ->
-        Logger.info("Client application #{client_id} credential didn't matches")
-        {:error, :unauthenticated}
-
-      {:confidential?, false} ->
-        Logger.info("Client application #{client_id} is not confidential")
-        {:error, :unauthenticated}
-
       {:valid_protocol?, false} ->
         Logger.info("Client application #{client_id} protocol is not openid-connect")
+        {:error, :unauthenticated}
+
+      {:secret_matches?, false} ->
+        Logger.info("Client application #{client_id} credential didn't matches")
+        generate_attempt(input, false)
         {:error, :unauthenticated}
 
       error ->
@@ -153,6 +152,30 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
       Logger.info("Refresh token not enabled for application #{application.client_id}")
       {:ok, nil, nil}
     end
+  end
+
+  defp generate_and_save(input, claims) do
+    Multi.new()
+    |> Multi.run(:save_attempt, fn _repo, _changes -> generate_attempt(input, true) end)
+    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims) end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{generate: session}} ->
+        Logger.info("Succeeds in creating session", id: session.id)
+        {:ok, session}
+
+      {:error, step, reason, _changes} ->
+        Logger.error("Failed to create session in step #{inspect(step)}", reason: reason)
+        {:error, reason}
+    end
+  end
+
+  defp generate_attempt(%{client_id: client_id, ip_address: ip_address}, success?) do
+    ApplicationAttempts.create(%{
+      client_id: client_id,
+      was_successful: success?,
+      ip_address: ip_address
+    })
   end
 
   defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do

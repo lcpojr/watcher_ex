@@ -19,9 +19,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, VerifyHash}
   alias Authenticator.Ports.ResourceManager, as: Port
-  alias Authenticator.Sessions
+  alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
+  alias Authenticator.SignIn.UserAttempts
+  alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
@@ -51,7 +53,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
          {:ok, access_token, claims} <- generate_access_token(user, app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_session(claims) do
+         {:ok, _session} <- generate_and_save(input, claims) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
@@ -96,6 +98,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
       {:pass_matches?, false} ->
         Logger.info("User #{username} password do not match any credential")
+        generate_attempt(input, false)
         {:error, :unauthenticated}
 
       error ->
@@ -183,6 +186,30 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       Logger.info("Refresh token not enabled for application #{application.client_id}")
       {:ok, nil, nil}
     end
+  end
+
+  defp generate_and_save(input, claims) do
+    Multi.new()
+    |> Multi.run(:save_attempt, fn _repo, _changes -> generate_attempt(input, true) end)
+    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims) end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{generate: session}} ->
+        Logger.info("Succeeds in creating session", id: session.id)
+        {:ok, session}
+
+      {:error, step, reason, _changes} ->
+        Logger.error("Failed to create session in step #{inspect(step)}", reason: reason)
+        {:error, reason}
+    end
+  end
+
+  defp generate_attempt(%{username: username, ip_address: ip_address}, success?) do
+    UserAttempts.create(%{
+      username: username,
+      was_successful: success?,
+      ip_address: ip_address
+    })
   end
 
   defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do
