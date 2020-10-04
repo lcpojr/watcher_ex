@@ -6,5 +6,5 @@ defmodule Authenticator.Sessions.Cache do
   to be faster in authentication requests.
   """
 
-  use Nebulex.Cache, otp_app: :my_app, adapter: Nebulex.Adapters.Local
+  use Nebulex.Cache, otp_app: :authenticator, adapter: Nebulex.Adapters.Local
 end

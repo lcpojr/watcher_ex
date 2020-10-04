@@ -1,7 +1,7 @@
 defmodule ResourceManager.Credentials.PasswordsTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.Passwords
+  alias ResourceManager.Credentials.{Cache, Passwords}
   alias ResourceManager.Credentials.Schemas.Password
 
   setup do
@@ -78,6 +78,28 @@ defmodule ResourceManager.Credentials.PasswordsTest do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
         Passwords.delete(%Password{})
       end
+    end
+  end
+
+  describe "#{Passwords}.is_strong?/1" do
+    test "returnt true if password is strong enough" do
+      assert true == Passwords.is_strong?("TheBiggestPasswordAll@Wed")
+    end
+
+    test "returnt false if password is not strong enough" do
+      assert false == Passwords.is_strong?("1234")
+    end
+  end
+
+  describe "#{Passwords}.is_allowed?/1" do
+    test "returnt true if password is allowed" do
+      assert Cache.set("TheBiggestPasswordAll", "TheBiggestPasswordAll")
+      assert true == Passwords.is_strong?("TheBiggestPasswordAll@Wed")
+    end
+
+    test "returnt false if password is not strong enough" do
+      assert Cache.set("TheBiggestPasswordAll", "TheBiggestPasswordAll")
+      assert false == Passwords.is_strong?("TheBiggestPasswordAll")
     end
   end
 end

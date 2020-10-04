@@ -3,6 +3,7 @@ defmodule RestAPI.Routers.Public do
 
   use RestAPI.Router
 
+  alias RestAPI.Controllers.Public
   alias RestAPI.Plugs.Authentication
 
   pipeline :rest_api do
@@ -13,7 +14,7 @@ defmodule RestAPI.Routers.Public do
     plug Authentication
   end
 
-  scope "/api/v1", RestAPI.Controllers.Public do
+  scope "/api/v1", Public do
     pipe_through :rest_api
 
     scope "/auth/protocol/openid-connect" do
