@@ -1,8 +1,8 @@
 defmodule Authenticator.SignIn.UserAttemptsTest do
   use Authenticator.DataCase, async: true
 
-  alias Authenticator.SignIn.UserAttempts
   alias Authenticator.SignIn.Schemas.UserAttempt
+  alias Authenticator.SignIn.UserAttempts
 
   setup do
     {:ok, user_attempt: insert!(:user_sign_in_attempt)}
