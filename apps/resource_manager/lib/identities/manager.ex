@@ -131,7 +131,7 @@ defmodule ResouceManager.Identities.Manager do
   end
 
   defp unblock_user_identities do
-    [status: "temporarilly_blocked", blocked_before: NaiveDateTime.utc_now()]
+    [status: "temporary_blocked", blocked_before: NaiveDateTime.utc_now()]
     |> User.query()
     |> Repo.update_all(set: [status: "active", blocked_until: nil])
     |> case do
@@ -162,7 +162,7 @@ defmodule ResouceManager.Identities.Manager do
   end
 
   defp unblock_application_identities do
-    [status: "temporarilly_blocked", blocked_before: NaiveDateTime.utc_now()]
+    [status: "temporary_blocked", blocked_before: NaiveDateTime.utc_now()]
     |> ClientApplication.query()
     |> Repo.update_all(set: [status: "active", blocked_until: nil])
     |> case do

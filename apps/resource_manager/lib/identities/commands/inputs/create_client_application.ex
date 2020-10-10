@@ -23,7 +23,7 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateClientApplication do
   @required [:name, :public_key, :status, :protocol, :access_type]
   @optional [:description, :scopes]
   embedded_schema do
-    # Identities
+    # Identity
     field :name, :string
     field :description, :string
     field :status, :string, default: "active"
