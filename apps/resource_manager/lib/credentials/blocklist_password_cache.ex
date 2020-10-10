@@ -1,4 +1,4 @@
-defmodule ResourceManager.Credentials.Cache do
+defmodule ResourceManager.Credentials.BlocklistPasswordCache do
   @moduledoc """
   Passwords credentials generic cache.
 

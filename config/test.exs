@@ -15,7 +15,7 @@ config :resource_manager, ResourceManager.Repo,
   show_sensitive_data_on_connection_error: true
 
 config :resource_manager, ResourceManager.Application,
-  children: [ResourceManager.Repo, ResourceManager.Credentials.Cache]
+  children: [ResourceManager.Repo, ResourceManager.Credentials.BlocklistPasswordCache]
 
 config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
   command: ResourceManager.Credentials.Ports.GenerateHashMock

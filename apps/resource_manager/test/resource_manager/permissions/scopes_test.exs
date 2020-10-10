@@ -62,7 +62,7 @@ defmodule ResourceManager.Permissions.ScopesTest do
 
   describe "#{Scopes}.delete/1" do
     test "succeed if params are valid", ctx do
-      assert {:ok, %Scope{id: id} = scope} = Scopes.delete(ctx.scope)
+      assert {:ok, %Scope{id: id}} = Scopes.delete(ctx.scope)
       assert nil == Repo.get(Scope, id)
     end
 

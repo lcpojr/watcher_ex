@@ -3,6 +3,7 @@ defmodule ResourceManager do
   Application to deal with request's to the resource server.
   """
 
+  alias ResourceManager.Credentials.Commands.PasswordIsAllowed
   alias ResourceManager.Identity.Commands.{CreateIdentity, GetIdentity}
   alias ResourceManager.Permissions.Commands.{ConsentScope, RemoveScope}
 
@@ -17,4 +18,7 @@ defmodule ResourceManager do
 
   @doc "Delegates to #{RemoveScope}.execute/2"
   defdelegate remove_scope(identity, scopes), to: RemoveScope, as: :execute
+
+  @doc "Delegates to #{PasswordIsAllowed}.execute/1"
+  defdelegate password_allowed?(password), to: PasswordIsAllowed, as: :execute
 end

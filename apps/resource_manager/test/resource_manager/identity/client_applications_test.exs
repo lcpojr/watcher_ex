@@ -73,8 +73,7 @@ defmodule ResourceManager.Identity.ClientApplicationsTest do
 
   describe "#{ClientApplications}.delete/1" do
     test "succeed if params are valid", ctx do
-      assert {:ok, %ClientApplication{id: id} = client_application} =
-               ClientApplications.delete(ctx.client_application)
+      assert {:ok, %ClientApplication{id: id}} = ClientApplications.delete(ctx.client_application)
 
       assert nil == Repo.get(ClientApplication, id)
     end

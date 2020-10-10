@@ -1,13 +1,15 @@
-defmodule ResourceManager.Credentials.Manager do
+defmodule ResourceManager.Credentials.BlocklistPasswordManager do
   @moduledoc """
-  GenServer for dealing with session expirations.
+  GenServer for managing password blocklist.
+
+  All passwords in this list should not be acceptable as user credentials.
   """
 
   use GenServer
 
   require Logger
 
-  alias ResourceManager.Credentials.Cache
+  alias ResourceManager.Credentials.BlocklistPasswordCache
 
   @typedoc "Credentials manager supervisor state"
   @type state :: %{
@@ -81,7 +83,7 @@ defmodule ResourceManager.Credentials.Manager do
   ##########
 
   defp manage_passwords do
-    if Cache.size() == 0 do
+    if BlocklistPasswordCache.size() == 0 do
       Logger.debug("Credential manager Loading cache from dump")
 
       file_path()
@@ -89,7 +91,7 @@ defmodule ResourceManager.Credentials.Manager do
       |> String.trim()
       |> String.split("\n")
       |> Enum.map(fn pwd -> %Nebulex.Object{key: pwd, value: pwd, version: 1} end)
-      |> Cache.set_many()
+      |> BlocklistPasswordCache.set_many()
       |> case do
         :ok ->
           Logger.debug("Credential manager cache loaded with success")
