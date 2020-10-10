@@ -72,5 +72,23 @@ defmodule RestAPI.Controllers.Admin.User do
                |> post(@create_endpoint, %{"password" => password})
                |> json_response(400)
     end
+
+    test "should return error when password is not strong enough", %{conn: conn} do
+      password = "MyP@ssword"
+
+      expect(ResourceManagerMock, :is_strong?, fn _input ->
+        false
+      end)
+
+      assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "unprocessable entity",
+               "response" => %{"error" => "not_strong_enough", "password" => "MyP@ssword"},
+               "status" => 422
+             } =
+               conn
+               |> post(@create_endpoint, %{"password" => password})
+               |> json_response(422)
+    end
   end
 end

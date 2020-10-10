@@ -42,6 +42,13 @@ defmodule RestAPI.Controllers.Fallback do
     |> render("changeset.json", response: changeset)
   end
 
+  def call(conn, {:error, status, response}) when status in [:unprocessable_entity, 422] do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(Default)
+    |> render("422.json", response: response)
+  end
+
   def call(conn, {:error, _unknown_error}) do
     conn
     |> put_status(:internal_server_error)

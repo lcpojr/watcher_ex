@@ -52,6 +52,15 @@ defmodule RestAPI.Views.Errors.Default do
     }
   end
 
+  def render("422.json", %{response: response}) do
+    %{
+      status: 422,
+      detail: "The given params failed in validation",
+      response: response,
+      error: "unprocessable entity"
+    }
+  end
+
   def template_not_found(_template, _assigns) do
     %{
       status: 501,
