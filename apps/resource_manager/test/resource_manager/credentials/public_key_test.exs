@@ -74,7 +74,7 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
 
   describe "#{PublicKeys}.delete/1" do
     test "succeed if params are valid", ctx do
-      assert {:ok, %PublicKey{id: id} = public_key} = PublicKeys.delete(ctx.public_key)
+      assert {:ok, %PublicKey{id: id}} = PublicKeys.delete(ctx.public_key)
       assert nil == Repo.get(PublicKey, id)
     end
 

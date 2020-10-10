@@ -15,8 +15,8 @@ config :resource_manager, ecto_repos: [ResourceManager.Repo]
 config :resource_manager, ResourceManager.Application,
   children: [
     ResourceManager.Repo,
-    ResourceManager.Credentials.Cache,
-    ResourceManager.Credentials.Manager
+    ResourceManager.Credentials.BlocklistPasswordCache,
+    ResourceManager.Credentials.BlocklistPasswordManager
   ]
 
 config :resource_manager, ResourceManager.Repo,

@@ -62,7 +62,7 @@ defmodule ResourceManager.Identity.UsersTest do
 
   describe "#{Users}.delete/1" do
     test "succeed if params are valid", ctx do
-      assert {:ok, %User{id: id} = user} = Users.delete(ctx.user)
+      assert {:ok, %User{id: id}} = Users.delete(ctx.user)
       assert nil == Repo.get(User, id)
     end
 
