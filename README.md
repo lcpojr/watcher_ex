@@ -36,11 +36,11 @@ To get the user and application data check out the database on `localhost:8181` 
 ```elixir
 # Getting all user identities
 # The user password will be `admin`
-ResourceManager.Repo.all(ResourceManager.Identity.Schemas.User) |> ResourceManager.Repo.preload([:scopes])
+ResourceManager.Repo.all(ResourceManager.Identities.Schemas.User) |> ResourceManager.Repo.preload([:scopes])
 
 # Getting all client application identities
 # Check out for the client secret
-ResourceManager.Repo.all(ResourceManager.Identity.Schemas.ClientApplication) |> ResourceManager.Repo.preload([:scopes])
+ResourceManager.Repo.all(ResourceManager.Identities.Schemas.ClientApplication) |> ResourceManager.Repo.preload([:scopes])
 ```
 
 ### Making requests

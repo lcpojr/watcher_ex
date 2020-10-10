@@ -37,7 +37,7 @@ defmodule ResourceManager.Credentials.BlocklistPasswordManager do
 
   # coveralls-ignore-stop
 
-  @doc "Update session statuses and save on cache"
+  @doc "Update blocked password list on cache"
   @spec execute() :: {:ok, :managed} | {:error, :update_failed | :failed_to_cache}
   def execute, do: manage_passwords()
 

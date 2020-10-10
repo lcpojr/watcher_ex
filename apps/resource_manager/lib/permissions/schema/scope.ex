@@ -7,7 +7,7 @@ defmodule ResourceManager.Permissions.Schemas.Scope do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Identity.Schemas.User
+  alias ResourceManager.Identities.Schemas.User
 
   @typedoc "Abstract scope module type."
   @type t :: %__MODULE__{

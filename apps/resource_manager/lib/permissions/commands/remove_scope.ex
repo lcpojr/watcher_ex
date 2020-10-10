@@ -6,7 +6,7 @@ defmodule ResourceManager.Permissions.Commands.RemoveScope do
   require Logger
 
   alias Ecto.Multi
-  alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, UserScope}
   alias ResourceManager.Repo
 

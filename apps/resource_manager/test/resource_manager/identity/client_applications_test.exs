@@ -1,9 +1,9 @@
-defmodule ResourceManager.Identity.ClientApplicationsTest do
+defmodule ResourceManager.Identities.ClientApplicationsTest do
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Credentials.Ports.GenerateHashMock
-  alias ResourceManager.Identity.ClientApplications
-  alias ResourceManager.Identity.Schemas.ClientApplication
+  alias ResourceManager.Identities.ClientApplications
+  alias ResourceManager.Identities.Schemas.ClientApplication
 
   setup do
     {:ok, client_application: insert!(:client_application)}

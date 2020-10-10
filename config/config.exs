@@ -16,7 +16,8 @@ config :resource_manager, ResourceManager.Application,
   children: [
     ResourceManager.Repo,
     ResourceManager.Credentials.BlocklistPasswordCache,
-    ResourceManager.Credentials.BlocklistPasswordManager
+    ResourceManager.Credentials.BlocklistPasswordManager,
+    ResouceManager.Identities.Manager
   ]
 
 config :resource_manager, ResourceManager.Repo,
@@ -35,6 +36,9 @@ config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
 
 config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
   command: Authenticator.Crypto.Commands.FakeVerifyHash
+
+config :resource_manager, ResourceManager.Identities.Ports.GetTemporarillyBlocked,
+  command: Authenticator.SignIn.Commands.GetTemporarillyBlocked
 
 ################
 # Authenticator
