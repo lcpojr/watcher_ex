@@ -9,7 +9,7 @@ defmodule RestAPI.Controller.Admin.User do
   action_fallback RestAPI.Controllers.Fallback
 
   def create(conn, %{"password" => password} = params) do
-    with true <- ResourceManager.is_strong?(password),
+    with true <- ResourceManager.password_allowed?(password),
          password_hash <- Authenticator.generate_hash(password, :argon2),
          params <-
            Map.merge(params, %{"password_hash" => password_hash, "password_algorithm" => "argon2"}),
@@ -20,7 +20,7 @@ defmodule RestAPI.Controller.Admin.User do
       |> render("create.json", response: response)
     else
       false ->
-        {:error, 422, %{error: :not_strong_enough, password: password}}
+        {:error, 400, %{password: ["password is not strong enough"]}}
 
       {:error, _any} = error ->
         error

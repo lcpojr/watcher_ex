@@ -1,8 +1,8 @@
 defmodule RestAPI.Controllers.Admin.User do
   use RestAPI.ConnCase, async: true
 
-  alias RestAPI.Ports.{AuthenticatorMock, ResourceManagerMock}
   alias ResourceManager.Identity.Commands.Inputs.CreateUser
+  alias RestAPI.Ports.{AuthenticatorMock, ResourceManagerMock}
 
   @create_endpoint "/admin/v1/users"
 
@@ -11,27 +11,13 @@ defmodule RestAPI.Controllers.Admin.User do
       access_token = "my-access-token"
       claims = default_claims()
 
-      expect(AuthenticatorMock, :validate_access_token, fn token ->
-        assert access_token == token
-        {:ok, claims}
-      end)
-
-      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
-        assert claims["jti"] == jti
-        {:ok, success_session(claims)}
-      end)
-
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
-        assert claims["jti"] == jti
-        {:ok, %{}}
-      end)
-
-      {:ok, access_token: access_token}
+      {:ok, access_token: access_token, claims: claims}
     end
 
     test "should render user identity response", %{
       conn: conn,
-      access_token: access_token
+      access_token: access_token,
+      claims: claims
     } do
       password = "MyP@ssword1234"
 
@@ -44,8 +30,22 @@ defmodule RestAPI.Controllers.Admin.User do
         ]
       }
 
+      expect(AuthenticatorMock, :validate_access_token, fn token ->
+        assert access_token == token
+        {:ok, claims}
+      end)
+
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
+        assert claims["jti"] == jti
+        {:ok, success_session(claims)}
+      end)
+
+      expect(ResourceManagerMock, :password_allowed?, fn _input ->
+        true
+      end)
+
       expect(AuthenticatorMock, :generate_hash, fn password_to_hash, :argon2 ->
-        assert password = password_to_hash
+        assert password == password_to_hash
         "password_hashed"
       end)
 
@@ -76,11 +76,29 @@ defmodule RestAPI.Controllers.Admin.User do
                |> json_response(201)
     end
 
-    test "should return error when params is not valid", %{conn: conn, access_token: access_token} do
+    test "should return error when params is not valid", %{
+      conn: conn,
+      access_token: access_token,
+      claims: claims
+    } do
       password = "MyP@ssword"
 
+      expect(AuthenticatorMock, :validate_access_token, fn token ->
+        assert access_token == token
+        {:ok, claims}
+      end)
+
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
+        assert claims["jti"] == jti
+        {:ok, success_session(claims)}
+      end)
+
+      expect(ResourceManagerMock, :password_allowed?, fn _input ->
+        true
+      end)
+
       expect(AuthenticatorMock, :generate_hash, fn password_to_hash, :argon2 ->
-        assert password = password_to_hash
+        assert password == password_to_hash
         "password_hashed"
       end)
 
@@ -89,7 +107,7 @@ defmodule RestAPI.Controllers.Admin.User do
       end)
 
       assert %{
-               "detail" => "The given params are invalid",
+               "detail" => "The given params failed in validation",
                "error" => "bad_request",
                "response" => %{"username" => ["can't be blank"]},
                "status" => 400
@@ -102,24 +120,40 @@ defmodule RestAPI.Controllers.Admin.User do
 
     test "should return error when password is not strong enough", %{
       conn: conn,
-      access_token: access_token
+      access_token: access_token,
+      claims: claims
     } do
       password = "MyP@ssword"
 
-      expect(ResourceManagerMock, :is_strong?, fn _input ->
+      expect(AuthenticatorMock, :validate_access_token, fn token ->
+        assert access_token == token
+        {:ok, claims}
+      end)
+
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
+        assert claims["jti"] == jti
+        {:ok, success_session(claims)}
+      end)
+
+      expect(AuthenticatorMock, :sign_out_session, fn jti ->
+        assert claims["jti"] == jti
+        {:ok, %{}}
+      end)
+
+      expect(ResourceManagerMock, :password_allowed?, fn _input ->
         false
       end)
 
       assert %{
                "detail" => "The given params failed in validation",
-               "error" => "unprocessable entity",
-               "response" => %{"error" => "not_strong_enough", "password" => "MyP@ssword"},
-               "status" => 422
-             } =
+               "error" => "bad_request",
+               "response" => %{"password" => ["password is not strong enough"]},
+               "status" => 400
+             } ==
                conn
                |> put_req_header("authorization", "Bearer #{access_token}")
                |> post(@create_endpoint, %{"password" => password})
-               |> json_response(422)
+               |> json_response(400)
     end
   end
 

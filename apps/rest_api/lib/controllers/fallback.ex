@@ -14,6 +14,13 @@ defmodule RestAPI.Controllers.Fallback do
     |> render("400.json")
   end
 
+  def call(conn, {:error, status, response}) when status in [:bad_request, 400] do
+    conn
+    |> put_status(status)
+    |> put_view(Default)
+    |> render("400.json", response: response)
+  end
+
   def call(conn, {:error, :unauthorized}) do
     conn
     |> put_status(:unauthorized)
@@ -35,18 +42,18 @@ defmodule RestAPI.Controllers.Fallback do
     |> render("404.json")
   end
 
+  def call(conn, {:error, status, response}) when status in [:unprocessable_entity, 422] do
+    conn
+    |> put_status(status)
+    |> put_view(Default)
+    |> render("422.json", response: response)
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:bad_request)
     |> put_view(Default)
     |> render("changeset.json", response: changeset)
-  end
-
-  def call(conn, {:error, status, response}) when status in [:unprocessable_entity, 422] do
-    conn
-    |> put_status(:unprocessable_entity)
-    |> put_view(Default)
-    |> render("422.json", response: response)
   end
 
   def call(conn, {:error, _unknown_error}) do

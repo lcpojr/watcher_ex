@@ -7,12 +7,19 @@ defmodule RestAPI.Ports.ResourceManager do
   @type possible_create_identity_response ::
           {:ok, struct()} | {:error, Ecto.Changeset.t() | :invalid_params}
 
-  @doc "Delegates to Authenticator.sign_in_resource_owner/1"
+  @doc "Delegates to ResourceManager.create_identity/1"
   @callback create_identity(input :: map()) :: possible_create_identity_response()
 
-  @doc "Authenticates the subject using Resource Owner Flow"
+  @doc "Delegates to ResourceManager.password_allowed?/1"
+  @callback password_allowed?(password :: String.t()) :: boolean()
+
+  @doc "Create a new identity with it's credentials"
   @spec create_identity(input :: map()) :: possible_create_identity_response()
   def create_identity(input), do: implementation().create_identity(input)
+
+  @doc "Checks if the given password is strong enough to be used"
+  @spec password_allowed?(password :: String.t()) :: boolean()
+  def password_allowed?(password), do: implementation().password_allowed?(password)
 
   defp implementation do
     :rest_api
