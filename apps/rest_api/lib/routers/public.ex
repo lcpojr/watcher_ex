@@ -30,7 +30,7 @@ defmodule RestAPI.Routers.Public do
   end
 
   scope "/admin/v1", RestAPI.Controller.Admin do
-    # pipe_through :authenticated
+    pipe_through :authenticated
 
     resources("/users", User, except: [:new])
   end
