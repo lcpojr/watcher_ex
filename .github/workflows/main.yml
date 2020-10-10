@@ -54,8 +54,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.10.3]
-        otp: [22.3]
+        elixir: [1.11]
+        otp: [23.1]
       
     steps:
       - uses: actions/checkout@v2
@@ -86,8 +86,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.10.3]
-        otp: [22.3]
+        elixir: [1.11]
+        otp: [23.1]
       
     steps:
       - uses: actions/checkout@v2
@@ -128,8 +128,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.10.3]
-        otp: [22.3]
+        elixir: [1.11]
+        otp: [23.1]
   
     services:
       postgres:
