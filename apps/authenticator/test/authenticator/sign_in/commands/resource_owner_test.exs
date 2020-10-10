@@ -5,6 +5,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Commands.ResourceOwner, as: Command
+  alias Authenticator.SignIn.Schemas.UserAttempt
 
   describe "#{Command}.execute/1" do
     test "succeeds and generates an access_token" do
@@ -14,15 +15,17 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
+      username = user.username
       subject_id = user.id
       client_id = app.client_id
       client_name = app.name
       scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        username: user.username,
+        username: username,
         password: "MyPassw@rd234",
         grant_type: "password",
+        ip_address: "45.232.192.12",
         scope: scope,
         client_id: client_id,
         client_secret: app.secret
@@ -33,8 +36,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
-      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
-        assert user.username == username
+      expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
+        assert username == input_username
         {:ok, %{user | password: password, scopes: scopes}}
       end)
 
@@ -61,6 +64,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
+      assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
@@ -71,13 +75,15 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
+      username = user.username
       client_id = app.client_id
       scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
-        "username" => user.username,
+        "username" => username,
         "password" => "MyPassw@rd234",
         "grant_type" => "password",
+        "ip_address" => "45.232.192.12",
         "scope" => scope,
         "client_id" => client_id,
         "client_secret" => app.secret
@@ -88,8 +94,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         {:ok, %{app | public_key: nil, scopes: scopes}}
       end)
 
-      expect(ResourceManagerMock, :get_identity, fn %{username: username} ->
-        assert user.username == username
+      expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
+        assert username == input_username
         {:ok, %{user | password: password, scopes: scopes}}
       end)
 
@@ -115,6 +121,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
+      assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
@@ -138,6 +145,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         username: user.username,
         password: "MyPassw@rd234",
         grant_type: "password",
+        ip_address: "45.232.192.12",
         scope: scopes |> Enum.map(& &1.name) |> Enum.join(" "),
         client_id: app.client_id,
         client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
@@ -185,6 +193,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         "username" => user.username,
         "password" => "MyPassw@rd234",
         "grant_type" => "password",
+        "ip_address" => "45.232.192.12",
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" "),
         "client_id" => app.client_id,
         "client_assertion_type" => "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
@@ -223,6 +232,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                   username: {"can't be blank", [validation: :required]},
                   password: {"can't be blank", [validation: :required]},
                   client_id: {"can't be blank", [validation: :required]},
+                  ip_address: {"can't be blank", [validation: :required]},
                   scope: {"can't be blank", [validation: :required]}
                 ]
               }} = Command.execute(%{grant_type: "password"})
@@ -234,6 +244,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: "my-secret"
       }
@@ -249,6 +260,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: "my-secret"
       }
@@ -266,6 +278,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: "my-secret"
       }
@@ -283,6 +296,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: Ecto.UUID.generate()
       }
@@ -300,6 +314,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: "my-secret"
       }
@@ -317,6 +332,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: Ecto.UUID.generate(),
         client_secret: "my-secret"
       }
@@ -336,6 +352,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: app.client_id,
         client_secret: app.secret
       }
@@ -358,6 +375,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: app.client_id,
         client_secret: app.secret
       }
@@ -382,6 +400,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         password: Ecto.UUID.generate(),
         grant_type: "password",
         scope: "admin:read",
+        ip_address: "45.232.192.12",
         client_id: app.client_id,
         client_secret: app.secret
       }

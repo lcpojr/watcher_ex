@@ -19,18 +19,21 @@ defmodule RestAPI.Controllers.Public.Auth do
   @spec sign_in(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def sign_in(conn, %{"grant_type" => "password"} = params) do
     params
+    |> Map.put("ip_address", get_remote_ip(conn))
     |> Commands.sign_in_resource_owner()
     |> parse_sign_in_response(conn)
   end
 
   def sign_in(conn, %{"grant_type" => "refresh_token"} = params) do
     params
+    |> Map.put("ip_address", get_remote_ip(conn))
     |> Commands.sign_in_refresh_token()
     |> parse_sign_in_response(conn)
   end
 
   def sign_in(conn, %{"grant_type" => "client_credentials"} = params) do
     params
+    |> Map.put("ip_address", get_remote_ip(conn))
     |> Commands.sign_in_client_credentials()
     |> parse_sign_in_response(conn)
   end

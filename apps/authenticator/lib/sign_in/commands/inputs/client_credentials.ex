@@ -16,12 +16,13 @@ defmodule Authenticator.SignIn.Inputs.ClientCredentials do
   @possible_grant_type ~w(client_credentials)
   @acceptable_assertion_types ~w(urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 
-  @required [:client_id, :grant_type, :scope]
+  @required [:client_id, :grant_type, :ip_address, :scope]
   @optional [:client_secret, :client_assertion, :client_assertion_type]
   embedded_schema do
     field :client_id, Ecto.UUID
     field :grant_type, :string
     field :scope, :string
+    field :ip_address, :string
 
     # Application credentials
     field :client_secret, :string

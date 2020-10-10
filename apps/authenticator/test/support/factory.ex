@@ -4,6 +4,7 @@ defmodule Authenticator.Factory do
   alias Authenticator.Repo
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.SignIn.Schemas.{ApplicationAttempt, UserAttempt}
 
   @doc false
   def build(:session) do
@@ -31,6 +32,22 @@ defmodule Authenticator.Factory do
       expires_at: default_expiration(),
       inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
       updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    }
+  end
+
+  def build(:user_sign_in_attempt) do
+    %UserAttempt{
+      username: Ecto.UUID.generate(),
+      was_successful: true,
+      ip_address: "45.232.192.12"
+    }
+  end
+
+  def build(:application_sign_in_attempt) do
+    %ApplicationAttempt{
+      client_id: Ecto.UUID.generate(),
+      was_successful: true,
+      ip_address: "45.232.192.12"
     }
   end
 

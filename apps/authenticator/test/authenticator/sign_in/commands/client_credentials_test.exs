@@ -5,6 +5,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.Commands.ClientCredentials, as: Command
+  alias Authenticator.SignIn.Schemas.ApplicationAttempt
 
   describe "#{Command}.execute/1" do
     test "succeeds and generates an access_token" do
@@ -20,7 +21,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: scope,
         client_id: client_id,
-        client_secret: app.secret
+        client_secret: app.secret,
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -51,6 +53,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
+      assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
@@ -65,7 +68,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         "grant_type" => "client_credentials",
         "scope" => scope,
         "client_id" => client_id,
-        "client_secret" => app.secret
+        "client_secret" => app.secret,
+        "ip_address" => "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -95,6 +99,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                 "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
+      assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
       assert %Session{jti: ^jti} = Repo.one(Session)
     end
 
@@ -116,7 +121,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         scope: scopes |> Enum.map(& &1.name) |> Enum.join(" "),
         client_id: app.client_id,
         client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-        client_assertion: client_assertion
+        client_assertion: client_assertion,
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -153,7 +159,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         "scope" => scopes |> Enum.map(& &1.name) |> Enum.join(" "),
         "client_id" => app.client_id,
         "client_assertion_type" => "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-        "client_assertion" => client_assertion
+        "client_assertion" => client_assertion,
+        "ip_address" => "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
@@ -181,6 +188,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                   client_assertion_type: {"can't be blank", [validation: :required]},
                   client_assertion: {"can't be blank", [validation: :required]},
                   client_id: {"can't be blank", [validation: :required]},
+                  ip_address: {"can't be blank", [validation: :required]},
                   scope: {"can't be blank", [validation: :required]}
                 ]
               }} = Command.execute(%{grant_type: "client_credentials"})
@@ -191,7 +199,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: "my-secret"
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:error, :not_found} end)
@@ -204,7 +213,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: "my-secret"
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
@@ -226,7 +236,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: "my-secret"
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
@@ -241,7 +252,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: Ecto.UUID.generate()
+        client_secret: Ecto.UUID.generate(),
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
@@ -256,7 +268,8 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
         grant_type: "client_credentials",
         scope: "admin:read",
         client_id: Ecto.UUID.generate(),
-        client_secret: "my-secret"
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
