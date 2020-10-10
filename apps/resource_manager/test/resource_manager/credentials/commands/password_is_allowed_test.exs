@@ -1,8 +1,8 @@
 defmodule ResourceManager.Credentials.Commands.PasswordIsAllowedTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.Commands.PasswordIsAllowed
   alias ResourceManager.Credentials.BlocklistPasswordCache
+  alias ResourceManager.Credentials.Commands.PasswordIsAllowed
 
   describe "#{PasswordIsAllowed}.execute/1" do
     test "returnt true if password is strong enough" do
