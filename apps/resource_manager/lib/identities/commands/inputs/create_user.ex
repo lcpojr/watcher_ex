@@ -19,7 +19,7 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
   @required [:username, :password_hash, :password_algorithm]
   @optional [:scopes]
   embedded_schema do
-    # Identities
+    # Identity
     field :username, :string
     field :status, :string, default: "active"
 
