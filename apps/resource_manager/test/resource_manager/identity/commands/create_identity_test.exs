@@ -1,9 +1,9 @@
-defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
+defmodule ResourceManager.Identities.Commands.CreateIdentityTest do
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Credentials.Ports.GenerateHashMock
-  alias ResourceManager.Identity.Commands.CreateIdentity
-  alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+  alias ResourceManager.Identities.Commands.CreateIdentity
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Repo
 
   setup do

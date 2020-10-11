@@ -7,7 +7,7 @@ defmodule ResourceManager.Permissions.Schemas.ClientApplicationScope do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Identity.Schemas.ClientApplication
+  alias ResourceManager.Identities.Schemas.ClientApplication
   alias ResourceManager.Permissions.Schemas.Scope
 
   @typedoc "Client application scope schema fields"

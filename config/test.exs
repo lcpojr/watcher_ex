@@ -26,6 +26,9 @@ config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
 config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
   command: ResourceManager.Credentials.Ports.FakeVerifyHashMock
 
+config :resource_manager, ResourceManager.Identities.Ports.GetTemporarillyBlocked,
+  command: ResourceManager.Identities.Ports.GetTemporarillyBlockedMock
+
 ################
 # Authenticator
 ################

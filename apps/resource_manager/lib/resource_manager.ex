@@ -4,7 +4,7 @@ defmodule ResourceManager do
   """
 
   alias ResourceManager.Credentials.Commands.PasswordIsAllowed
-  alias ResourceManager.Identity.Commands.{CreateIdentity, GetIdentity}
+  alias ResourceManager.Identities.Commands.{CreateIdentity, GetIdentity}
   alias ResourceManager.Permissions.Commands.{ConsentScope, RemoveScope}
 
   @doc "Delegates to #{CreateIdentity}.execute/1"

@@ -2,7 +2,7 @@ defmodule ResourceManager.Factory do
   @moduledoc false
 
   alias ResourceManager.Credentials.Schemas.{Password, PublicKey}
-  alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, Scope, UserScope}
   alias ResourceManager.Repo
 

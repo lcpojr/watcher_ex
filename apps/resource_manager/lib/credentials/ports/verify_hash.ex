@@ -3,7 +3,7 @@ defmodule ResourceManager.Credentials.Ports.VerifyHash do
   Port to access Authenticator verify hash command.
   """
 
-  alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
 
   @typedoc "All possible hash algorithms"
   @type algorithms :: :argon2 | :bcrypt | :pbkdf2
