@@ -24,9 +24,5 @@ defmodule Authenticator.SignIn.Commands.GetTemporarillyBlocked do
 
   # Query filters
   defp get_filters, do: [temporarilly_blocked: {@max_attempts, created_after()}]
-
-  defp created_after do
-    NaiveDateTime.utc_now()
-    |> NaiveDateTime.add(@max_interval, :second)
-  end
+  defp created_after, do: NaiveDateTime.add(NaiveDateTime.utc_now(), @max_interval, :second)
 end

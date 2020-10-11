@@ -17,7 +17,7 @@ config :resource_manager, ResourceManager.Application,
     ResourceManager.Repo,
     ResourceManager.Credentials.BlocklistPasswordCache,
     ResourceManager.Credentials.BlocklistPasswordManager,
-    ResouceManager.Identities.Manager
+    ResourceManager.Identities.Manager
   ]
 
 config :resource_manager, ResourceManager.Repo,

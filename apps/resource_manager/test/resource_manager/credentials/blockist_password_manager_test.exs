@@ -3,7 +3,7 @@ defmodule ResourceManager.Credentials.BlocklistPasswordManagerTest do
 
   alias ResourceManager.Credentials.{BlocklistPasswordCache, BlocklistPasswordManager}
 
-  describe "#{BlocklistPasswordManager}.execute/o" do
+  describe "#{BlocklistPasswordManager}.execute/0" do
     test "populates the cache with the passwords" do
       assert [] == BlocklistPasswordCache.all()
       assert {:ok, :managed} = BlocklistPasswordManager.execute()

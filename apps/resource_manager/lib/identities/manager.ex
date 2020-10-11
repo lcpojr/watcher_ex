@@ -1,4 +1,4 @@
-defmodule ResouceManager.Identities.Manager do
+defmodule ResourceManager.Identities.Manager do
   @moduledoc """
   Genserver for dealing with identity status changes.
 
@@ -170,11 +170,8 @@ defmodule ResouceManager.Identities.Manager do
         Logger.debug("Identities manager unblocked #{inspect(count)} app identities")
         {:ok, count}
 
-      error ->
-        Logger.error("Identities manager failed to unblocked app identities",
-          error: inspect(error)
-        )
-
+      err ->
+        Logger.error("Identities manager failed to unblocked app identities", error: inspect(err))
         {:error, :update_failed}
     end
   end
