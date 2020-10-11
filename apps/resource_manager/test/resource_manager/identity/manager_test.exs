@@ -2,8 +2,8 @@ defmodule ResourceManager.Identities.ManagerTest do
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identities.Manager
-  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Identities.Ports.GetTemporarillyBlockedMock
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
 
   describe "#{Manager}.execute/0" do
     setup do
