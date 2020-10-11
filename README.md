@@ -6,8 +6,8 @@
 
 ## Requirements
 
-- Elixir `1.10` using `OTP-23`;
-- Erlang `23.0`;
+- Elixir `1.11` using `OTP-23`;
+- Erlang `23.1`;
 - Docker-compose (Just when running in dev enviroment);
 
 ## Running it locally
