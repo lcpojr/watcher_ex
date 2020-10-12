@@ -9,9 +9,9 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Credentials.Ports.GenerateHash
   alias ResourceManager.Credentials.Schemas.PublicKey
   alias ResourceManager.Permissions.Schemas.Scope
+  alias ResourceManager.Ports.Authenticator
 
   @typedoc "User schema fields"
   @type t :: %__MODULE__{
@@ -73,7 +73,7 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
   defp generate_secret(%{valid?: false} = changeset), do: changeset
 
   defp generate_secret(changeset) do
-    secret = GenerateHash.execute(Ecto.UUID.generate(), :bcrypt)
+    secret = Authenticator.generate_hash(Ecto.UUID.generate(), :bcrypt)
     put_change(changeset, :secret, secret)
   end
 

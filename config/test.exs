@@ -17,17 +17,8 @@ config :resource_manager, ResourceManager.Repo,
 config :resource_manager, ResourceManager.Application,
   children: [ResourceManager.Repo, ResourceManager.Credentials.BlocklistPasswordCache]
 
-config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
-  command: ResourceManager.Credentials.Ports.GenerateHashMock
-
-config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
-  command: ResourceManager.Credentials.Ports.VerifyHashMock
-
-config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
-  command: ResourceManager.Credentials.Ports.FakeVerifyHashMock
-
-config :resource_manager, ResourceManager.Identities.Ports.GetTemporarillyBlocked,
-  command: ResourceManager.Identities.Ports.GetTemporarillyBlockedMock
+config :resource_manager, ResourceManager.Ports.Authenticator,
+  command: ResourceManager.Ports.AuthenticatorMock
 
 ################
 # Authenticator

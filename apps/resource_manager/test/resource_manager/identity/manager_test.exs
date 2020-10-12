@@ -2,7 +2,7 @@ defmodule ResourceManager.Identities.ManagerTest do
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identities.Manager
-  alias ResourceManager.Identities.Ports.GetTemporarillyBlockedMock
+  alias ResourceManager.Ports.AuthenticatorMock
   alias ResourceManager.Identities.Schemas.{ClientApplication, User}
 
   describe "#{Manager}.execute/0" do
@@ -11,16 +11,19 @@ defmodule ResourceManager.Identities.ManagerTest do
     end
 
     test "succeeds and temporary blocks users", %{user: %{id: id, username: username}} do
-      expect(GetTemporarillyBlockedMock, :execute, fn :user -> {:ok, [username]} end)
-      expect(GetTemporarillyBlockedMock, :execute, fn :application -> {:ok, []} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :user -> {:ok, [username]} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :application -> {:ok, []} end)
 
       assert {:ok, :managed} == Manager.execute()
       assert %{status: "temporary_blocked", blocked_until: %{}} = Repo.get(User, id)
     end
 
     test "succeeds and temporary blocks applications", %{app: %{id: id, client_id: client_id}} do
-      expect(GetTemporarillyBlockedMock, :execute, fn :user -> {:ok, []} end)
-      expect(GetTemporarillyBlockedMock, :execute, fn :application -> {:ok, [client_id]} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :user -> {:ok, []} end)
+
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :application ->
+        {:ok, [client_id]}
+      end)
 
       assert {:ok, :managed} == Manager.execute()
       assert %{status: "temporary_blocked", blocked_until: %{}} = Repo.get(ClientApplication, id)
@@ -29,8 +32,8 @@ defmodule ResourceManager.Identities.ManagerTest do
     test "succeeds and unblock users" do
       user = insert!(:user, status: "temporary_blocked", blocked_until: blocked_until())
 
-      expect(GetTemporarillyBlockedMock, :execute, fn :user -> {:ok, []} end)
-      expect(GetTemporarillyBlockedMock, :execute, fn :application -> {:ok, []} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :user -> {:ok, []} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :application -> {:ok, []} end)
 
       assert {:ok, :managed} == Manager.execute()
       assert %{status: "active", blocked_until: nil} = Repo.get(User, user.id)
@@ -44,8 +47,11 @@ defmodule ResourceManager.Identities.ManagerTest do
           blocked_until: blocked_until()
         )
 
-      expect(GetTemporarillyBlockedMock, :execute, fn :user -> {:ok, []} end)
-      expect(GetTemporarillyBlockedMock, :execute, fn :application -> {:ok, [app.client_id]} end)
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :user -> {:ok, []} end)
+
+      expect(AuthenticatorMock, :get_temporarilly_blocked, fn :application ->
+        {:ok, [app.client_id]}
+      end)
 
       assert {:ok, :managed} == Manager.execute()
       assert %{status: "active", blocked_until: nil} = Repo.get(ClientApplication, app.id)

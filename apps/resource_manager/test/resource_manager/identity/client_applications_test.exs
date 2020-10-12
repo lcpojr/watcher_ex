@@ -1,9 +1,9 @@
 defmodule ResourceManager.Identities.ClientApplicationsTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.Ports.GenerateHashMock
   alias ResourceManager.Identities.ClientApplications
   alias ResourceManager.Identities.Schemas.ClientApplication
+  alias ResourceManager.Ports.AuthenticatorMock
 
   setup do
     {:ok, client_application: insert!(:client_application)}
@@ -13,7 +13,7 @@ defmodule ResourceManager.Identities.ClientApplicationsTest do
     test "succeed if params are valid" do
       params = %{name: "my-test-application"}
 
-      expect(GenerateHashMock, :execute, fn secret, :bcrypt ->
+      expect(AuthenticatorMock, :generate_hash, fn secret, :bcrypt ->
         assert is_binary(secret)
         gen_hashed_password(Ecto.UUID.generate())
       end)
