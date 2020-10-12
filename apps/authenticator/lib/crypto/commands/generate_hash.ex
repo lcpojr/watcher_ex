@@ -23,9 +23,11 @@ defmodule Authenticator.Crypto.Commands.GenerateHash do
   with a sliding computational cost and generally used to reduce vulnerabilities to brute force attacks.
   """
 
-  @behaviour ResourceManager.Credentials.Ports.GenerateHash
+  @typedoc "All possible hash algorithms"
+  @type algorithms :: :argon2 | :bcrypt | :pbkdf2
 
-  @impl true
+  @doc "Generates a hash using the given algorithm"
+  @spec execute(value :: String.t(), algorithm :: algorithms()) :: String.t()
   def execute(value, :argon2) when is_binary(value), do: Argon2.hash_pwd_salt(value)
   def execute(value, :bcrypt) when is_binary(value), do: Bcrypt.hash_pwd_salt(value)
   def execute(value, :pbkdf2) when is_binary(value), do: Pbkdf2.hash_pwd_salt(value)

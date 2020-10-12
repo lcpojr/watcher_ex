@@ -11,8 +11,8 @@ defmodule ResourceManager.Identities.Manager do
   require Logger
 
   alias Ecto.Multi
-  alias ResourceManager.Identities.Ports.GetTemporarillyBlocked
   alias ResourceManager.Identities.Schemas.{ClientApplication, User}
+  alias ResourceManager.Ports.Authenticator
   alias ResourceManager.Repo
 
   @typedoc "Identities manager supervisor state"
@@ -86,7 +86,7 @@ defmodule ResourceManager.Identities.Manager do
   defp manage_identities do
     Multi.new()
     |> Multi.run(:get_user_identities, fn _repo, _changes ->
-      GetTemporarillyBlocked.execute(:user)
+      Authenticator.get_temporarilly_blocked(:user)
     end)
     |> Multi.run(:block_user_identities, fn _repo, %{get_user_identities: usernames} ->
       block_user_identities(usernames)
@@ -95,7 +95,7 @@ defmodule ResourceManager.Identities.Manager do
       unblock_user_identities()
     end)
     |> Multi.run(:get_application_identities, fn _repo, _changes ->
-      GetTemporarillyBlocked.execute(:application)
+      Authenticator.get_temporarilly_blocked(:application)
     end)
     |> Multi.run(:block_application_identities, fn _, %{get_application_identities: client_ids} ->
       block_application_identities(client_ids)
