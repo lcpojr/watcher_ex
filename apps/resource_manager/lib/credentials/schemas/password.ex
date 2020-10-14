@@ -12,7 +12,7 @@ defmodule ResourceManager.Credentials.Schemas.Password do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Identity.Schemas.User
+  alias ResourceManager.Identities.Schemas.User
 
   @typedoc """
   Abstract password module type.

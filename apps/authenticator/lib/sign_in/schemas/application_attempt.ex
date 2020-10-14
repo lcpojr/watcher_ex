@@ -47,4 +47,12 @@ defmodule Authenticator.SignIn.Schemas.ApplicationAttempt do
   defp custom_query(query, {:ids, ids}), do: where(query, [c], c.id in ^ids)
   defp custom_query(query, {:created_after, date}), do: where(query, [c], c.inserted_at > ^date)
   defp custom_query(query, {:created_before, date}), do: where(query, [c], c.inserted_at < ^date)
+
+  defp custom_query(query, {:temporarilly_blocked, {max_attempts, date}}) do
+    query
+    |> where([c], c.inserted_at > ^date)
+    |> group_by([c], c.client_id)
+    |> having([c], count(c.client_id) > ^max_attempts)
+    |> select([c], c.client_id)
+  end
 end

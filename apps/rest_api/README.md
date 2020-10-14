@@ -16,7 +16,7 @@ To generate the client assertions follow the exemple bellow (in the project iex)
 ```elixir
 signer = Joken.Signer.create("RS256", %{"pem" => "YOUR_PRIVATE_KEY_HERE"})
 
-Authenticator.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
+Authenticator.Sessions.Tokens.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
 ```
 
 Then you can try out the request using:
@@ -24,7 +24,7 @@ Then you can try out the request using:
 ```sh
 curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
-    -d '{"username":"admin", "password":"admin", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
+    -d '{"username":"admin", "password":"admin222", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDIzNTY4NTMsImlhdCI6MTYwMjM0OTY1MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm91YjExOWNrdDgxNHFybDRvMDAwNmwxIiwibmJmIjoxNjAyMzQ5NjUzLCJ0eXAiOiJCZWFyZXIifQ.Hp8XCLjAQXnS3LrCPVNMvDfd4TKZcDL8CaPhVqtMU_jZ08yJmz3YKIrPyHclI2GnXY-Ii-KfkMJrcWj93VisJlf514ft3fRkqGC-MRfCdDyIWDOjhwIS1-ckn35ej0PxWK2QbPnqv0wIHYqdVpXBdDnF0xaZk_KX_nb4obEx6K5soiewieWDO-PZtgqQZAHKrsKO83kiM3rPeGia1FLvMy2mY7SE7g2fsbK0_Ik_h-MtQ9lTn0dC7uUGYmAGse82MyMNLVzeW2FezVLvoFuQ9yA9VlKNtl-VhXQ5kEdpzSCSUhFYzUOgR_U09U2AI6AegsybR_MEFdGGSHfb7l_m6V44I1LPhi-0LOdOgbsfo_g_uO7zrGI9nMhlsJjwgRUy50ONDQjkzlYTYjYSR-EBqS_ulwG8_keNG93JPM662z7h2o15AfQmZ8dISi4nPR_CeWZZ0gaKunhstsGopI8a9JalsNySVdar84RP6tvxrAdhr7nS37D5FE5_gylB_dT7hJ15DeAfZ34h-jX_v2VqinlWf3DwWuEYfwKHb7afGIB-udcN-cMDI_WrC6WO_SU7OV2PquQ43MYB-79wHVqaqGmDV3UrhsfbBok7iGDs1yhsUGKrp2sTPEz41epfUrH4K81qEkRSdgDrQMyDbq9En9gtqFCJeWnYIuhqFjhS_v4", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
 ```
 
 
@@ -77,7 +77,7 @@ To generate the client assertions follow the exemple bellow (in the project iex)
 ```elixir
 signer = Joken.Signer.create("RS256", %{"pem" => "YOUR_PRIVATE_KEY_HERE"})
 
-Authenticator.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
+Authenticator.Sessions.Tokens.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
 ```
 
 Then you can try out the request using:

@@ -1,8 +1,8 @@
-defmodule ResourceManager.Identity.UsersTest do
+defmodule ResourceManager.Identities.UsersTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Identity.Schemas.User
-  alias ResourceManager.Identity.Users
+  alias ResourceManager.Identities.Schemas.User
+  alias ResourceManager.Identities.Users
 
   setup do
     {:ok, user: insert!(:user)}

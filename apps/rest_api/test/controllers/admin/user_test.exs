@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.Admin.User do
   use RestAPI.ConnCase, async: true
 
-  alias ResourceManager.Identity.Commands.Inputs.CreateUser
+  alias ResourceManager.Identities.Commands.Inputs.CreateUser
   alias RestAPI.Ports.{AuthenticatorMock, ResourceManagerMock}
 
   @create_endpoint "/admin/v1/users"

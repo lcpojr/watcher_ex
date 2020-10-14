@@ -3,7 +3,7 @@
 #     mix run priv/repo/seeds.exs
 
 alias ResourceManager.Credentials.Schemas.{Password, PublicKey}
-alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+alias ResourceManager.Identities.Schemas.{ClientApplication, User}
 alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, Scope, UserScope}
 alias ResourceManager.Repo
 

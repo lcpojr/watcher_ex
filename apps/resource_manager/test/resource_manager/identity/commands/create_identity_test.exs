@@ -1,9 +1,9 @@
-defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
+defmodule ResourceManager.Identities.Commands.CreateIdentityTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.Ports.GenerateHashMock
-  alias ResourceManager.Identity.Commands.CreateIdentity
-  alias ResourceManager.Identity.Schemas.{ClientApplication, User}
+  alias ResourceManager.Identities.Commands.CreateIdentity
+  alias ResourceManager.Identities.Schemas.{ClientApplication, User}
+  alias ResourceManager.Ports.AuthenticatorMock
   alias ResourceManager.Repo
 
   setup do
@@ -30,7 +30,7 @@ defmodule ResourceManager.Identity.Commands.CreateIdentityTest do
         scopes: ctx.scopes
       }
 
-      expect(GenerateHashMock, :execute, fn secret, :bcrypt ->
+      expect(AuthenticatorMock, :generate_hash, fn secret, :bcrypt ->
         assert is_binary(secret)
         gen_hashed_password(Ecto.UUID.generate())
       end)

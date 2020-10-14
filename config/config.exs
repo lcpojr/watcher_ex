@@ -16,7 +16,8 @@ config :resource_manager, ResourceManager.Application,
   children: [
     ResourceManager.Repo,
     ResourceManager.Credentials.BlocklistPasswordCache,
-    ResourceManager.Credentials.BlocklistPasswordManager
+    ResourceManager.Credentials.BlocklistPasswordManager,
+    ResourceManager.Identities.Manager
   ]
 
 config :resource_manager, ResourceManager.Repo,
@@ -27,14 +28,7 @@ config :resource_manager, ResourceManager.Repo,
   port: 5432,
   pool_size: 10
 
-config :resource_manager, ResourceManager.Credentials.Ports.GenerateHash,
-  command: Authenticator.Crypto.Commands.GenerateHash
-
-config :resource_manager, ResourceManager.Credentials.Ports.VerifyHash,
-  command: Authenticator.Crypto.Commands.VerifyHash
-
-config :resource_manager, ResourceManager.Credentials.Ports.FakeVerifyHash,
-  command: Authenticator.Crypto.Commands.FakeVerifyHash
+config :resource_manager, ResourceManager.Ports.Authenticator, command: Authenticator
 
 ################
 # Authenticator

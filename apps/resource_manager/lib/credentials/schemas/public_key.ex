@@ -7,7 +7,7 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Identity.Schemas.ClientApplication
+  alias ResourceManager.Identities.Schemas.ClientApplication
 
   @typedoc """
   Abstract public_key module type.

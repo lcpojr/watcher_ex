@@ -7,7 +7,7 @@ defmodule ResourceManager.Permissions.Schemas.UserScope do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Identity.Schemas.User
+  alias ResourceManager.Identities.Schemas.User
   alias ResourceManager.Permissions.Schemas.Scope
 
   @typedoc "User scope schema fields"
