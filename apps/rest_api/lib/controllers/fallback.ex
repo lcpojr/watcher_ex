@@ -14,6 +14,13 @@ defmodule RestAPI.Controllers.Fallback do
     |> render("400.json")
   end
 
+  def call(conn, {:error, status, response}) when status in [:bad_request, 400] do
+    conn
+    |> put_status(status)
+    |> put_view(Default)
+    |> render("400.json", response: response)
+  end
+
   def call(conn, {:error, :unauthorized}) do
     conn
     |> put_status(:unauthorized)
@@ -33,6 +40,13 @@ defmodule RestAPI.Controllers.Fallback do
     |> put_status(:not_found)
     |> put_view(Default)
     |> render("404.json")
+  end
+
+  def call(conn, {:error, status, response}) when status in [:unprocessable_entity, 422] do
+    conn
+    |> put_status(status)
+    |> put_view(Default)
+    |> render("422.json", response: response)
   end
 
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do

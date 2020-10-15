@@ -50,7 +50,7 @@ defmodule RestAPI.Controllers.FallbackTest do
 
   test "handles changeset responses", %{conn: conn} do
     assert %{
-             "detail" => "The given params are invalid",
+             "detail" => "The given params failed in validation",
              "status" => 400,
              "error" => "bad_request",
              "response" => %{

@@ -134,3 +134,26 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/logout \
 **Response (204)**:
 
 `No content`
+
+### Create an user
+
+**Request**:
+
+```sh
+curl -X POST http://localhost:4000/admin/v1/users \
+    -H "Content-Type: application/json" \
+-d '{"username":"yashu", "password":"lcpo", "scopes":["6a3a3771-9f56-4254-9497-927e441dacfc" "8a235ba0-a827-4593-92c9-6248bef4fa06"]}'
+```
+
+**Response (201)**:
+
+```json
+{
+    "id":"0c5fb5a7-5d86-4b11-b4e3-facf925b3e9d",
+    "inserted_at":"2020-10-04T13:23:45",
+    "is_admin":false,
+    "status":"active",
+    "update_at":"2020-10-04T13:23:45",
+    "username":"yashu"
+}      
+```

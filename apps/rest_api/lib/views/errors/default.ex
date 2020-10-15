@@ -3,6 +3,15 @@ defmodule RestAPI.Views.Errors.Default do
 
   use RestAPI.View
 
+  def render("400.json", %{response: response}) do
+    %{
+      status: 400,
+      error: "bad_request",
+      detail: "The given params failed in validation",
+      response: response
+    }
+  end
+
   def render("400.json", _assigns) do
     %{
       status: 400,
@@ -43,10 +52,19 @@ defmodule RestAPI.Views.Errors.Default do
     }
   end
 
+  def render("422.json", %{response: response}) do
+    %{
+      status: 422,
+      detail: "The given params failed in validation",
+      response: response,
+      error: "unprocessable entity"
+    }
+  end
+
   def render("changeset.json", %{response: response}) do
     %{
       status: 400,
-      detail: "The given params are invalid",
+      detail: "The given params failed in validation",
       response: Ecto.Changeset.traverse_errors(response, &translate_error/1),
       error: "bad_request"
     }
