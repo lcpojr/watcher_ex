@@ -34,6 +34,12 @@ config :authenticator, Authenticator.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   show_sensitive_data_on_connection_error: true
 
+#############
+# Authorizer
+#############
+
+config :authorizer, Authorizer.Ports.ResourceManager, domain: Authorizer.Ports.ResourceManagerMock
+
 ##########
 # Rest API
 ##########

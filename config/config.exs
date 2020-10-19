@@ -53,6 +53,12 @@ config :authenticator, Authenticator.Repo,
   port: 5432,
   pool_size: 10
 
+#############
+# Authorizer
+#############
+
+config :authorizer, Authorizer.Ports.ResourceManager, domain: ResourceManager
+
 ##########
 # Rest API
 ##########
