@@ -49,4 +49,5 @@ config :rest_api, RestAPI.Endpoint,
   server: false
 
 config :rest_api, RestAPI.Ports.Authenticator, domain: RestAPI.Ports.AuthenticatorMock
+config :rest_api, RestAPI.Ports.Authorizer, domain: RestAPI.Ports.AuthorizerMock
 config :rest_api, RestAPI.Ports.ResourceManager, domain: RestAPI.Ports.ResourceManagerMock

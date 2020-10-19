@@ -1,6 +1,6 @@
 defmodule RestAPI.Plugs.Authentication do
   @moduledoc """
-  Provides authentication for public calls.
+  Provides authentication for public and admin calls.
   """
 
   require Logger
