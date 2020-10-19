@@ -31,6 +31,9 @@ defmodule Authorizer.MixProject do
 
   defp deps do
     [
+      # Umbrella
+      {:resource_manager, in_umbrella: true},
+
       # Domain
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
