@@ -38,7 +38,8 @@ config :authenticator, Authenticator.Repo,
 # Authorizer
 #############
 
-config :authorizer, Authorizer.Ports.ResourceManager, domain: Authorizer.Ports.ResourceManagerMock
+config :authorizer, Authorizer.Ports.ResourceManager,
+  domain: Authorizer.Ports.ResourceManagerMock
 
 ##########
 # Rest API

@@ -21,26 +21,41 @@ defmodule Authorizer.Policies.SubjectActive do
   end
 
   @impl true
-  def validate(%Conn{private: %{subject_id: subject_id, subject_type: subject_type} = context})
-      when is_binary(subject_id) and subject_type in @subject_types,
-      do: {:ok, context}
+  def validate(%Conn{private: %{session: session}} = context) when is_map(session) do
+    case session do
+      %{subject_id: id, subject_type: type} when is_binary(id) and type in @subject_types ->
+        Logger.debug("Policity #{__MODULE__} validated with success")
+        {:ok, context}
 
-  def validate(_any), do: {:error, :invalid_session}
+      _any ->
+        Logger.error("Policy #{__MODULE__} failed on validation because session is invalid")
+        {:error, :unauthorized}
+    end
+  end
+
+  def validate(%Conn{private: %{session: _}}) do
+    Logger.error("Policy #{__MODULE__} failed on validation because session was not found")
+    {:error, :unauthorized}
+  end
 
   @impl true
-  def execute(context, _opts) when is_map(context) do
-    with {:identity, {:ok, identity}} <- {:identity, get_identity(context)},
+  def execute(%Conn{private: %{session: session}}, opts \\ [])
+      when is_map(session) and is_list(opts) do
+    # We look for the identity on shared context first
+    identity = Keyword.get(opts, :identity)
+
+    with {:identity, {:ok, identity}} <- {:identity, get_identity(identity || session)},
          {:active?, "active"} <- {:active?, identity.status} do
-      Logger.debug("Policy #{__MODULE__} succeeded")
-      :ok
+      Logger.debug("Policy #{__MODULE__} execution succeeded")
+      {:ok, Keyword.put(opts, :identity, identity)}
     else
       {:identity, error} ->
         Logger.error("Policy #{__MODULE__} failed to get identity", error: inspect(error))
-        {:error, :identity_not_found}
+        {:error, :unauthorized}
 
-      {:active?, false} ->
-        Logger.error("Policy #{__MODULE__} failed because subject is not active")
-        {:error, :not_active}
+      {:active?, status} ->
+        Logger.error("Policy #{__MODULE__} failed because subject is status is #{status}")
+        {:error, :unauthorized}
     end
   end
 
@@ -49,4 +64,6 @@ defmodule Authorizer.Policies.SubjectActive do
 
   defp get_identity(%{subject_id: subject_id, subject_type: "application"}),
     do: ResourceManager.get_identity(%{id: subject_id, client_id: nil})
+
+  defp get_identity(%{status: _} = identity), do: {:ok, identity}
 end

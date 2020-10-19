@@ -10,5 +10,6 @@ defmodule Authorizer.Policies.Behaviour do
   @callback validate(conn :: Plug.Conn.t()) :: {:ok, context :: map()} | {:error, atom()}
 
   @doc "Runs the authorization policy"
-  @callback execute(context :: map(), opts :: Keyword.t()) :: :ok | {:error, :unauthorized}
+  @callback execute(context :: map(), opts :: Keyword.t()) ::
+              {:ok, shared_context :: Keyword.t()} | {:error, :unauthorized}
 end

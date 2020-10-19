@@ -14,8 +14,8 @@ defmodule Authorizer.Ports.ResourceManager do
   def get_identity(input), do: implementation().get_identity(input)
 
   defp implementation do
-    :resource_manager
+    :authorizer
     |> Application.get_env(__MODULE__)
-    |> Keyword.get(:command)
+    |> Keyword.get(:domain)
   end
 end
