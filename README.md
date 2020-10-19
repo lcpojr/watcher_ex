@@ -45,7 +45,7 @@ ResourceManager.Repo.all(ResourceManager.Identities.Schemas.ClientApplication) |
 
 ### Making requests
 
-Check out the rest api guide on the specific application `README.md`.
+Check out the [rest api guide](https://github.com/lcpojr/watcher_ex/blob/master/apps/rest_api/README.md) on the specific application `README.md`.
 
 ## Testing
 
