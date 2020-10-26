@@ -2,7 +2,7 @@ defmodule RestAPI.Controllers.Admin.User do
   use RestAPI.ConnCase, async: true
 
   alias ResourceManager.Identities.Commands.Inputs.CreateUser
-  alias RestAPI.Ports.{AuthenticatorMock, ResourceManagerMock}
+  alias RestAPI.Ports.{AuthenticatorMock, AuthorizerMock, ResourceManagerMock}
 
   @create_endpoint "/admin/v1/users"
 
@@ -63,6 +63,8 @@ defmodule RestAPI.Controllers.Admin.User do
          }}
       end)
 
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
+
       assert %{
                "id" => _id,
                "inserted_at" => _inserted_at,
@@ -106,6 +108,8 @@ defmodule RestAPI.Controllers.Admin.User do
         CreateUser.cast_and_apply(input)
       end)
 
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
+
       assert %{
                "detail" => "The given params failed in validation",
                "error" => "bad_request",
@@ -143,6 +147,8 @@ defmodule RestAPI.Controllers.Admin.User do
       expect(ResourceManagerMock, :password_allowed?, fn _input ->
         false
       end)
+
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
 
       assert %{
                "detail" => "The given params failed in validation",

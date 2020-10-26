@@ -4,7 +4,7 @@ defmodule RestAPI.Routers.Public do
   use RestAPI.Router
 
   alias RestAPI.Controllers.Public
-  alias RestAPI.Plugs.Authentication
+  alias RestAPI.Plugs.{Authentication, Authorization}
 
   pipeline :rest_api do
     plug :accepts, ["json"]
@@ -12,6 +12,10 @@ defmodule RestAPI.Routers.Public do
 
   pipeline :authenticated do
     plug Authentication
+  end
+
+  pipeline :authorized_by_admin do
+    plug Authorization, type: "admin"
   end
 
   scope "/api/v1", Public do
@@ -31,6 +35,7 @@ defmodule RestAPI.Routers.Public do
 
   scope "/admin/v1", RestAPI.Controller.Admin do
     pipe_through :authenticated
+    pipe_through :authorized_by_admin
 
     resources("/users", User, except: [:new])
   end

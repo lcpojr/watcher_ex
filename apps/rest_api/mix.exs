@@ -35,6 +35,7 @@ defmodule RestAPI.MixProject do
       # Umbrealla
       {:resource_manager, in_umbrella: true},
       {:authenticator, in_umbrella: true},
+      {:authorizer, in_umbrella: true},
 
       # Domain
       {:phoenix, "~> 1.5.4"},
