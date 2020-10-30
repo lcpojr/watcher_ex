@@ -5,6 +5,7 @@ defmodule RestAPI.Controllers.Admin.User do
   alias RestAPI.Ports.{AuthenticatorMock, AuthorizerMock, ResourceManagerMock}
 
   @create_endpoint "/admin/v1/users"
+  @show_endpoint "/admin/v1/users/"
 
   describe "POST #{@create_endpoint}" do
     setup do
@@ -160,6 +161,63 @@ defmodule RestAPI.Controllers.Admin.User do
                |> put_req_header("authorization", "Bearer #{access_token}")
                |> post(@create_endpoint, %{"password" => password})
                |> json_response(400)
+    end
+  end
+
+  describe "GET #{@show_endpoint}" do
+    setup do
+      access_token = "my-access-token"
+      claims = default_claims()
+
+      {:ok, access_token: access_token, claims: claims, user: insert!(:user)}
+    end
+
+    test "should render user identity", %{
+      conn: conn,
+      access_token: access_token,
+      claims: claims,
+      user: user
+    } do
+      username = user.username
+
+      expect(AuthenticatorMock, :validate_access_token, fn token ->
+        assert access_token == token
+        {:ok, claims}
+      end)
+
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
+        assert claims["jti"] == jti
+        {:ok, success_session(claims)}
+      end)
+
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
+
+      expect(ResourceManagerMock, :get_identity, fn input ->
+        assert is_map(input)
+
+        {:ok,
+         %{
+           id: user.id,
+           inserted_at: NaiveDateTime.utc_now(),
+           is_admin: user.is_admin,
+           status: user.status,
+           updated_at: NaiveDateTime.utc_now(),
+           username: username
+         }}
+      end)
+
+      assert %{
+               "id" => _id,
+               "inserted_at" => _inserted_at,
+               "updated_at" => _updated_at,
+               "is_admin" => false,
+               "status" => "active",
+               "username" => ^username
+             } =
+               conn
+               |> put_req_header("authorization", "Bearer #{access_token}")
+               |> get(@show_endpoint <> "username")
+               |> json_response(201)
     end
   end
 

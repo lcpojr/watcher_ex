@@ -24,6 +24,7 @@ defmodule RestAPI.ConnCase do
       import Phoenix.ConnTest
       import RestAPI.ConnCase
       import Mox
+      import ResourceManager.Factory
 
       alias RestAPI.Router.Helpers, as: Routes
 

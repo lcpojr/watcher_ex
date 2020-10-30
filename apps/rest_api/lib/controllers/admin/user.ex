@@ -26,4 +26,20 @@ defmodule RestAPI.Controller.Admin.User do
         error
     end
   end
+
+  def show(conn, %{"id" => username} = params) do
+    params
+    |> Map.put(:username, username)
+    |> ResourceManager.get_identity()
+    |> case do
+      {:ok, identity} when is_map(identity) ->
+        conn
+        |> put_status(:created)
+        |> put_view(User)
+        |> render("show.json", response: identity)
+
+      {:error, error_reason} ->
+        error_reason
+    end
+  end
 end
