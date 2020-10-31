@@ -2,23 +2,13 @@
 
 **This is a work in progress and every contribution is welcome :)**
 
-**TODO: Add description**
-
 ## Requirements
 
-- Elixir `1.11` using `OTP-23`;
+- Elixir `1.11`;
 - Erlang `23.1`;
 - Docker-compose (Just when running in dev enviroment);
 
 ## Running it locally
-
-First you should install all requirement, we recommend you to use [asdf](https://github.com/asdf-vm/asdf).
-
-If you are using `asdf` just run:
-
-- `asdf plugin-add elixir`;
-- `asdf plugin-add erlang`;
-- `asdf install`;
 
 In order to prepare the application run:
 
@@ -47,7 +37,7 @@ ResourceManager.Repo.all(ResourceManager.Identities.Schemas.ClientApplication) |
 
 Check out the [rest api guide](https://github.com/lcpojr/watcher_ex/blob/master/apps/rest_api/README.md) on the specific application `README.md`.
 
-## Testing
+### Testing
 
 Before you can run the tests you should setup the test dabatase by using `mix test_setup`. After that just call `mix test` or `mix coveralls` if you want to check code coverage.
 

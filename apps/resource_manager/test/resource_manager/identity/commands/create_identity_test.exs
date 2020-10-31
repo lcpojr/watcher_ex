@@ -26,7 +26,7 @@ defmodule ResourceManager.Identities.Commands.CreateIdentityTest do
       input = %{
         name: "my-client-application",
         description: "App for tests",
-        public_key: get_priv_public_key(),
+        public_key: get_public_key(),
         scopes: ctx.scopes
       }
 

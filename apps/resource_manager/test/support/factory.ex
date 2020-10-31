@@ -8,7 +8,8 @@ defmodule ResourceManager.Factory do
 
   @default_password "My-passw@rd123"
 
-  @doc false
+  @doc "Builds a default struct from the requested model"
+  @spec build(model :: atom()) :: struct()
   def build(:user) do
     %User{
       username: "my-test-username#{System.unique_integer()}",
@@ -37,7 +38,7 @@ defmodule ResourceManager.Factory do
 
   def build(:public_key) do
     %PublicKey{
-      value: get_priv_public_key()
+      value: get_public_key()
     }
   end
 
@@ -62,43 +63,60 @@ defmodule ResourceManager.Factory do
     }
   end
 
-  @doc false
+  @doc "Returns the a model struct with the given attributes"
+  @spec build(factory_name :: atom(), attributes :: Keyword.t()) :: struct()
   def build(factory_name, attributes) when is_atom(factory_name) and is_list(attributes) do
     factory_name
     |> build()
     |> struct!(attributes)
   end
 
-  @doc false
+  @doc "Inserts a model with the given attributes on database"
+  @spec insert!(factory_name :: atom(), attributes :: Keyword.t()) :: struct()
   def insert!(factory_name, attributes \\ []) when is_atom(factory_name) do
     factory_name
     |> build(attributes)
     |> Repo.insert!()
   end
 
-  @doc false
+  @doc "Inserts a list of the given model on database"
+  @spec insert_list!(
+          factory_name :: atom(),
+          count :: integer(),
+          attributes :: Keyword.t()
+        ) :: list(struct())
   def insert_list!(factory_name, count \\ 10, attributes \\ []) when is_atom(factory_name),
     do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
 
-  @doc false
+  @doc "Returns the given password hashed using the selected algorithm"
+  @spec gen_hashed_password(
+          password :: String.t(),
+          algorithm :: :argon2 | :bcrypt | :pbkdf2
+        ) :: String.t()
   def gen_hashed_password(password \\ @default_password, alg \\ :argon2)
-  def gen_hashed_password(password, :argon2), do: Argon2.hash_pwd_salt(password)
-  def gen_hashed_password(password, :bcrypt), do: Bcrypt.hash_pwd_salt(password)
-  def gen_hashed_password(password, :pbkdf2), do: Pbkdf2.hash_pwd_salt(password)
 
-  @doc false
-  def get_priv_public_key do
-    :resource_manager
-    |> :code.priv_dir()
-    |> Path.join("/keys/resource_manager_key.pub")
+  def gen_hashed_password(password, :argon2) when is_binary(password),
+    do: Argon2.hash_pwd_salt(password)
+
+  def gen_hashed_password(password, :bcrypt) when is_binary(password),
+    do: Bcrypt.hash_pwd_salt(password)
+
+  def gen_hashed_password(password, :pbkdf2) when is_binary(password),
+    do: Pbkdf2.hash_pwd_salt(password)
+
+  @doc "Returns the mocked public key"
+  @spec get_public_key() :: String.t()
+  def get_public_key do
+    File.cwd!()
+    |> Path.join("/test/support/mocks/keys/public_key.pub")
     |> File.read!()
   end
 
-  @doc false
-  def get_priv_private_key do
-    :resource_manager
-    |> :code.priv_dir()
-    |> Path.join("/keys/resource_manager_key.pem")
+  @doc "Returns the mocked private key"
+  @spec get_private_key() :: String.t()
+  def get_private_key do
+    File.cwd!()
+    |> Path.join("/test/support/mocks/keys/private_key.pem")
     |> File.read!()
   end
 end

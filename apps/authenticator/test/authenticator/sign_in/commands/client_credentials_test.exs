@@ -106,9 +106,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
     test "succeeds using client_assertions and generates an access_token" do
       scopes = RF.insert_list!(:scope, 3)
       app = RF.insert!(:client_application, grant_flows: ["client_credentials"])
-      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
 
-      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+      signer = Joken.Signer.create("RS256", %{"pem" => get_private_key()})
 
       client_assertion =
         ClientAssertion.generate_and_sign!(
@@ -144,9 +144,9 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
     test "succeeds using client_assertions and generates a refresh_token" do
       scopes = RF.insert_list!(:scope, 3)
       app = RF.insert!(:client_application, grant_flows: ["client_credentials", "refresh_token"])
-      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
 
-      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+      signer = Joken.Signer.create("RS256", %{"pem" => get_private_key()})
 
       client_assertion =
         ClientAssertion.generate_and_sign!(
