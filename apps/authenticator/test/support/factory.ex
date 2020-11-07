@@ -6,7 +6,8 @@ defmodule Authenticator.Factory do
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
   alias Authenticator.SignIn.Schemas.{ApplicationAttempt, UserAttempt}
 
-  @doc false
+  @doc "Builds a default struct from the requested model"
+  @spec build(model :: atom()) :: struct()
   def build(:session) do
     jti = Ecto.UUID.generate()
 
@@ -51,50 +52,60 @@ defmodule Authenticator.Factory do
     }
   end
 
-  @doc false
+  @doc "Returns the a model struct with the given attributes"
+  @spec build(factory_name :: atom(), attributes :: Keyword.t()) :: struct()
   def build(factory_name, attributes) when is_atom(factory_name) and is_list(attributes) do
     factory_name
     |> build()
     |> struct!(attributes)
   end
 
-  @doc false
+  @doc "Inserts a model with the given attributes on database"
+  @spec insert!(factory_name :: atom(), attributes :: Keyword.t()) :: struct()
   def insert!(factory_name, attributes \\ []) when is_atom(factory_name) do
     factory_name
     |> build(attributes)
     |> Repo.insert!()
   end
 
-  @doc false
+  @doc "Inserts a list of the given model on database"
+  @spec insert_list!(
+          factory_name :: atom(),
+          count :: integer(),
+          attributes :: Keyword.t()
+        ) :: list(struct())
   def insert_list!(factory_name, count \\ 10, attributes \\ []) when is_atom(factory_name),
     do: Enum.map(0..count, fn _ -> insert!(factory_name, attributes) end)
 
-  @doc false
-  def build_access_token(claims), do: AccessToken.generate_and_sign(claims)
+  @doc "Returns an mocked access token using the given claims"
+  @spec build_access_token(claims :: map()) :: {:ok, token :: String.t(), claims :: map()}
+  def build_access_token(claims) when is_map(claims), do: AccessToken.generate_and_sign(claims)
 
-  @doc false
-  def build_refresh_token(claims), do: RefreshToken.generate_and_sign(claims)
+  @doc "Returns an mocked refresh token using the given claims"
+  @spec build_refresh_token(claims :: map()) :: {:ok, token :: String.t(), claims :: map()}
+  def build_refresh_token(claims) when is_map(claims), do: RefreshToken.generate_and_sign(claims)
 
-  @doc false
+  @doc "Returns an default token expiration"
+  @spec default_expiration() :: NaiveDateTime.t()
   def default_expiration do
     NaiveDateTime.utc_now()
     |> NaiveDateTime.truncate(:second)
     |> NaiveDateTime.add(60 * 60 * 24, :second)
   end
 
-  @doc false
-  def get_priv_public_key do
-    :authenticator
-    |> :code.priv_dir()
-    |> Path.join("/keys/authenticator_key.pub")
+  @doc "Returns the mocked public key"
+  @spec get_public_key() :: String.t()
+  def get_public_key do
+    File.cwd!()
+    |> Path.join("/test/support/mocks/keys/public_key.pub")
     |> File.read!()
   end
 
-  @doc false
-  def get_priv_private_key do
-    :authenticator
-    |> :code.priv_dir()
-    |> Path.join("/keys/authenticator_key.pem")
+  @doc "Returns the mocked private key"
+  @spec get_private_key() :: String.t()
+  def get_private_key do
+    File.cwd!()
+    |> Path.join("/test/support/mocks/keys/private_key.pem")
     |> File.read!()
   end
 end

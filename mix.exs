@@ -52,8 +52,7 @@ defmodule WatcherEx.MixProject do
       main: "WatcherEx",
       extras: ["README.md"],
       deps: [
-        ecto_sql: "https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.html",
-        argon2_elixir: "https://hexdocs.pm/argon2_elixir/api-reference.html"
+        ecto_sql: "https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.html"
       ]
     ]
   end
@@ -61,8 +60,8 @@ defmodule WatcherEx.MixProject do
   defp dialyzer do
     [
       plt_add_apps: [:ex_unit],
-      plt_core_path: "_build/plts",
-      plt_file: {:no_warn, "_build/plts/watcher_ex.plt"}
+      plt_core_path: "dialyzer/",
+      plt_file: {:no_warn, "_dialyzer/watcher_ex.plt"}
     ]
   end
 

@@ -129,11 +129,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
       app = RF.insert!(:client_application)
-      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
-      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+      signer = Joken.Signer.create("RS256", %{"pem" => get_private_key()})
 
       client_assertion =
         ClientAssertion.generate_and_sign!(
@@ -177,11 +177,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
       app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
-      public_key = RF.insert!(:public_key, client_application: app, value: get_priv_public_key())
+      public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
-      signer = Joken.Signer.create("RS256", %{"pem" => get_priv_private_key()})
+      signer = Joken.Signer.create("RS256", %{"pem" => get_private_key()})
 
       client_assertion =
         ClientAssertion.generate_and_sign!(

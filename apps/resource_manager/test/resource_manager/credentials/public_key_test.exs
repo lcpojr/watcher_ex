@@ -17,7 +17,7 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
 
       params = %{
         client_application_id: client_application.id,
-        value: get_priv_public_key()
+        value: get_public_key()
       }
 
       assert {:ok, %PublicKey{id: id} = public_key} = PublicKeys.create(params)
@@ -32,7 +32,7 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
 
   describe "#{PublicKeys}.update/2" do
     test "succeed if params are valid", ctx do
-      value = get_priv_public_key()
+      value = get_public_key()
 
       assert {:ok, %PublicKey{id: id, value: ^value} = public_key} =
                PublicKeys.update(ctx.public_key, %{value: value})
@@ -47,7 +47,7 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
 
     test "raises if public_key does not exist" do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
-        PublicKeys.update(%PublicKey{}, %{value: get_priv_public_key()})
+        PublicKeys.update(%PublicKey{}, %{value: get_public_key()})
       end
     end
   end
