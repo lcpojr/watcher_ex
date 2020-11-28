@@ -40,9 +40,18 @@ config :authenticator, Authenticator.Sessions.Cache, n_shards: 2, gc_interval: 3
 
 config :authenticator, Authenticator.Application,
   children: [
+    Authenticator.Repo,
     Authenticator.Sessions.Cache,
     Authenticator.Sessions.Manager
   ]
+
+config :authenticator, Authenticator.Repo,
+  database: "watcher_ex_#{Mix.env()}",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  port: 5432,
+  pool_size: 10
 
 #############
 # Authorizer
