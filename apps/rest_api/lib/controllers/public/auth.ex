@@ -2,6 +2,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   @moduledoc false
 
   use RestAPI.Controller, :controller
+  use RestAPI.Swagger.AuthOperations
 
   alias RestAPI.Ports.Authenticator, as: Commands
   alias RestAPI.Views.Public.SignIn

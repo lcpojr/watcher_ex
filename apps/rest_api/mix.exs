@@ -30,7 +30,7 @@ defmodule RestAPI.MixProject do
   def application do
     [
       mod: {RestAPI.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :phoenix_swagger]
     ]
   end
 
@@ -54,6 +54,10 @@ defmodule RestAPI.MixProject do
 
       # Validations
       {:ecto_sql, "~> 3.4"},
+
+      # Docs
+      {:phoenix_swagger, "~> 0.8"},
+      {:ex_json_schema, "~> 0.5"},
 
       # Tools
       {:junit_formatter, "~> 3.1", only: [:test]},

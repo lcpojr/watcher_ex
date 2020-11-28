@@ -2,6 +2,7 @@ import Config
 
 config :logger, :console, format: "$metadata[$level] $time $message\n", handle_sasl_reports: true
 config :phoenix, :json_library, Jason
+config :phoenix_swagger, json_library: Jason
 
 # This is just for test purposes and should change in near future
 config :joken, default_signer: "secret"
@@ -15,9 +16,9 @@ config :resource_manager, ecto_repos: [ResourceManager.Repo]
 config :resource_manager, ResourceManager.Application,
   children: [
     ResourceManager.Repo,
-    # ResourceManager.Credentials.BlocklistPasswordCache,
-    # ResourceManager.Credentials.BlocklistPasswordManager,
-    # ResourceManager.Identities.Manager
+    ResourceManager.Credentials.BlocklistPasswordCache,
+    ResourceManager.Credentials.BlocklistPasswordManager,
+    ResourceManager.Identities.Manager
   ]
 
 config :resource_manager, ResourceManager.Repo,
@@ -41,8 +42,8 @@ config :authenticator, Authenticator.Sessions.Cache, n_shards: 2, gc_interval: 3
 config :authenticator, Authenticator.Application,
   children: [
     Authenticator.Repo,
-    # Authenticator.Sessions.Cache
-    # Authenticator.Sessions.Manager
+    Authenticator.Sessions.Cache,
+    Authenticator.Sessions.Manager
   ]
 
 config :authenticator, Authenticator.Repo,
@@ -71,5 +72,13 @@ config :rest_api, RestAPI.Application, children: [RestAPI.Telemetry, RestAPI.End
 config :rest_api, RestAPI.Ports.Authenticator, domain: Authenticator
 config :rest_api, RestAPI.Ports.Authorizer, domain: Authorizer
 config :rest_api, RestAPI.Ports.ResourceManager, domain: ResourceManager
+
+config :rest_api, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/swagger.json" => [
+      router: RestAPI.Routers.Default,
+      endpoint: RestAPI.Endpoint
+    ]
+  }
 
 import_config "#{Mix.env()}.exs"
