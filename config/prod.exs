@@ -7,13 +7,23 @@ config :logger, level: :info
 ###################
 
 config :resource_manager, ResourceManager.Repo,
-  url: System.fetch_env!("DATABASE_URL"),
-  pool_size: "DATABASE_POOL_SIZE" |> System.fetch_env!() |> String.to_integer()
+  # url: System.fetch_env!("DATABASE_URL"),
+  database: System.fetch_env!("DATABASE_NAME"),
+  username: System.fetch_env!("DATABASE_USERNAME"),
+  password: System.fetch_env!("DATABASE_PASSWORD"),
+  hostname: System.fetch_env!("DATABASE_HOSTNAME"),
+  port: System.fetch_env!("DATABASE_PORT"),
+  pool_size: String.to_integer(System.fetch_env!("DATABASE_POOL_SIZE"))
 
 ################
 # Authenticator
 ################
 
 config :authenticator, Authenticator.Repo,
-  url: System.fetch_env!("DATABASE_URL"),
-  pool_size: "DATABASE_POOL_SIZE" |> System.fetch_env!() |> String.to_integer()
+  # url: System.fetch_env!("DATABASE_URL"),
+  database: System.fetch_env!("DATABASE_NAME"),
+  username: System.fetch_env!("DATABASE_USERNAME"),
+  password: System.fetch_env!("DATABASE_PASSWORD"),
+  hostname: System.fetch_env!("DATABASE_HOSTNAME"),
+  port: System.fetch_env!("DATABASE_PORT"),
+  pool_size: String.to_integer(System.fetch_env!("DATABASE_POOL_SIZE"))
