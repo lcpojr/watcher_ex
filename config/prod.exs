@@ -7,7 +7,6 @@ config :logger, level: :info
 ###################
 
 config :resource_manager, ResourceManager.Repo,
-  # url: System.fetch_env!("DATABASE_URL"),
   database: System.fetch_env!("DATABASE_NAME"),
   username: System.fetch_env!("DATABASE_USERNAME"),
   password: System.fetch_env!("DATABASE_PASSWORD"),
@@ -20,7 +19,6 @@ config :resource_manager, ResourceManager.Repo,
 ################
 
 config :authenticator, Authenticator.Repo,
-  # url: System.fetch_env!("DATABASE_URL"),
   database: System.fetch_env!("DATABASE_NAME"),
   username: System.fetch_env!("DATABASE_USERNAME"),
   password: System.fetch_env!("DATABASE_PASSWORD"),
