@@ -19,5 +19,5 @@ defmodule RestAPI.Endpoint do
   plug Plug.Head
 
   # Routers
-  plug RestAPI.Routers.Public
+  plug RestAPI.Routers.Default
 end
