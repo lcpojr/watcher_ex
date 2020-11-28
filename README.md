@@ -1,6 +1,6 @@
 # WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
 
-**This is a work in progress and every contribution is welcome :)**
+WatcherEx is an Oauth2 provider made entirely in elixir.
 
 ## Requirements
 

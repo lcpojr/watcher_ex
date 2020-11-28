@@ -1,10 +1,17 @@
-use Mix.Config
+import Config
 
 config :logger, level: :warn
 config :ex_unit, capture_log: true
 config :argon2_elixir, t_cost: 1, m_cost: 8
 config :bcrypt_elixir, log_rounds: 1
 config :pbkdf2_elixir, rounds: 1
+
+config :junit_formatter,
+  report_file: "junit_report.xml",
+  report_dir: "/reports/",
+  print_report_file: true,
+  prepend_project_name?: true,
+  include_filename?: true
 
 ###################
 # RESOURCE MANAGER
