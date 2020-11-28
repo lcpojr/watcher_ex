@@ -1,10 +1,12 @@
 defmodule RestAPI.MixProject do
   use Mix.Project
 
+  @version_file "../../VERSION.txt"
+
   def project do
     [
       app: :rest_api,
-      version: "0.1.0",
+      version: version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -17,6 +19,12 @@ defmodule RestAPI.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
     ]
+  end
+
+  defp version do
+    @version_file
+    |> File.read!()
+    |> String.trim()
   end
 
   def application do
@@ -48,6 +56,7 @@ defmodule RestAPI.MixProject do
       {:ecto_sql, "~> 3.4"},
 
       # Tools
+      {:junit_formatter, "~> 3.1", only: [:test]},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},

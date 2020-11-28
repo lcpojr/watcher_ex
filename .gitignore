@@ -4,14 +4,17 @@
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 
-# The directory Mix downloads your dependencies sources to.
-/deps/
-
 # The directory where the files will be saved on every build.
 /dialyzer/
 
+# The directory Mix downloads your dependencies sources to.
+/deps/
+
 # Where third-party dependencies like ExDoc output generated docs.
 /doc/
+
+# Releases enviroments and configurations
+/rel/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
