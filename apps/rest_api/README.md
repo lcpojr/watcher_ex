@@ -16,22 +16,22 @@ To generate the client assertions follow the exemple bellow (in the project iex)
 ```elixir
 signer = Joken.Signer.create("RS256", %{"pem" => "YOUR_PRIVATE_KEY_HERE"})
 
-Authenticator.Sessions.Tokens.ClientAssertion.generate_and_sign!(%{"iss" => "YOUR_APP_CLIENT_ID", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
+Authenticator.Sessions.Tokens.ClientAssertion.generate_and_sign!(%{"iss" => "22ae27f0-f77e-473f-b460-62494b76844d", "aud" => "WatcherEx", "typ" => "Bearer"}, signer)
 ```
 
 Then you can try out the request using:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
-    -d '{"username":"admin", "password":"admin222", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDIzNTY4NTMsImlhdCI6MTYwMjM0OTY1MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm91YjExOWNrdDgxNHFybDRvMDAwNmwxIiwibmJmIjoxNjAyMzQ5NjUzLCJ0eXAiOiJCZWFyZXIifQ.Hp8XCLjAQXnS3LrCPVNMvDfd4TKZcDL8CaPhVqtMU_jZ08yJmz3YKIrPyHclI2GnXY-Ii-KfkMJrcWj93VisJlf514ft3fRkqGC-MRfCdDyIWDOjhwIS1-ckn35ej0PxWK2QbPnqv0wIHYqdVpXBdDnF0xaZk_KX_nb4obEx6K5soiewieWDO-PZtgqQZAHKrsKO83kiM3rPeGia1FLvMy2mY7SE7g2fsbK0_Ik_h-MtQ9lTn0dC7uUGYmAGse82MyMNLVzeW2FezVLvoFuQ9yA9VlKNtl-VhXQ5kEdpzSCSUhFYzUOgR_U09U2AI6AegsybR_MEFdGGSHfb7l_m6V44I1LPhi-0LOdOgbsfo_g_uO7zrGI9nMhlsJjwgRUy50ONDQjkzlYTYjYSR-EBqS_ulwG8_keNG93JPM662z7h2o15AfQmZ8dISi4nPR_CeWZZ0gaKunhstsGopI8a9JalsNySVdar84RP6tvxrAdhr7nS37D5FE5_gylB_dT7hJ15DeAfZ34h-jX_v2VqinlWf3DwWuEYfwKHb7afGIB-udcN-cMDI_WrC6WO_SU7OV2PquQ43MYB-79wHVqaqGmDV3UrhsfbBok7iGDs1yhsUGKrp2sTPEz41epfUrH4K81qEkRSdgDrQMyDbq9En9gtqFCJeWnYIuhqFjhS_v4", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
+    -d '{"username":"admin", "password":"admin", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "22ae27f0-f77e-473f-b460-62494b76844d", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDY1OTc2OTgsImlhdCI6MTYwNjU5MDQ5OCwiaXNzIjoiMjJhZTI3ZjAtZjc3ZS00NzNmLWI0NjAtNjI0OTRiNzY4NDRkIiwianRpIjoiMnA1czMydjg4MGU4YmhuMHBjMDAwMjYxIiwibmJmIjoxNjA2NTkwNDk4LCJ0eXAiOiJCZWFyZXIifQ.aEpUjdqJcHYLA7nTjeNcpg0RnIn05qvymzJ26CwrmU9R8JYt0fZQ3A2GVoD7fQJudXvR4plT_ojwH0NrP3boFgDumr3HyHmk5HuoxyvD0KU5Yx9JMlhV0DKo7xzjQfq_vEy7rtOxEB-OGWFo7pEd5DSqXMvcparNGUwtgLFaZMPqFvAl-U1UzVMLhQ1P1aXAAXKtW_OL98w1rVl09sfeYQycUhYWmkfwbXI4EYqi5lbEhxhtuGfV95g3nq2bJpHvESatjPTJqxOdHn0NHi1JUN3_JSwReuvCHpJaL2xOreQADebEIioBwwwJxUCIbgjqUj1YHiUGilTr3dJOetFU8hlujtnWUaVFZFTlZh0sHxNXX1dDFkKRHpjj_Jsv5rP0TAd77Tys9xAaugJb35IL47fnVOqK_e6adTo3YItLm9kjNM915fdkHVCp411nHcV6P9lpmw2Z3yLqfcsgXH10Bx4xcT_sEF-KpoT3LzwndjGLMwJ0KM4jucnPhlVQRADaK7dw4V-DV24hzd2uOBUQkMidYmAjx3FoQPt0M60QWmcFW1dDsd1tv9hwEF9zBcNKoNpG09DhBpglIrlxOEoQ9FiJ0hAfOU-jRay5cT7x7NdL02rp0ctKBsxD9m151f_pZxaDAY2TnD2j1XcsAZO7rdRw9u6_oOeFjTByLJ0wsk4", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
 ```
 
 
 **Request (Client secret)**:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
     -d '{"username":"admin", "password":"admin", "grant_type":"password", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_secret": "$2b$12$BSrTLJnb0Vfuk1iiSzw3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"}'
 ```
@@ -52,7 +52,7 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
 **Request**:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
     -d '{"refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMzM4MjM2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210OG5vbjRkZHQ5YzgwMDAxcTEiLCJuYmYiOjE2MDA3OTAzNjcsInR5cCI6IkJlYXJlciJ9.U010q6KUB04K8rIU9rVnW_AOI1q5XSXSGIYdL1moaOA", "grant_type": "refresh_token"}'
 ```
@@ -83,7 +83,7 @@ Authenticator.Sessions.Tokens.ClientAssertion.generate_and_sign!(%{"iss" => "YOU
 Then you can try out the request using:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
     -d '{"grant_type":"client_credentials", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_assertion": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps", "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"}'
 ```
@@ -91,7 +91,7 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
 **Request (client secret)**:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/token \
     -H "Content-Type: application/json" \
     -d '{"grant_type":"client_credentials", "scope":"admin:read admin:write", "client_id": "2e455bb1-0604-4812-9756-36f7ab23b8d9", "client_secret": "$2b$12$BSrTLJnb0Vfuk1iiSzw3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"}'
 ```
@@ -112,7 +112,7 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/token \
 **Request**:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/logout-all-sessions \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/logout-all-sessions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMTE1NzEyNCwiaWF0IjoxNjAxMTQ5OTI0LCJpZGVudGl0eSI6InVzZXIiLCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3M2cW5zN2ZxYjFvOGhrZDQwMDAxNTQiLCJuYmYiOjE2MDExNDk5MjQsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjIyZTk2MTA4LThkZDYtNGZiZS1iMjExLTY4OTM0YmJhNWJkNyIsInR0bCI6NzIwMCwidHlwIjoiQmVhcmVyIn0.EuIJtx_AGLrL2O7E7cBfsvEQymalO_A5-J0BX4PODwk"
 ```
@@ -126,7 +126,7 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/logout-al
 **Request**:
 
 ```sh
-curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/logout \
+curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/logout \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDgyMzMxNiwiaWF0IjoxNjAwODE2MTE2LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JqcmhuMHNxdDlncjk3ZXMwMDAzMDMiLCJuYmYiOjE2MDA4MTYxMTYsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.NxFH6MIOFGc54UR9EVLPFB0m-6b-YMyXhZrOuGxErdw"
 ```
@@ -140,7 +140,7 @@ curl -X POST http://localhost:4000/api/v1/auth/protocol/openid-connect/logout \
 **Request**:
 
 ```sh
-curl -X POST http://localhost:4000/admin/v1/users \
+curl -X POST https://watcherex.gigalixirapp.com/admin/v1/users \
     -H "Content-Type: application/json" \
 -d '{"username":"yashu", "password":"lcpo", "scopes":["6a3a3771-9f56-4254-9497-927e441dacfc" "8a235ba0-a827-4593-92c9-6248bef4fa06"]}'
 ```
