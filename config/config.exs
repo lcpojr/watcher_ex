@@ -15,9 +15,9 @@ config :resource_manager, ecto_repos: [ResourceManager.Repo]
 config :resource_manager, ResourceManager.Application,
   children: [
     ResourceManager.Repo,
-    ResourceManager.Credentials.BlocklistPasswordCache,
-    ResourceManager.Credentials.BlocklistPasswordManager,
-    ResourceManager.Identities.Manager
+    # ResourceManager.Credentials.BlocklistPasswordCache,
+    # ResourceManager.Credentials.BlocklistPasswordManager,
+    # ResourceManager.Identities.Manager
   ]
 
 config :resource_manager, ResourceManager.Repo,
@@ -41,8 +41,8 @@ config :authenticator, Authenticator.Sessions.Cache, n_shards: 2, gc_interval: 3
 config :authenticator, Authenticator.Application,
   children: [
     Authenticator.Repo,
-    Authenticator.Sessions.Cache,
-    Authenticator.Sessions.Manager
+    # Authenticator.Sessions.Cache
+    # Authenticator.Sessions.Manager
   ]
 
 config :authenticator, Authenticator.Repo,
