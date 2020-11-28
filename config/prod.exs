@@ -8,7 +8,7 @@ config :logger, level: :info
 
 config :resource_manager, ResourceManager.Repo,
   url: System.fetch_env!("DATABASE_URL"),
-  pool_size: System.fetch_env!("DATABASE_POOL_SIZE")
+  pool_size: "DATABASE_POOL_SIZE" |> System.fetch_env!() |> String.to_integer()
 
 ################
 # Authenticator
@@ -16,4 +16,4 @@ config :resource_manager, ResourceManager.Repo,
 
 config :authenticator, Authenticator.Repo,
   url: System.fetch_env!("DATABASE_URL"),
-  pool_size: System.fetch_env!("DATABASE_POOL_SIZE")
+  pool_size: "DATABASE_POOL_SIZE" |> System.fetch_env!() |> String.to_integer()
