@@ -64,8 +64,6 @@ defmodule RestAPI.Routers.Default do
       securityDefinitions: %{
         Bearer: %{
           type: "apiKey",
-          scheme: "bearer",
-          bearerFormat: "JWT",
           name: "Authorization",
           description: "API Token must be provided via `Authorization: Bearer ` header",
           in: "header"
