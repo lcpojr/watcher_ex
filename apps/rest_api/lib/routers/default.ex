@@ -22,7 +22,7 @@ defmodule RestAPI.Routers.Default do
 
   # This should be used only for documentation purposes
   # When running in production it should be disabled
-  scope "/api/swagger" do
+  scope "/api/v1/swagger" do
     forward "/", SwaggerUI, otp_app: :rest_api, swagger_file: "swagger.json"
   end
 

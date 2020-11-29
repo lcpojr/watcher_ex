@@ -1,5 +1,11 @@
 import Config
 
+config :resource_manager, ResourceManager.Application,
+  children: [
+    ResourceManager.Repo,
+    ResourceManager.Identities.Manager
+  ]
+
 # You can change the endpoint configurations the way it suits you better
 # This is just for us to have an exemple running on gigalixir
 # https://watcherex.gigalixirapp.com/
