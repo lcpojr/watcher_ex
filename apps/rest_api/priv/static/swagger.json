@@ -1,0 +1,262 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "definitions": {},
+  "host": "localhost:4000",
+  "info": {
+    "contact": {
+      "email": "lcpojr@gmail.com",
+      "name": "Luiz Carlos"
+    },
+    "description": "An Oauth2 and Resource server interelly in elixir.",
+    "termsOfService": "Open for public",
+    "title": "WatcherEx",
+    "version": "1.0"
+  },
+  "paths": {
+    "/admin/v1/users/": {
+      "post": {
+        "description": "",
+        "operationId": "RestAPI.Controller.Admin.User.create",
+        "parameters": [
+          {
+            "description": "Request Body",
+            "in": "body",
+            "name": "attributes",
+            "required": false,
+            "schema": {
+              "properties": {
+                "password": {
+                  "description": "User Password credential",
+                  "example": "myPass@rd123",
+                  "required": true,
+                  "type": "string"
+                },
+                "scopes": {
+                  "description": "List of scopes",
+                  "example": [
+                    "admin:read",
+                    "admin:write"
+                  ],
+                  "required": true,
+                  "type": "array"
+                },
+                "username": {
+                  "description": "User email or nickname",
+                  "example": "my_admin_username",
+                  "required": true,
+                  "type": "string"
+                }
+              },
+              "title": "User creation body",
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SUCCESS",
+            "schema": {
+              "properties": {
+                "id": {
+                  "description": "User identifier",
+                  "example": "497ea1c2-a30e-4b86-8f3b-0c860b8e9e79",
+                  "type": "string"
+                },
+                "inserted_at": {
+                  "description": "When the identity was created",
+                  "example": "2020-11-29 13:29:06.947381",
+                  "type": "string"
+                },
+                "is_admin": {
+                  "description": "Represents if a user has access to admin api or not",
+                  "example": true,
+                  "type": "boolean"
+                },
+                "status": {
+                  "description": "Represents if a user is active or not",
+                  "example": "active",
+                  "type": "string"
+                },
+                "username": {
+                  "description": "User email or nickname",
+                  "example": "my_admin_username",
+                  "type": "string"
+                }
+              },
+              "title": "Sign in response",
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Creates a new user identity",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/api/v1/auth/protocol/openid-connect/logout": {
+      "post": {
+        "description": "",
+        "operationId": "RestAPI.Controllers.Public.Auth.sign_out",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "NO CONTENT"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Sign out the given session",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/protocol/openid-connect/logout-all-sessions": {
+      "post": {
+        "description": "",
+        "operationId": "RestAPI.Controllers.Public.Auth.sign_out_all_sessions",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "NO CONTENT"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Sign out all sessions",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/protocol/openid-connect/token": {
+      "post": {
+        "description": "",
+        "operationId": "RestAPI.Controllers.Public.Auth.sign_in",
+        "parameters": [
+          {
+            "description": "Request Body",
+            "in": "body",
+            "name": "attributes",
+            "required": false,
+            "schema": {
+              "properties": {
+                "client_assertion": {
+                  "description": "Required while using keys",
+                  "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps",
+                  "type": "string"
+                },
+                "client_assertion_type": {
+                  "description": "Required while using keys",
+                  "example": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                  "type": "string"
+                },
+                "client_id": {
+                  "description": "Application Client ID",
+                  "example": "2e455bb1-0604-4812-9756-36f7ab23b8d9",
+                  "required": true,
+                  "type": "string"
+                },
+                "client_secret": {
+                  "description": "Only used when we don't have access to the keys",
+                  "example": "$2b$12$BSrTLJnb0Vfuk1iiSzw3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe",
+                  "type": "string"
+                },
+                "grant_type": {
+                  "description": "Represent the authentication flow to be used",
+                  "example": "password",
+                  "type": "string"
+                },
+                "password": {
+                  "description": "Required on Resource Owner Flow",
+                  "example": "admin",
+                  "type": "string"
+                },
+                "scope": {
+                  "description": "Represent the scopes an subject is requesting",
+                  "example": "admin:read admin:write",
+                  "type": "string"
+                },
+                "username": {
+                  "description": "Required on Resource Owner Flow",
+                  "example": "admin",
+                  "type": "string"
+                }
+              },
+              "title": "Sign in body",
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SUCCESS",
+            "schema": {
+              "properties": {
+                "access_token": {
+                  "description": "The access token that should be used on API",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDc5NzU2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJuYmYiOjE2MDA3OTAzNjcsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.LWniDC38j2kW8ER8kgDnVVJO0eOXWGNq0KqXooMl-5s",
+                  "type": "string"
+                },
+                "expires_in": {
+                  "description": "When the access_token will be expired",
+                  "example": 7200000,
+                  "type": "integer"
+                },
+                "refresh_token": {
+                  "description": "The refresh token that should be used to get a new access_token",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdGkiOiIyb3JpY210ODQ3NTg1ZHQ5YzgwMDAxcDEiLCJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMzM4MjM2NywiaWF0IjoxNjAwNzkwMzY3LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JpY210OG5vbjRkZHQ5YzgwMDAxcTEiLCJuYmYiOjE2MDA3OTAzNjcsInR5cCI6IkJlYXJlciJ9.U010q6KUB04K8rIU9rVnW_AOI1q5XSXSGIYdL1moaOA",
+                  "type": "string"
+                },
+                "token_type": {
+                  "description": "The type of the access_token",
+                  "example": "Bearer",
+                  "type": "string"
+                }
+              },
+              "title": "Sign in response",
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Sign in the identity",
+        "tags": [
+          "Auth"
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "securityDefinitions": {
+    "Bearer": {
+      "bearerFormat": "JWT",
+      "description": "API Token must be provided via `Authorization: Bearer ` header",
+      "in": "header",
+      "name": "Authorization",
+      "scheme": "bearer",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0",
+  "tags": []
+}
