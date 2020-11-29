@@ -2,6 +2,7 @@ defmodule RestAPI.Controller.Admin.User do
   @moduledoc false
 
   use RestAPI.Controller, :controller
+  use RestAPI.Swagger.UserOperations
 
   alias RestAPI.Ports.{Authenticator, ResourceManager}
   alias RestAPI.Views.Admin.User

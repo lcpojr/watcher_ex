@@ -15,7 +15,7 @@ defmodule RestAPI.Swagger.AuthOperations do
       @client_secret "$2b$12$BSrTLJnb0Vfuk1iiSzw3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"
       @client_assertion "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJXYXRjaGVyRXgiLCJleHAiOjE2MDEyMzgwOTMsImlhdCI6MTYwMTIzMDg5MywiaXNzIjoiMmU0NTViYjEtMDYwNC00ODEyLTk3NTYtMzZmN2FiMjNiOGQ5IiwianRpIjoiMm9zYmUwc3JrbTMyc2tvN2ZrMDAwMnAzIiwibmJmIjoxNjAxMjMwODkzLCJ0eXAiOiJCZWFyZXIifQ.SDUlLMO9kVLfxyRRJUCCVPpz2fcjUtxC1K3IJPa2NrBp7S-IUGuZx9965M09jFJOZrNzqEC9VRZb9KqlZS2T0bGUg3pk8R91oqOgnPOvXEQ8bjTKuvqIv7K7hKaAARxRTgBf-o87quUoVoZzepLzfmJdnDVXy0QoFIO7_SYe4zmq3mrrvHM5Kaypgf0JMiOZORr2kEnk0zEkPoIvqL8psTrLlaUHr-cn3l3F7eGARhHijOTXoFXTH4BFjJzsQJRKcz1cyzUQ64Y02JWeYsbfi1higF14lGnFTduuVwMpqa7Wu5xK9FhmR1mmlqqFgD6NVeiDxoDcAzhhDbQWdKuuAyqyr67uYfY5qeeudoKYyJcjvfE0c1iMLpEQAlZDK_HjoChBEORcTcvbsCD-75y2lJhqsrW0cTWoqq0YTXU3SHvdewEZto8AEaQMKHnGozQQEkeF7rOFOJF7P_LX2LV7JbtxIl8RZPvjNNF6F6VHy_DJTVoJJNbIRRm47v8fXBBej60_76XZmxG_FtgZBevVgINq_lnYf2nb_2RybxyzRxfC4pRvTh6Og8mZy5fcgYIa4Yq3eXdDVAVxrFJWrJqfjdPSuZbFDuq6VfiXOAd_bNqNHMLN_jiTtJlVJnS-gk9Ejot8X-kwG-UPDoAQZIfyBqMSXIqyL-qFfVR8dIX9Dps"
 
-      @sign_in_body %Schema{
+      @sign_in_request %Schema{
         type: :object,
         title: "Sign in body",
         properties: %{
@@ -102,10 +102,26 @@ defmodule RestAPI.Swagger.AuthOperations do
         summary("Sign in the identity")
 
         parameters do
-          attributes(:body, @sign_in_body, "Request Body")
+          attributes(:body, @sign_in_request, "Request Body")
         end
 
         response(200, "SUCCESS", @sign_in_response)
+      end
+
+      swagger_path :sign_out do
+        post("/api/v1/auth/protocol/openid-connect/logout")
+        summary("Sign out the given session")
+        security([%{Bearer: []}])
+
+        response(204, "NO CONTENT")
+      end
+
+      swagger_path :sign_out_all_sessions do
+        post("/api/v1/auth/protocol/openid-connect/logout-all-sessions")
+        summary("Sign out all sessions")
+        security([%{Bearer: []}])
+
+        response(204, "NO CONTENT")
       end
     end
   end
