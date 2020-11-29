@@ -3,6 +3,8 @@
 This application handles all requests on the restfull api.
 It exposes public and admin endpoints.
 
+You can check out our exemple running [here](https://watcherex.gigalixirapp.com/api/v1/swagger/index.html)
+
 ## Testing it locally
 
 Follow the `Running it locally` guide on project `README.md` in order to know how to install all dependencies and get the server ready.
