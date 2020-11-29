@@ -249,11 +249,9 @@
   ],
   "securityDefinitions": {
     "Bearer": {
-      "bearerFormat": "JWT",
       "description": "API Token must be provided via `Authorization: Bearer ` header",
       "in": "header",
       "name": "Authorization",
-      "scheme": "bearer",
       "type": "apiKey"
     }
   },
