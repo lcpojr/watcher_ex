@@ -1,6 +1,11 @@
 # WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
 
 WatcherEx is an Oauth2 provider made entirely in elixir.
+We have an initial implementation of some oauth2 most common flows as:
+
+- [Resource Owner](https://tools.ietf.org/html/rfc6749#page-9);
+- [Refresh Token](https://tools.ietf.org/html/rfc6749#section-1.5);
+- [Client Credentials](https://tools.ietf.org/html/rfc6749#page-9);
 
 ## Requirements
 
