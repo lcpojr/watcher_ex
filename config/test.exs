@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :logger, level: :warn
 config :ex_unit, capture_log: true

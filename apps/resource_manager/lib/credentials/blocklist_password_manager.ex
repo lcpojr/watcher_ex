@@ -31,7 +31,7 @@ defmodule ResourceManager.Credentials.BlocklistPasswordManager do
   @spec start_link(args :: keyword()) :: {:ok, pid()} | :ignore | {:error, keyword()}
   def start_link(args \\ []), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
-  @doc "Checks #{__MODULE__} actual state"
+  @doc "Checks GenServer actual state"
   @spec check(process_id :: pid() | __MODULE__) :: state()
   def check(pid \\ __MODULE__), do: GenServer.call(pid, :check)
 

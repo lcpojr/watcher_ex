@@ -1,10 +1,12 @@
 defmodule Authorizer.MixProject do
   use Mix.Project
 
+  @version_file "../../VERSION.txt"
+
   def project do
     [
       app: :authorizer,
-      version: "0.1.0",
+      version: version(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -15,6 +17,12 @@ defmodule Authorizer.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls]
     ]
+  end
+
+  defp version do
+    @version_file
+    |> File.read!()
+    |> String.trim()
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -39,6 +47,7 @@ defmodule Authorizer.MixProject do
       {:plug_cowboy, "~> 2.0"},
 
       # Tools
+      {:junit_formatter, "~> 3.1", only: [:test]},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},

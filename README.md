@@ -1,6 +1,11 @@
 # WatcherEx ![Build](https://github.com/lcpojr/watcher_ex/workflows/CI/badge.svg) [![Coverage](https://coveralls.io/repos/github/lcpojr/watcher_ex/badge.svg)](https://coveralls.io/github/lcpojr/watcher_ex)
 
-**This is a work in progress and every contribution is welcome :)**
+WatcherEx is an Oauth2 provider made entirely in elixir.
+We have an initial implementation of some oauth2 most common flows as:
+
+- [Resource Owner](https://tools.ietf.org/html/rfc6749#page-9);
+- [Refresh Token](https://tools.ietf.org/html/rfc6749#section-1.5);
+- [Client Credentials](https://tools.ietf.org/html/rfc6749#page-9);
 
 ## Requirements
 
@@ -35,7 +40,7 @@ ResourceManager.Repo.all(ResourceManager.Identities.Schemas.ClientApplication) |
 
 ### Making requests
 
-Check out the [rest api guide](https://github.com/lcpojr/watcher_ex/blob/master/apps/rest_api/README.md) on the specific application `README.md`.
+Check out the [rest api guide](https://github.com/lcpojr/watcher_ex/blob/master/apps/rest_api/README.md) on the specific application `README.md` or you can check it out on or live example [here](https://watcherex.gigalixirapp.com/api/v1/swagger/index.html).
 
 ### Testing
 
