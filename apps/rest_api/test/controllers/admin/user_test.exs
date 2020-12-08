@@ -219,6 +219,40 @@ defmodule RestAPI.Controllers.Admin.User do
                |> get(@show_endpoint <> "username")
                |> json_response(201)
     end
+
+    test "if id is not an id, should return error", %{
+      conn: conn,
+      access_token: access_token,
+      claims: claims
+    } do
+      expect(AuthenticatorMock, :validate_access_token, fn token ->
+        assert access_token == token
+        {:ok, claims}
+      end)
+
+      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
+        assert claims["jti"] == jti
+        {:ok, success_session(claims)}
+      end)
+
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
+
+      expect(ResourceManagerMock, :get_identity, fn input ->
+        assert is_map(input)
+
+        {:error, {:error, :invalid_params}}
+      end)
+
+      assert %{
+               "detail" => "The given parameters are invalid",
+               "error" => "bad_request",
+               "status" => 400
+             } =
+               conn
+               |> put_req_header("authorization", "Bearer #{access_token}")
+               |> get(@show_endpoint <> "1")
+               |> json_response(400)
+    end
   end
 
   defp default_claims do
