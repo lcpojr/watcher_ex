@@ -16,14 +16,14 @@ defmodule RestAPI.Ports.ResourceManager do
   @doc "Delegates to ResourceManager.password_allowed?/1"
   @callback password_allowed?(password :: String.t()) :: boolean()
 
-  @callback get_identity(input :: String.t()) :: possible_get_identity_responses()
+  @callback get_identity(input :: map()) :: possible_get_identity_responses()
 
   @doc "Create a new identity with it's credentials"
   @spec create_identity(input :: map()) :: possible_create_identity_response()
   def create_identity(input), do: implementation().create_identity(input)
 
   @doc "Returns an user or application identity seaching by the given input"
-  @spec get_identity(input :: String.t()) :: possible_get_identity_responses()
+  @spec get_identity(input :: map()) :: possible_get_identity_responses()
   def get_identity(input), do: implementation().get_identity(input)
 
   @doc "Checks if the given password is strong enough to be used"
