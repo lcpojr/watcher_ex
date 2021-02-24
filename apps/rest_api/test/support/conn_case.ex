@@ -16,13 +16,14 @@ defmodule RestAPI.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  alias Ecto.Adapters.SQL.Sandbox
 
   using do
     quote do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import RestAPI.ConnCase
+      import RestAPI.{ConnCase, Factory}
       import Mox
 
       alias RestAPI.Router.Helpers, as: Routes
@@ -32,7 +33,13 @@ defmodule RestAPI.ConnCase do
     end
   end
 
-  setup _tags do
+  setup tags do
+    :ok = Sandbox.checkout(ResourceManager.Repo)
+
+    unless tags[:async] do
+      Sandbox.mode(ResourceManager.Repo, {:shared, self()})
+    end
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
