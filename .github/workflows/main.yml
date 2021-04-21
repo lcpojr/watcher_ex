@@ -41,7 +41,6 @@ jobs:
         if: steps.deps-cache.outputs.cache-hit != 'true'
         run: |
           mix local.hex --force
-          mix local.rebar --force
           mix deps.get
 
       - name: Compile code
