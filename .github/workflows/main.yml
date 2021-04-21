@@ -33,9 +33,7 @@ jobs:
           install-hex: false
   
       - name: Install crypto
-        run: |
-          sudo apt-get install aptitude
-          sudo aptitude install erlang-crypto
+        run: sudo aptitude install erlang-crypto
           
       - name: Restore dependencies cache
         uses: actions/cache@v2
