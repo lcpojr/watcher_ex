@@ -18,7 +18,7 @@ jobs:
     
     strategy:
       matrix:
-        elixir: [1.11]
+        elixir: [1.11.4]
         otp: [23.1]
 
     steps:
@@ -41,6 +41,7 @@ jobs:
         if: steps.deps-cache.outputs.cache-hit != 'true'
         run: |
           mix local.hex --force
+          mix local.rebar --force
           mix deps.get
 
       - name: Compile code
@@ -53,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11]
+        elixir: [1.11.4]
         otp: [23.1]
       
     steps:
@@ -127,7 +128,7 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11]
+        elixir: [1.11.4]
         otp: [23.1]
   
     services:
