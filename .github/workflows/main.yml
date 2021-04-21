@@ -27,9 +27,10 @@ jobs:
       - name: Set up Elixir
         uses: actions/setup-elixir@v1
         with:
+          install-rebar: false
+          install-hex: false
           elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
           otp-version: ${{ matrix.otp }} # Define the OTP version [required]
-          install-rebar: false
           
       - name: Restore dependencies cache
         uses: actions/cache@v2
