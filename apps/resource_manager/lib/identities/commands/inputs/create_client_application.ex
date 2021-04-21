@@ -5,23 +5,28 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateClientApplication do
 
   use ResourceManager.Input
 
+  alias ResourceManager.Credentials.Schemas.PublicKey
   alias ResourceManager.Identities.Schemas.ClientApplication
 
   @typedoc "Create client application input fields"
   @type t :: %__MODULE__{
           name: String.t(),
           description: String.t(),
-          public_key: String.t(),
-          public_key_type: String.t(),
-          public_key_format: String.t(),
           status: String.t() | nil,
           protocol: String.t() | nil,
           access_type: String.t() | nil,
-          scopes: list(String.t()) | nil
+          credential: %{
+            value: String.t(),
+            type: String.t(),
+            format: String.t()
+          },
+          permission: %{
+            scopes: list(String.t()) | nil
+          }
         }
 
-  @required [:name, :public_key, :status, :protocol, :access_type]
-  @optional [:description, :scopes]
+  @required [:name, :status, :protocol, :access_type]
+  @optional [:description]
   embedded_schema do
     # Identity
     field :name, :string
@@ -31,27 +36,43 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateClientApplication do
     field :access_type, :string, default: "confidential"
     field :grant_flows, {:array, :string}
 
-    # Credentials
-    field :public_key, :string
-    field :public_key_type, :string, default: "rsa"
-    field :public_key_format, :string, default: "pem"
+    embeds_one :credential, Credential do
+      field :value, :string
+      field :type, :string, default: "rsa"
+      field :format, :string, default: "pem"
+    end
 
-    # Permissions
-    field :scopes, {:array, :string}
+    embeds_one :permission, Permission do
+      field :scopes, {:array, :string}
+    end
   end
 
   @doc false
   def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
+    |> cast_embed(:credential, with: &changeset_credential/2)
+    |> cast_embed(:permission, with: &changeset_permission/2)
     |> validate_length(:name, min: 1)
-    |> validate_length(:public_key, min: 1)
-    |> validate_length(:public_key_type, min: 1)
-    |> validate_length(:public_key_format, min: 1)
-    |> validate_inclusion(:status, ClientApplication.possible_statuses())
-    |> validate_inclusion(:protocol, ClientApplication.possible_protocols())
-    |> validate_inclusion(:grant_flows, ClientApplication.possible_grant_flows())
-    |> validate_inclusion(:access_type, ClientApplication.possible_access_types())
+    |> validate_inclusion(:status, ClientApplication.acceptable_statuses())
+    |> validate_inclusion(:protocol, ClientApplication.acceptable_protocols())
+    |> validate_inclusion(:grant_flows, ClientApplication.acceptable_grant_flows())
+    |> validate_inclusion(:access_type, ClientApplication.acceptable_access_types())
     |> validate_required(@required)
+  end
+
+  defp changeset_credential(model, params) do
+    model
+    |> cast(params, [:value, :type, :format])
+    |> validate_length(:value, min: 1)
+    |> validate_inclusion(:type, PublicKey.acceptable_types())
+    |> validate_inclusion(:format, PublicKey.acceptable_formats())
+    |> validate_required([:value])
+  end
+
+  defp changeset_permission(model, params) do
+    model
+    |> cast(params, [:scopes])
+    |> validate_required([:scopes])
   end
 end

@@ -19,17 +19,17 @@ defmodule ResourceManager.Permissions.Commands.ConsentScope do
   @doc "Consent new scopes to the identity"
   @spec execute(identity :: identities(), scopes :: list(String.t())) :: possible_response()
   def execute(%User{} = user, scopes) when is_list(scopes) do
-    Logger.info("Consenting scopes to user #{user.id}")
+    Logger.debug("Consenting scopes to user #{user.id}")
 
     params = Enum.map(scopes, &build_params(user, &1))
 
     Multi.new()
-    |> Multi.delete_all(:remove_consent, UserScope, params)
+    |> Multi.delete_all(:remove_consent, UserScope.query(user_id: user.id))
     |> Multi.insert_all(:consent_scopes, UserScope, params, returning: true)
     |> Repo.transaction()
     |> case do
       {:ok, %{consent_scopes: {_qtd, user_scopes}}} ->
-        Logger.info("Succeeds in consenting scopes to user #{user.id}")
+        Logger.debug("Succeeds in consenting scopes to user #{user.id}")
         {:ok, user_scopes}
 
       {:error, step, reason, _changes} ->
@@ -38,18 +38,18 @@ defmodule ResourceManager.Permissions.Commands.ConsentScope do
     end
   end
 
-  def execute(%ClientApplication{} = application, scopes) when is_list(scopes) do
-    Logger.info("Consenting scopes to client application #{application.id}")
+  def execute(%ClientApplication{} = app, scopes) when is_list(scopes) do
+    Logger.debug("Consenting scopes to client application #{app.id}")
 
-    params = Enum.map(scopes, &build_params(application, &1))
+    params = Enum.map(scopes, &build_params(app, &1))
 
     Multi.new()
-    |> Multi.delete_all(:remove_consent, ClientApplicationScope, params)
+    |> Multi.delete_all(:remove_consent, ClientApplicationScope.query(client_application: app.id))
     |> Multi.insert_all(:consent_scopes, ClientApplicationScope, params, returning: true)
     |> Repo.transaction()
     |> case do
       {:ok, %{consent_scopes: {_qtd, application_scopes}}} ->
-        Logger.info("Succeeds in consenting scopes to client application #{application.id}")
+        Logger.debug("Succeeds in consenting scopes to client application #{app.id}")
         {:ok, application_scopes}
 
       {:error, step, reason, _changes} ->

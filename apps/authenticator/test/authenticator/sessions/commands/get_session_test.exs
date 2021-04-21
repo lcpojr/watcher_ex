@@ -29,8 +29,8 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
     end
 
     test "fails if parameters are empty" do
-      assert {:error, %{errors: [jti: {"All input fields are empty", []}]}} =
-               GetSession.execute(%{})
+      assert {:error, changeset} = GetSession.execute(%{})
+      assert %{jti: ["All input fields are empty"]} = errors_on(changeset)
     end
   end
 end

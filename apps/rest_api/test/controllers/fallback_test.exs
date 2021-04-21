@@ -54,7 +54,6 @@ defmodule RestAPI.Controllers.FallbackTest do
              "status" => 400,
              "error" => "bad_request",
              "response" => %{
-               "password_hash" => ["can't be blank"],
                "username" => ["can't be blank"]
              }
            } ==

@@ -4,22 +4,21 @@ defmodule RestAPI.Ports.ResourceManager do
   """
 
   @typedoc "All possible create_identity responses"
-  @type possible_create_identity_response ::
-          {:ok, struct()} | {:error, Ecto.Changeset.t() | :invalid_params}
+  @type possible_response :: {:ok, struct()} | {:error, Ecto.Changeset.t()}
 
-  @doc "Delegates to ResourceManager.create_identity/1"
-  @callback create_identity(input :: map()) :: possible_create_identity_response()
+  @doc "Delegates to ResourceManager.create_user/1"
+  @callback create_user(input :: map()) :: possible_response()
 
-  @doc "Delegates to ResourceManager.password_allowed?/1"
-  @callback password_allowed?(password :: String.t()) :: boolean()
+  @doc "Delegates to ResourceManager.create_client_application/1"
+  @callback create_client_application(input :: map()) :: possible_response()
 
-  @doc "Create a new identity with it's credentials"
-  @spec create_identity(input :: map()) :: possible_create_identity_response()
-  def create_identity(input), do: implementation().create_identity(input)
+  @doc "Create a new user identity with it's credentials"
+  @spec create_user(input :: map()) :: possible_response()
+  def create_user(input), do: implementation().create_user(input)
 
-  @doc "Checks if the given password is strong enough to be used"
-  @spec password_allowed?(password :: String.t()) :: boolean()
-  def password_allowed?(password), do: implementation().password_allowed?(password)
+  @doc "Create a new client application identity with it's credentials"
+  @spec create_client_application(input :: map()) :: possible_response()
+  def create_client_application(input), do: implementation().create_client_application(input)
 
   defp implementation do
     :rest_api

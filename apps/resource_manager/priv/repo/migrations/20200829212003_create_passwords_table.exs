@@ -6,6 +6,7 @@ defmodule ResourceManager.Repo.Migrations.CreatePasswordsTable do
       add :id, :uuid, primary_key: true
       add :password_hash, :string, null: false
       add :algorithm, :string, null: false, default: "argon2"
+      add :salt, :integer, null: false, default: 16
 
       add :user_id, references(:users, type: :uuid), null: false
 

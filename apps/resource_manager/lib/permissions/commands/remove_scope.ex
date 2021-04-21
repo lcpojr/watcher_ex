@@ -5,7 +5,6 @@ defmodule ResourceManager.Permissions.Commands.RemoveScope do
 
   require Logger
 
-  alias Ecto.Multi
   alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, UserScope}
   alias ResourceManager.Repo
@@ -19,46 +18,26 @@ defmodule ResourceManager.Permissions.Commands.RemoveScope do
   @doc "Remove scopes from the identity"
   @spec execute(identity :: identities(), scopes :: list(String.t())) :: possible_response()
   def execute(%User{} = user, scopes) when is_list(scopes) do
-    Logger.info("Removing scopes from user #{user.id}")
+    Logger.debug("Removing scopes from user #{user.id}")
 
-    params = Enum.map(scopes, &build_params(user, &1))
+    {qtd, _} =
+      [user_id: user.id, scope_id_in: scopes]
+      |> UserScope.query()
+      |> Repo.delete_all()
 
-    Multi.new()
-    |> Multi.delete_all(:remove_consent, UserScope, params)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{remove_consent: {_qtd, _any}}} ->
-        Logger.info("Succeeds in removing scopes to user #{user.id}")
-        :ok
-
-      {:error, step, reason, _changes} ->
-        Logger.error("Failed to remove scope in step #{inspect(step)}", reason: reason)
-        {:error, reason}
-    end
+    Logger.debug("Succeeds in removing scopes #{qtd} from user #{user.id}")
+    :ok
   end
 
-  def execute(%ClientApplication{} = application, scopes) when is_list(scopes) do
-    Logger.info("Removing scopes from client application #{application.id}")
+  def execute(%ClientApplication{} = app, scopes) when is_list(scopes) do
+    Logger.debug("Removing scopes from client application #{app.id}")
 
-    params = Enum.map(scopes, &build_params(application, &1))
+    {qtd, _} =
+      [client_application_id: app.id, scope_id_in: scopes]
+      |> ClientApplicationScope.query()
+      |> Repo.delete_all()
 
-    Multi.new()
-    |> Multi.delete_all(:remove_consent, ClientApplicationScope, params)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{remove_consent: {_qtd, _any}}} ->
-        Logger.info("Succeeds in removing scopes to client application #{application.id}")
-        :ok
-
-      {:error, step, reason, _changes} ->
-        Logger.error("Failed to remove scope in step #{inspect(step)}", reason: reason)
-        {:error, reason}
-    end
+    Logger.debug("Succeeds in removing scopes #{qtd} from client application #{app.id}")
+    :ok
   end
-
-  defp build_params(%User{id: user_id}, scope_id),
-    do: %{scope_id: scope_id, user_id: user_id}
-
-  defp build_params(%ClientApplication{id: client_application_id}, scope_id),
-    do: %{scope_id: scope_id, client_application_id: client_application_id}
 end

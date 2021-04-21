@@ -23,14 +23,13 @@ defmodule Authenticator.SignIn.ApplicationAttemptsTest do
     end
 
     test "fails if params are invalid" do
-      assert {:error,
-              %{
-                errors: [
-                  client_id: {"can't be blank", _},
-                  was_successful: {"can't be blank", _},
-                  ip_address: {"can't be blank", _}
-                ]
-              }} = ApplicationAttempts.create(%{})
+      assert {:error, changeset} = ApplicationAttempts.create(%{})
+
+      assert %{
+               client_id: ["can't be blank"],
+               was_successful: ["can't be blank"],
+               ip_address: ["can't be blank"]
+             } = errors_on(changeset)
     end
   end
 
@@ -43,8 +42,10 @@ defmodule Authenticator.SignIn.ApplicationAttemptsTest do
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [was_successful: {"is invalid", _}]}} =
+      assert {:error, changeset} =
                ApplicationAttempts.update(ctx.application_attempt, %{was_successful: 123})
+
+      assert %{was_successful: ["is invalid"]} = errors_on(changeset)
     end
   end
 

@@ -23,11 +23,15 @@ defmodule RestAPI.Controllers.Admin.User do
 
       params = %{
         "username" => "Shurato",
-        "password" => password,
-        "scopes" => [
-          "6a3a3771-9f56-4254-9497-927e441dacfc",
-          "8a235ba0-a827-4593-92c9-6248bef4fa06"
-        ]
+        "credential" => %{
+          "password" => password
+        },
+        "permission" => %{
+          "scopes" => [
+            "6a3a3771-9f56-4254-9497-927e441dacfc",
+            "8a235ba0-a827-4593-92c9-6248bef4fa06"
+          ]
+        }
       }
 
       expect(AuthenticatorMock, :validate_access_token, fn token ->
@@ -40,16 +44,9 @@ defmodule RestAPI.Controllers.Admin.User do
         {:ok, success_session(claims)}
       end)
 
-      expect(ResourceManagerMock, :password_allowed?, fn _input ->
-        true
-      end)
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
 
-      expect(AuthenticatorMock, :generate_hash, fn password_to_hash, :argon2 ->
-        assert password == password_to_hash
-        "password_hashed"
-      end)
-
-      expect(ResourceManagerMock, :create_identity, fn input ->
+      expect(ResourceManagerMock, :create_user, fn input ->
         assert is_map(input)
 
         {:ok,
@@ -62,8 +59,6 @@ defmodule RestAPI.Controllers.Admin.User do
            username: "Shurato"
          }}
       end)
-
-      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
 
       assert %{
                "id" => _id,
@@ -95,20 +90,11 @@ defmodule RestAPI.Controllers.Admin.User do
         {:ok, success_session(claims)}
       end)
 
-      expect(ResourceManagerMock, :password_allowed?, fn _input ->
-        true
-      end)
+      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
 
-      expect(AuthenticatorMock, :generate_hash, fn password_to_hash, :argon2 ->
-        assert password == password_to_hash
-        "password_hashed"
-      end)
-
-      expect(ResourceManagerMock, :create_identity, fn input ->
+      expect(ResourceManagerMock, :create_user, fn input ->
         CreateUser.cast_and_apply(input)
       end)
-
-      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
 
       assert %{
                "detail" => "The given params failed in validation",
@@ -116,46 +102,6 @@ defmodule RestAPI.Controllers.Admin.User do
                "response" => %{"username" => ["can't be blank"]},
                "status" => 400
              } =
-               conn
-               |> put_req_header("authorization", "Bearer #{access_token}")
-               |> post(@create_endpoint, %{"password" => password})
-               |> json_response(400)
-    end
-
-    test "should return error when password is not strong enough", %{
-      conn: conn,
-      access_token: access_token,
-      claims: claims
-    } do
-      password = "MyP@ssword"
-
-      expect(AuthenticatorMock, :validate_access_token, fn token ->
-        assert access_token == token
-        {:ok, claims}
-      end)
-
-      expect(AuthenticatorMock, :get_session, fn %{"jti" => jti} ->
-        assert claims["jti"] == jti
-        {:ok, success_session(claims)}
-      end)
-
-      expect(AuthenticatorMock, :sign_out_session, fn jti ->
-        assert claims["jti"] == jti
-        {:ok, %{}}
-      end)
-
-      expect(ResourceManagerMock, :password_allowed?, fn _input ->
-        false
-      end)
-
-      expect(AuthorizerMock, :authorize_admin, fn %Plug.Conn{} -> :ok end)
-
-      assert %{
-               "detail" => "The given params failed in validation",
-               "error" => "bad_request",
-               "response" => %{"password" => ["password is not strong enough"]},
-               "status" => 400
-             } ==
                conn
                |> put_req_header("authorization", "Bearer #{access_token}")
                |> post(@create_endpoint, %{"password" => password})

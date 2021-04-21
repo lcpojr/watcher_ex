@@ -16,7 +16,7 @@ defmodule ResourceManager.Domain do
       @spec create(params :: map()) :: response()
       def create(params) when is_map(params) do
         params
-        |> @schema.changeset_create()
+        |> @schema.changeset()
         |> Repo.insert()
       end
 
@@ -24,7 +24,7 @@ defmodule ResourceManager.Domain do
       @spec update(model :: @schema.t(), params :: map()) :: response()
       def update(%@schema{} = model, params) when is_map(params) do
         model
-        |> @schema.changeset_update(params)
+        |> @schema.changeset(params)
         |> Repo.update()
       end
 

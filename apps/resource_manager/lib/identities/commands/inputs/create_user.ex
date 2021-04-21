@@ -6,39 +6,62 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
   use ResourceManager.Input
 
   alias ResourceManager.Identities.Schemas.User
+  alias ResourceManager.Credentials.Schemas.Password
 
   @typedoc "Create user input fields"
   @type t :: %__MODULE__{
           username: String.t(),
           status: String.t(),
-          password_hash: String.t(),
-          password_algorithm: String.t(),
-          scopes: list(String.t()) | nil
+          password: %{
+            value: String.t(),
+            algorithm: String.t() | nil,
+            salt: integer() | nil
+          },
+          permission: %{
+            scopes: list(String.t()) | nil
+          }
         }
 
-  @required [:username, :password_hash, :password_algorithm]
-  @optional [:scopes]
+  @required [:username]
+  @optional [:status]
   embedded_schema do
     # Identity
     field :username, :string
     field :status, :string, default: "active"
 
-    # Credentials
-    field :password_hash, :string
-    field :password_algorithm, :string, default: "argon2"
+    embeds_one :password, Credential, primary_key: false do
+      field :value, :string
+      field :algorithm, :string, default: "argon2"
+      field :salt, :integer, default: 16
+    end
 
-    # Permissions
-    field :scopes, {:array, :string}
+    embeds_one :permission, Permission, primary_key: false do
+      field :scopes, {:array, :string}
+    end
   end
 
   @doc false
   def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
+    |> cast_embed(:password, with: &changeset_password/2)
+    |> cast_embed(:permission, with: &changeset_permission/2)
     |> validate_length(:username, min: 1)
-    |> validate_length(:password_hash, min: 1)
-    |> validate_length(:password_algorithm, min: 1)
-    |> validate_inclusion(:status, User.possible_statuses())
+    |> validate_inclusion(:status, User.acceptable_statuses())
     |> validate_required(@required)
+  end
+
+  defp changeset_password(model, params) do
+    model
+    |> cast(params, [:value, :algorithm, :salt])
+    |> validate_length(:value, min: 6)
+    |> validate_inclusion(:algorithm, Password.acceptable_algorithms())
+    |> validate_required([:value])
+  end
+
+  defp changeset_permission(model, params) do
+    model
+    |> cast(params, [:scopes])
+    |> validate_required([:scopes])
   end
 end
