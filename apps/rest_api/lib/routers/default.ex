@@ -3,7 +3,7 @@ defmodule RestAPI.Routers.Default do
 
   use RestAPI.Router
 
-  alias RestAPI.Routers.{Admin, Documentation, Public}
+  alias RestAPI.Routers.{Admin, Public}
 
   forward "/admin", Admin
   forward "/api", Public
