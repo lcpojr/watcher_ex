@@ -50,5 +50,5 @@ defmodule ResourceManager.Identities.Commands.CreateClientApplication do
   defp create_permission(client_application, %{scopes: scopes}),
     do: ConsentScope.execute(client_application, scopes)
 
-  defp create_permission(client_application, _), do: {:ok, :ignore}
+  defp create_permission(_client_application, _), do: {:ok, :ignore}
 end

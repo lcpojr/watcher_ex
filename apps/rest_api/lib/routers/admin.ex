@@ -3,10 +3,11 @@ defmodule RestAPI.Routers.Admin do
 
   use RestAPI.Router
 
-  alias RestAPI.Plugs.{Authentication, Authorization}
+  alias RestAPI.Plugs.{Authentication, Authorization, Tracker}
 
   pipeline :authenticated do
     plug Authentication
+    plug Tracker
   end
 
   pipeline :authorized_by_admin do

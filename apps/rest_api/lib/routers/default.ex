@@ -7,5 +7,4 @@ defmodule RestAPI.Routers.Default do
 
   forward "/admin", Admin
   forward "/api", Public
-  forward "/", Documentation
 end
