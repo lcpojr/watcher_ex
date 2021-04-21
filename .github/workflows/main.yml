@@ -27,10 +27,15 @@ jobs:
       - name: Set up Elixir
         uses: actions/setup-elixir@v1
         with:
-          install-rebar: false
-          install-hex: false
           elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
           otp-version: ${{ matrix.otp }} # Define the OTP version [required]
+          install-rebar: false
+          install-hex: false
+  
+      - name: Install crypto
+        run: |
+          sudo apt-get install aptitude
+          sudo aptitude install erlang-crypto
           
       - name: Restore dependencies cache
         uses: actions/cache@v2
@@ -41,7 +46,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.deps-cache.outputs.cache-hit != 'true'
-        run: mix deps.get
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
 
       - name: Compile code
         run: mix compile --warnings-as-errors
