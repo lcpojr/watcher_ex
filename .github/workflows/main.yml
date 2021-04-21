@@ -18,7 +18,7 @@ jobs:
     
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.11]
         otp: [23.1]
 
     steps:
@@ -39,7 +39,10 @@ jobs:
 
       - name: Install dependencies
         if: steps.deps-cache.outputs.cache-hit != 'true'
-        run: mix deps.get
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
 
       - name: Compile code
         run: mix compile --warnings-as-errors
@@ -51,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.11]
         otp: [23.1]
       
     steps:
@@ -83,7 +86,7 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.11]
         otp: [23.1]
       
     steps:
@@ -125,7 +128,7 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.11]
         otp: [23.1]
   
     services:
