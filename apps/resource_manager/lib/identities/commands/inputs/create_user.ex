@@ -5,8 +5,8 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
 
   use ResourceManager.Input
 
-  alias ResourceManager.Identities.Schemas.User
   alias ResourceManager.Credentials.Schemas.Password
+  alias ResourceManager.Identities.Schemas.User
 
   @typedoc "Create user input fields"
   @type t :: %__MODULE__{

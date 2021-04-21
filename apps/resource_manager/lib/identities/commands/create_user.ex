@@ -5,10 +5,10 @@ defmodule ResourceManager.Identities.Commands.CreateUser do
 
   require Logger
 
-  alias ResourceManager.Permissions.Commands.ConsentScope
   alias ResourceManager.Identities.Commands.Inputs.CreateUser
   alias ResourceManager.Identities.Schemas.User
   alias ResourceManager.Identities.Users
+  alias ResourceManager.Permissions.Commands.ConsentScope
   alias ResourceManager.Repo
 
   @typedoc "All possible responses"

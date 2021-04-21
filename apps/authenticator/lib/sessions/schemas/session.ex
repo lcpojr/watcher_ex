@@ -14,7 +14,7 @@ defmodule Authenticator.Sessions.Schemas.Session do
 
   @typedoc "Session schema fields"
   @type t :: %__MODULE__{
-          id: binary(),
+          id: Ecto.UUID.t(),
           jti: String.t(),
           subject_id: String.t(),
           subject_type: String.t(),

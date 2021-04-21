@@ -5,10 +5,10 @@ defmodule ResourceManager.Identities.Commands.CreateClientApplication do
 
   require Logger
 
-  alias ResourceManager.Permissions.Commands.ConsentScope
+  alias ResourceManager.Identities.ClientApplications
   alias ResourceManager.Identities.Commands.Inputs.CreateClientApplication
   alias ResourceManager.Identities.Schemas.ClientApplication
-  alias ResourceManager.Identities.ClientApplications
+  alias ResourceManager.Permissions.Commands.ConsentScope
   alias ResourceManager.Repo
 
   @typedoc "All possible responses"

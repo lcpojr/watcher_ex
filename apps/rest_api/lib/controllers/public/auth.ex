@@ -3,7 +3,7 @@ defmodule RestAPI.Controllers.Public.Auth do
 
   use RestAPI.Controller, :controller
 
-  alias Authenticator.SignIn.Inputs.{ClientCredentials, ResourceOwner, RefreshToken}
+  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.Authenticator, as: Commands
   alias RestAPI.Views.Public.SignIn
 
