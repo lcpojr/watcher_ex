@@ -20,6 +20,8 @@ jobs:
       matrix:
         elixir: [1.11]
         otp: [23.1]
+        install-hex: false
+        install-rebar: false
 
     steps:
       - uses: actions/checkout@v2
