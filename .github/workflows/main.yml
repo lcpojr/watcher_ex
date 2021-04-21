@@ -29,6 +29,7 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
           otp-version: ${{ matrix.otp }} # Define the OTP version [required]
+          install-rebar: false
           
       - name: Restore dependencies cache
         uses: actions/cache@v2
