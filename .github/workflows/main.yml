@@ -29,7 +29,12 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }} # Define the elixir version [required]
           otp-version: ${{ matrix.otp }} # Define the OTP version [required]
-        
+  
+      - name: Install crypto
+        run: |
+          sudo apt-get install aptitude
+          sudo aptitude install erlang-crypto
+          
       - name: Restore dependencies cache
         uses: actions/cache@v2
         id: deps-cache
