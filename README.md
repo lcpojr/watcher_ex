@@ -13,6 +13,13 @@ We have an initial implementation of some oauth2 most common flows as:
 - Erlang `23.1`;
 - Docker-compose (Just when running in dev enviroment);
 
+## Managing required dependencies
+
+This repository contains `.tool-versions` file, which contains requirements libraries version structions to [asdf](https://github.com/asdf-vm/asdf). It may be easier to keep compatibility with the project, all you have to do is:
+```
+$ asdf install
+```
+
 ## Running it locally
 
 In order to prepare the application run:
