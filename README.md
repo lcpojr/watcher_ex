@@ -24,7 +24,7 @@ $ asdf install
 
 In order to prepare the application run:
 
-- `docker-compose up` to get your containers running;
+- `docker-compose up -d` to get your containers running in detached mode;
 - `mix deps.get` to get all project dependencies;
 - `mix setup` to create the database and run all migrations;
 
