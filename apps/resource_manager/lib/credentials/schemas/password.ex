@@ -66,13 +66,7 @@ defmodule ResourceManager.Credentials.Schemas.Password do
     |> validate_required(@required_fields)
   end
 
-  defp validate_password(
-         %Ecto.Changeset{
-           valid?: true,
-           changes: %{value: password}
-         } = changeset
-       )
-       when is_binary(password) do
+  defp validate_password(%Ecto.Changeset{valid?: true, changes: %{value: password}} = changeset) do
     if PasswordIsAllowed.execute(password) do
       changeset
     else

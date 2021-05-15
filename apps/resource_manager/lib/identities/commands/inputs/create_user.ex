@@ -22,6 +22,10 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
           }
         }
 
+  @default_algorithm "argon2"
+  @default_salt 16
+  @minimum_password_size 6
+
   @required [:username]
   @optional [:status]
   embedded_schema do
@@ -31,8 +35,8 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
 
     embeds_one :password, Credential, primary_key: false do
       field :value, :string
-      field :algorithm, :string, default: "argon2"
-      field :salt, :integer, default: 16
+      field :algorithm, :string, default: @default_algorithm
+      field :salt, :integer, default: @default_salt
     end
 
     embeds_one :permission, Permission, primary_key: false do
@@ -54,7 +58,7 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
   defp changeset_password(model, params) do
     model
     |> cast(params, [:value, :algorithm, :salt])
-    |> validate_length(:value, min: 6)
+    |> validate_length(:value, min: @minimum_password_size)
     |> validate_inclusion(:algorithm, Password.acceptable_algorithms())
     |> validate_required([:value])
   end

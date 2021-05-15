@@ -11,7 +11,7 @@ defmodule ResourceManager do
   defdelegate create_user(input), to: CreateUser, as: :execute
 
   @doc "Delegates to #{CreateClientApplication}.execute/1"
-  defdelegate create_clien_application(input), to: CreateClientApplication, as: :execute
+  defdelegate create_client_application(input), to: CreateClientApplication, as: :execute
 
   @doc "Delegates to #{GetIdentity}.execute/1"
   defdelegate get_identity(input), to: GetIdentity, as: :execute
