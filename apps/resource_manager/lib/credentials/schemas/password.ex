@@ -30,6 +30,10 @@ defmodule ResourceManager.Credentials.Schemas.Password do
           updated_at: NaiveDatetime.t()
         }
 
+  # Default password values
+  @default_algorithm "argon2"
+  @default_salt 16
+
   # Changeset validation arguments
   @acceptable_algorithms ~w(argon2 bcrypt pbkdf2)
 
@@ -38,8 +42,8 @@ defmodule ResourceManager.Credentials.Schemas.Password do
   schema "passwords" do
     field :value, :string, virtual: true, redact: true
     field :password_hash, :string
-    field :algorithm, :string, default: "argon2"
-    field :salt, :integer, default: 16
+    field :algorithm, :string, default: @default_algorithm
+    field :salt, :integer, default: @default_salt
 
     belongs_to(:user, User)
 
