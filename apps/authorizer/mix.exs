@@ -47,7 +47,7 @@ defmodule Authorizer.MixProject do
       {:plug_cowboy, "~> 2.0"},
 
       # Tools
-      {:junit_formatter, "~> 3.1", only: [:test]},
+      {:junit_formatter, "~> 3.2", only: [:test]},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},

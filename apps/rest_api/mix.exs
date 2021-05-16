@@ -46,9 +46,9 @@ defmodule RestAPI.MixProject do
       {:authorizer, in_umbrella: true},
 
       # Domain
-      {:phoenix, "~> 1.5.8"},
-      {:telemetry_metrics, "~> 0.4"},
-      {:telemetry_poller, "~> 0.5"},
+      {:phoenix, "~> 1.5.9"},
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
 
@@ -56,7 +56,7 @@ defmodule RestAPI.MixProject do
       {:ecto_sql, "~> 3.6"},
 
       # Tools
-      {:junit_formatter, "~> 3.1", only: [:test]},
+      {:junit_formatter, "~> 3.2", only: [:test]},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},

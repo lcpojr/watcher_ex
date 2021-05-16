@@ -47,7 +47,7 @@ defmodule Authenticator.MixProject do
       {:argon2_elixir, "~> 2.4"},
       {:bcrypt_elixir, "~> 2.3"},
       {:pbkdf2_elixir, "~> 1.4"},
-      {:joken, "~> 2.2"},
+      {:joken, "~> 2.3"},
       {:jason, "~> 1.2"},
       {:nebulex, "~> 1.2"},
 
@@ -56,7 +56,7 @@ defmodule Authenticator.MixProject do
       {:ecto_sql, "~> 3.6"},
 
       # Tools
-      {:junit_formatter, "~> 3.1", only: [:test]},
+      {:junit_formatter, "~> 3.2", only: [:test]},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
