@@ -30,10 +30,6 @@ defmodule ResourceManager.Credentials.Schemas.Password do
           updated_at: Datetime.t()
         }
 
-  # Default module arguments
-  @default_algorithm "argon2"
-  @default_salt 16
-
   # Changeset validation arguments
   @acceptable_algorithms ~w(argon2 bcrypt pbkdf2)
 
@@ -42,8 +38,8 @@ defmodule ResourceManager.Credentials.Schemas.Password do
   schema "passwords" do
     field :value, :string, virtual: true, redact: true
     field :password_hash, :string
-    field :algorithm, :string, default: @default_algorithm
-    field :salt, :integer, default: @default_salt
+    field :algorithm, :string, default: "argon2"
+    field :salt, :integer, default: 16
 
     belongs_to(:user, User)
 
@@ -84,8 +80,8 @@ defmodule ResourceManager.Credentials.Schemas.Password do
        )
        when is_binary(password) do
     # Getting configs from changes or defaults
-    algorithm = Map.get(changes, :algorithm, @default_algorithm)
-    salt = Map.get(changes, :salt, @default_salt)
+    algorithm = Map.get(changes, :algorithm, "argon2")
+    salt = Map.get(changes, :salt, 16)
 
     password_hash =
       case algorithm do

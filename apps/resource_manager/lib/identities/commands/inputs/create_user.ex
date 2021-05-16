@@ -22,8 +22,6 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
           }
         }
 
-  @default_algorithm "argon2"
-  @default_salt 16
   @minimum_password_size 6
 
   @required [:username]
@@ -35,8 +33,8 @@ defmodule ResourceManager.Identities.Commands.Inputs.CreateUser do
 
     embeds_one :password, Credential, primary_key: false do
       field :value, :string
-      field :algorithm, :string, default: @default_algorithm
-      field :salt, :integer, default: @default_salt
+      field :algorithm, :string, default: "argon2"
+      field :salt, :integer, default: 16
     end
 
     embeds_one :permission, Permission, primary_key: false do
