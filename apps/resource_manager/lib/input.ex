@@ -42,17 +42,25 @@ defmodule ResourceManager.Input do
         |> Map.new(&do_cast_to_map/1)
       end
 
-      defp do_cast_to_map(%Date{} = value), do: value
-      defp do_cast_to_map(%DateTime{} = value), do: value
-      defp do_cast_to_map(%NaiveDateTime{} = value), do: value
-      defp do_cast_to_map(%Time{} = value), do: value
-      defp do_cast_to_map([_ | _] = list), do: Enum.map(list, &do_cast_to_map/1)
+      defp do_cast_to_map({key, %Date{} = value}), do: {key, value}
+      defp do_cast_to_map({key, %DateTime{} = value}), do: {key, value}
+      defp do_cast_to_map({key, %NaiveDateTime{} = value}), do: {key, value}
+      defp do_cast_to_map({key, %Time{} = value}), do: {key, value}
 
-      defp do_cast_to_map(%_struct{} = struct) do
-        struct
-        |> Map.from_struct()
-        |> Map.new(&do_cast_to_map/1)
+      defp do_cast_to_map({key, %{__struct__: _} = struct}) do
+        result =
+          struct
+          |> Map.from_struct()
+          |> Map.new(&do_cast_to_map/1)
+
+        {key, result}
       end
+
+      defp do_cast_to_map({key, params}) when is_map(params),
+        do: {key, Map.new(params, &do_cast_to_map/1)}
+
+      defp do_cast_to_map({key, params}) when is_list(params),
+        do: {key, Enum.map(params, &do_cast_to_map/1)}
 
       defp do_cast_to_map(value), do: value
     end

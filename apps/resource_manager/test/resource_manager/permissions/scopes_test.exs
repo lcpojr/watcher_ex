@@ -35,7 +35,7 @@ defmodule ResourceManager.Permissions.ScopesTest do
 
     test "raises if scope does not exist" do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
-        Scopes.update(%Scope{}, %{description: "My new description"})
+        Scopes.update(%Scope{}, %{name: "My new scope"})
       end
     end
   end

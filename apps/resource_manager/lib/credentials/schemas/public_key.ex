@@ -13,8 +13,9 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
   Abstract public_key module type.
   """
   @type t :: %__MODULE__{
-          id: binary(),
-          client_application: ClientApplication.t(),
+          id: Ecto.UUID.t(),
+          client_application: ClientApplication.t() | Ecto.Association.NotLoaded.t(),
+          client_application_id: Ecto.UUID.t(),
           value: String.t(),
           type: String.t(),
           format: String.t(),
@@ -22,12 +23,12 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_types ~w(rsa)
-  @possible_formats ~w(pem)
+  # Changeset validation arguments
+  @acceptable_types ~w(rsa)
+  @acceptable_formats ~w(pem)
 
   @required_fields [:value]
-  @foreign_key_fields [:client_application_id]
-  @optional_fields [:type, :format]
+  @optional_fields [:client_application_id, :type, :format]
   schema "public_keys" do
     field :value, :string
     field :type, :string, default: "rsa"
@@ -38,28 +39,25 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
     timestamps()
   end
 
-  @doc false
-  def changeset_create(params) when is_map(params) do
-    %__MODULE__{}
-    |> cast(params, @required_fields ++ @foreign_key_fields ++ @optional_fields)
-    |> validate_required(@required_fields ++ @foreign_key_fields)
-    |> validate_inclusion(:type, @possible_types)
-    |> validate_inclusion(:format, @possible_formats)
-    |> unique_constraint(:user_id)
-  end
+  @doc "Generates an `%Ecto.Changeset{}` to be used in insert operations"
+  @spec changeset(params :: map()) :: Ecto.Changeset.t()
+  def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
 
-  @doc false
-  def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
+  @doc "Generates an `%Ecto.Changeset to be used in update operations."
+  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
     |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_inclusion(:type, @possible_types)
-    |> validate_inclusion(:format, @possible_formats)
+    |> validate_inclusion(:type, @acceptable_types)
+    |> validate_inclusion(:format, @acceptable_formats)
     |> validate_required(@required_fields)
   end
 
-  @doc false
-  def possible_types, do: @possible_types
+  @doc "All acceptable public key types"
+  @spec acceptable_types() :: list(String.t())
+  def acceptable_types, do: @acceptable_types
 
-  @doc false
-  def possible_formats, do: @possible_formats
+  @doc "All acceptable public key formats"
+  @spec acceptable_formats() :: list(String.t())
+  def acceptable_formats, do: @acceptable_formats
 end

@@ -25,17 +25,16 @@ defmodule Authenticator.Sessions.SessionsTest do
     end
 
     test "fails if params are invalid" do
-      assert {:error,
-              %{
-                errors: [
-                  jti: {"can't be blank", _},
-                  subject_id: {"can't be blank", _},
-                  subject_type: {"can't be blank", _},
-                  claims: {"can't be blank", _},
-                  expires_at: {"can't be blank", _},
-                  grant_flow: {"can't be blank", _}
-                ]
-              }} = Sessions.create(%{})
+      assert {:error, changeset} = Sessions.create(%{})
+
+      assert %{
+               claims: ["can't be blank"],
+               expires_at: ["can't be blank"],
+               grant_flow: ["can't be blank"],
+               jti: ["can't be blank"],
+               subject_id: ["can't be blank"],
+               subject_type: ["can't be blank"]
+             } = errors_on(changeset)
     end
   end
 
@@ -48,8 +47,8 @@ defmodule Authenticator.Sessions.SessionsTest do
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [status: {"is invalid", _}]}} =
-               Sessions.update(ctx.session, %{status: 123})
+      assert {:error, changeset} = Sessions.update(ctx.session, %{status: 123})
+      assert %{status: ["is invalid"]} = errors_on(changeset)
     end
 
     test "raises if session does not exist" do

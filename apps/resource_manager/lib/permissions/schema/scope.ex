@@ -29,19 +29,16 @@ defmodule ResourceManager.Permissions.Schemas.Scope do
     timestamps()
   end
 
-  @doc false
-  def changeset_create(params) when is_map(params) do
-    %__MODULE__{}
-    |> cast(params, @required ++ @optional)
-    |> validate_required(@required)
-    |> validate_length(:name, min: 1)
-    |> unique_constraint(:name)
-  end
+  @doc "Generates an `%Ecto.Changeset{}` to be used in insert operations"
+  @spec changeset(params :: map()) :: Ecto.Changeset.t()
+  def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
 
-  @doc false
-  def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
+  @doc "Generates an `%Ecto.Changeset to be used in update operations."
+  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
     |> cast(params, @required ++ @optional)
+    |> validate_required(@required)
     |> validate_length(:name, min: 1)
     |> unique_constraint(:name)
   end

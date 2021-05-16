@@ -2,8 +2,8 @@ defmodule RestAPI.Controllers.Public.Auth do
   @moduledoc false
 
   use RestAPI.Controller, :controller
-  use RestAPI.Swagger.AuthOperations
 
+  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.Authenticator, as: Commands
   alias RestAPI.Views.Public.SignIn
 
@@ -19,33 +19,39 @@ defmodule RestAPI.Controllers.Public.Auth do
   """
   @spec sign_in(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def sign_in(conn, %{"grant_type" => "password"} = params) do
-    params
-    |> Map.put("ip_address", get_remote_ip(conn))
-    |> Commands.sign_in_resource_owner()
-    |> parse_sign_in_response(conn)
+    params = Map.merge(params, conn.private.tracking)
+
+    with {:ok, input} <- ResourceOwner.cast_and_apply(params),
+         {:ok, response} <- Commands.sign_in_resource_owner(input) do
+      conn
+      |> put_view(SignIn)
+      |> put_status(200)
+      |> render("sign_in.json", response: response)
+    end
   end
 
   def sign_in(conn, %{"grant_type" => "refresh_token"} = params) do
-    params
-    |> Map.put("ip_address", get_remote_ip(conn))
-    |> Commands.sign_in_refresh_token()
-    |> parse_sign_in_response(conn)
+    params = Map.merge(params, conn.private.tracking)
+
+    with {:ok, input} <- RefreshToken.cast_and_apply(params),
+         {:ok, response} <- Commands.sign_in_refresh_token(input) do
+      conn
+      |> put_view(SignIn)
+      |> put_status(200)
+      |> render("sign_in.json", response: response)
+    end
   end
 
   def sign_in(conn, %{"grant_type" => "client_credentials"} = params) do
-    params
-    |> Map.put("ip_address", get_remote_ip(conn))
-    |> Commands.sign_in_client_credentials()
-    |> parse_sign_in_response(conn)
-  end
+    params = Map.merge(params, conn.private.tracking)
 
-  defp parse_sign_in_response({:error, _any} = error, _conn), do: error
-
-  defp parse_sign_in_response({:ok, response}, conn) do
-    conn
-    |> put_status(:ok)
-    |> put_view(SignIn)
-    |> render("sign_in.json", response: response)
+    with {:ok, input} <- ClientCredentials.cast_and_apply(params),
+         {:ok, response} <- Commands.sign_in_client_credentials(input) do
+      conn
+      |> put_view(SignIn)
+      |> put_status(200)
+      |> render("sign_in.json", response: response)
+    end
   end
 
   @doc "Logout the authenticated subject session."

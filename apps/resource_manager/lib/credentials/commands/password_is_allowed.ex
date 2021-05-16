@@ -14,15 +14,15 @@ defmodule ResourceManager.Credentials.Commands.PasswordIsAllowed do
 
     with {:strong?, true} <- {:strong?, is_strong?(password)},
          {:blocklisted?, false} <- {:blocklisted?, is_blocklisted?(password)} do
-      Logger.info("Password allowed!")
+      Logger.debug("Password allowed!")
       true
     else
       {:strong?, false} ->
-        Logger.info("Password not allowed because it's not strong enough")
+        Logger.debug("Password not allowed because it's not strong enough")
         false
 
       {:blocklisted?, true} ->
-        Logger.info("Password not allowed because it's on blocklist")
+        Logger.debug("Password not allowed because it's on blocklist")
         false
     end
   end

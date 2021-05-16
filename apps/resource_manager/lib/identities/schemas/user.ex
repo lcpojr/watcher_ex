@@ -15,17 +15,18 @@ defmodule ResourceManager.Identities.Schemas.User do
 
   @typedoc "User schema fields"
   @type t :: %__MODULE__{
-          id: binary(),
+          id: Ecto.UUID.t(),
           username: String.t(),
           status: String.t(),
-          password: Password.t(),
+          password: Password.t() | Ecto.Association.NotLoaded.t(),
           is_admin: boolean(),
-          scopes: Scope.t(),
+          scopes: Scope.t() | Ecto.Association.NotLoaded.t(),
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~w(active inactive blocked temporary_blocked)
+  # Changeset validation fields
+  @acceptable_statuses ~w(active inactive blocked temporary_blocked)
 
   @required_fields [:username, :status]
   @optional_fields [:blocked_until]
@@ -41,27 +42,25 @@ defmodule ResourceManager.Identities.Schemas.User do
     timestamps()
   end
 
-  @doc false
-  def changeset_create(params) when is_map(params) do
-    %__MODULE__{}
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(@required_fields)
-    |> validate_length(:username, min: 5, max: 150)
-    |> validate_inclusion(:status, @possible_statuses)
-    |> unique_constraint(:username)
-  end
+  @doc "Generates an `%Ecto.Changeset{}` to be used in insert operations"
+  @spec changeset(params :: map()) :: Ecto.Changeset.t()
+  def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
 
-  @doc false
-  def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
+  @doc "Generates an `%Ecto.Changeset to be used in update operations."
+  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
     |> cast(params, @required_fields ++ @optional_fields)
+    |> cast_assoc(:password, required: false, with: &Password.changeset/2)
+    |> validate_required(@required_fields)
     |> validate_length(:username, min: 5, max: 150)
-    |> validate_inclusion(:status, @possible_statuses)
+    |> validate_inclusion(:status, @acceptable_statuses)
     |> unique_constraint(:username)
   end
 
-  @doc false
-  def possible_statuses, do: @possible_statuses
+  @doc "All acceptable user statuses"
+  @spec acceptable_statuses() :: list(String.t())
+  def acceptable_statuses, do: @acceptable_statuses
 
   #################
   # Custom filters

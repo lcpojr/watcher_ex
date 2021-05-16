@@ -3,23 +3,16 @@ defmodule RestAPI.Routers.Public do
 
   use RestAPI.Router
 
-  alias PhoenixSwagger.Plug.SwaggerUI
-
   alias RestAPI.Controllers.Public
-  alias RestAPI.Plugs.Authentication
+  alias RestAPI.Plugs.{Authentication, Tracker}
 
   pipeline :rest_api do
     plug :accepts, ["json"]
+    plug Tracker
   end
 
   pipeline :authenticated do
     plug Authentication
-  end
-
-  # This should be used only for documentation purposes
-  # When running in production it should be disabled
-  scope "/v1/swagger" do
-    forward "/", SwaggerUI, otp_app: :rest_api, swagger_file: "swagger.json"
   end
 
   scope "/v1", Public do

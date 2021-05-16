@@ -1,7 +1,7 @@
 defmodule ResourceManager.Credentials.PasswordsTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.Passwords
+  alias ResourceManager.Credentials.{BlocklistPasswordCache, Passwords}
   alias ResourceManager.Credentials.Schemas.Password
 
   setup do
@@ -14,36 +14,40 @@ defmodule ResourceManager.Credentials.PasswordsTest do
   describe "#{Passwords}.create/1" do
     test "succeed if params are valid" do
       user = insert!(:user)
-      params = %{user_id: user.id, password_hash: gen_hashed_password("MyPassw@rdTest123")}
-
+      params = %{user_id: user.id, value: "MyPassw@rdTest123"}
       assert {:ok, %Password{id: id} = password} = Passwords.create(params)
-      assert password == Repo.get(Password, id)
+      assert password.id == Repo.get(Password, id).id
+    end
+
+    test "fails if password not allowed", ctx do
+      params = %{user_id: ctx.user.id, value: "123456"}
+      assert BlocklistPasswordCache.set("123456", "123456")
+      assert {:error, changeset} = Passwords.create(params)
+      assert %{password: ["password not allowed"]} = errors_on(changeset)
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [password_hash: {"can't be blank", _}]}} =
-               Passwords.create(%{user_id: ctx.user.id})
+      assert {:error, changeset} = Passwords.create(%{user_id: ctx.user.id})
+      assert %{password_hash: ["can't be blank"]} = errors_on(changeset)
     end
   end
 
   describe "#{Passwords}.update/2" do
     test "succeed if params are valid", ctx do
-      password_hash = gen_hashed_password("UpdatePassw@rdTest123")
+      assert {:ok, %Password{id: id} = password} =
+               Passwords.update(ctx.password, %{value: "UpdatePassw@rdTest123"})
 
-      assert {:ok, %Password{id: id, password_hash: ^password_hash} = password} =
-               Passwords.update(ctx.password, %{password_hash: password_hash})
-
-      assert password == Repo.get(Password, id)
+      assert password.id == Repo.get(Password, id).id
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [password_hash: {"is invalid", _}]}} =
-               Passwords.update(ctx.password, %{password_hash: 123})
+      assert {:error, changeset} = Passwords.update(ctx.password, %{value: 123})
+      assert %{value: ["is invalid"]} = errors_on(changeset)
     end
 
     test "raises if password does not exist" do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
-        Passwords.update(%Password{}, %{password_hash: gen_hashed_password()})
+        Passwords.update(%Password{}, %{value: "any_password"})
       end
     end
   end

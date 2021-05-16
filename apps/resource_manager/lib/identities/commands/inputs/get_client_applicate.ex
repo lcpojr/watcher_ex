@@ -30,8 +30,8 @@ defmodule ResourceManager.Identities.Commands.Inputs.GetClientApplication do
     %__MODULE__{}
     |> cast(params, @optional)
     |> validate_length(:name, min: 1)
-    |> validate_inclusion(:status, ClientApplication.possible_statuses())
-    |> validate_inclusion(:protocol, ClientApplication.possible_protocols())
-    |> validate_inclusion(:access_type, ClientApplication.possible_access_types())
+    |> validate_inclusion(:status, ClientApplication.acceptable_statuses())
+    |> validate_inclusion(:protocol, ClientApplication.acceptable_protocols())
+    |> validate_inclusion(:access_type, ClientApplication.acceptable_access_types())
   end
 end

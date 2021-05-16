@@ -25,6 +25,6 @@ defmodule ResourceManager.Identities.Commands.Inputs.GetUser do
     %__MODULE__{}
     |> cast(params, @optional)
     |> validate_length(:username, min: 1)
-    |> validate_inclusion(:status, User.possible_statuses())
+    |> validate_inclusion(:status, User.acceptable_statuses())
   end
 end

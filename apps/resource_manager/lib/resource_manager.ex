@@ -4,11 +4,14 @@ defmodule ResourceManager do
   """
 
   alias ResourceManager.Credentials.Commands.PasswordIsAllowed
-  alias ResourceManager.Identities.Commands.{CreateIdentity, GetIdentity}
+  alias ResourceManager.Identities.Commands.{CreateClientApplication, CreateUser, GetIdentity}
   alias ResourceManager.Permissions.Commands.{ConsentScope, RemoveScope}
 
-  @doc "Delegates to #{CreateIdentity}.execute/1"
-  defdelegate create_identity(input), to: CreateIdentity, as: :execute
+  @doc "Delegates to #{CreateUser}.execute/1"
+  defdelegate create_user(input), to: CreateUser, as: :execute
+
+  @doc "Delegates to #{CreateClientApplication}.execute/1"
+  defdelegate create_client_application(input), to: CreateClientApplication, as: :execute
 
   @doc "Delegates to #{GetIdentity}.execute/1"
   defdelegate get_identity(input), to: GetIdentity, as: :execute

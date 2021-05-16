@@ -11,11 +11,10 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
 
   alias ResourceManager.Credentials.Schemas.PublicKey
   alias ResourceManager.Permissions.Schemas.Scope
-  alias ResourceManager.Ports.Authenticator
 
   @typedoc "User schema fields"
   @type t :: %__MODULE__{
-          id: binary(),
+          id: Ecto.UUID.t(),
           client_id: String.t(),
           name: String.t(),
           description: String.t(),
@@ -24,16 +23,17 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
           access_type: String.t(),
           is_admin: boolean(),
           grant_flows: list(String.t()),
-          public_key: PublicKey.t(),
-          scopes: Scope.t(),
+          public_key: PublicKey.t() | Ecto.Association.NotLoaded.t(),
+          scopes: Scope.t() | Ecto.Association.NotLoaded.t(),
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~w(active inactive blocked)
-  @possible_protocols ~w(openid-connect)
-  @possible_access_types ~w(confidential public bearer-only)
-  @possible_grant_flows ~w(resource_owner implicit client_credentials refresh_token authorization_code)
+  # Changeset validation attributes
+  @acceptable_statuses ~w(active inactive blocked)
+  @acceptable_protocols ~w(openid-connect)
+  @acceptable_access_types ~w(confidential public bearer-only)
+  @acceptable_grant_flows ~w(resource_owner implicit client_credentials refresh_token authorization_code)
 
   @required_fields [:name, :status, :protocol, :access_type]
   @optional_fields [:grant_flows, :description, :redirect_uri, :blocked_until]
@@ -56,50 +56,47 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
     timestamps()
   end
 
-  @doc false
-  def changeset_create(params) when is_map(params) do
-    %__MODULE__{}
+  @doc "Generates an `%Ecto.Changeset{}` to be used in insert operations"
+  @spec changeset(params :: map()) :: Ecto.Changeset.t()
+  def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
+
+  @doc "Generates an `%Ecto.Changeset to be used in update operations."
+  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = model, params) when is_map(params) do
+    model
     |> cast(params, @required_fields ++ @optional_fields)
     |> validate_required(@required_fields)
     |> validate_length(:name, min: 1, max: 150)
-    |> validate_inclusion(:status, @possible_statuses)
-    |> validate_inclusion(:protocol, @possible_protocols)
-    |> validate_inclusion(:access_type, @possible_access_types)
-    |> validate_subset(:grant_flows, @possible_grant_flows)
+    |> validate_inclusion(:status, @acceptable_statuses)
+    |> validate_inclusion(:protocol, @acceptable_protocols)
+    |> validate_inclusion(:access_type, @acceptable_access_types)
+    |> validate_subset(:grant_flows, @acceptable_grant_flows)
     |> unique_constraint(:name)
     |> generate_secret()
   end
 
-  defp generate_secret(%{valid?: false} = changeset), do: changeset
+  defp generate_secret(%Ecto.Changeset{valid?: false} = changeset), do: changeset
 
-  defp generate_secret(changeset) do
-    secret = Authenticator.generate_hash(Ecto.UUID.generate(), :bcrypt)
+  defp generate_secret(%Ecto.Changeset{valid?: true} = changeset) do
+    secret = Bcrypt.hash_pwd_salt(Ecto.UUID.generate())
     put_change(changeset, :secret, secret)
   end
 
-  @doc false
-  def changeset_update(%__MODULE__{} = model, params) when is_map(params) do
-    model
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_length(:name, min: 1, max: 150)
-    |> validate_inclusion(:status, @possible_statuses)
-    |> validate_inclusion(:protocol, @possible_protocols)
-    |> validate_inclusion(:access_type, @possible_access_types)
-    |> validate_subset(:grant_flows, @possible_grant_flows)
-    |> unique_constraint(:name)
-  end
+  @doc "All acceptable client application statuses"
+  @spec acceptable_statuses() :: list(String.t())
+  def acceptable_statuses, do: @acceptable_statuses
 
-  @doc false
-  def possible_statuses, do: @possible_statuses
+  @doc "All acceptable client application protocols"
+  @spec acceptable_protocols() :: list(String.t())
+  def acceptable_protocols, do: @acceptable_protocols
 
-  @doc false
-  def possible_protocols, do: @possible_protocols
+  @doc "All acceptable client application access types"
+  @spec acceptable_access_types() :: list(String.t())
+  def acceptable_access_types, do: @acceptable_access_types
 
-  @doc false
-  def possible_access_types, do: @possible_access_types
-
-  @doc false
-  def possible_grant_flows, do: @possible_grant_flows
+  @doc "All acceptable client application grant flows"
+  @spec acceptable_grant_flows() :: list(String.t())
+  def acceptable_grant_flows, do: @acceptable_grant_flows
 
   #################
   # Custom filters

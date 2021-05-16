@@ -3,7 +3,6 @@ defmodule ResourceManager.Identities.ClientApplicationsTest do
 
   alias ResourceManager.Identities.ClientApplications
   alias ResourceManager.Identities.Schemas.ClientApplication
-  alias ResourceManager.Ports.AuthenticatorMock
 
   setup do
     {:ok, client_application: insert!(:client_application)}
@@ -12,11 +11,6 @@ defmodule ResourceManager.Identities.ClientApplicationsTest do
   describe "#{ClientApplications}.create/1" do
     test "succeed if params are valid" do
       params = %{name: "my-test-application"}
-
-      expect(AuthenticatorMock, :generate_hash, fn secret, :bcrypt ->
-        assert is_binary(secret)
-        gen_hashed_password(Ecto.UUID.generate())
-      end)
 
       assert {:ok, %ClientApplication{id: id} = client_application} =
                ClientApplications.create(params)

@@ -30,7 +30,7 @@ defmodule RestAPI.MixProject do
   def application do
     [
       mod: {RestAPI.Application, []},
-      extra_applications: [:logger, :runtime_tools, :phoenix_swagger]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -46,25 +46,21 @@ defmodule RestAPI.MixProject do
       {:authorizer, in_umbrella: true},
 
       # Domain
-      {:phoenix, "~> 1.5.4"},
-      {:telemetry_metrics, "~> 0.4"},
+      {:phoenix, "~> 1.5.9"},
+      {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 0.4"},
-      {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"},
+      {:jason, "~> 1.2"},
+      {:plug_cowboy, "~> 2.5"},
 
       # Validations
-      {:ecto_sql, "~> 3.4"},
-
-      # Docs
-      {:phoenix_swagger, "~> 0.8"},
-      {:ex_json_schema, "~> 0.5"},
+      {:ecto_sql, "~> 3.6"},
 
       # Tools
-      {:junit_formatter, "~> 3.1", only: [:test]},
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.13", only: :test},
+      {:junit_formatter, "~> 3.2", only: [:test]},
+      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14", only: :test},
       {:mox, "~> 0.5", only: :test}
     ]
   end

@@ -12,7 +12,7 @@ defmodule Authenticator.SignIn.Schemas.UserAttempt do
 
   @typedoc "User attempt schema fields"
   @type t :: %__MODULE__{
-          id: binary(),
+          id: Ecto.UUID.t(),
           username: String.t(),
           was_successful: boolean(),
           ip_address: String.t(),

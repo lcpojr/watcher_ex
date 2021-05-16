@@ -21,12 +21,14 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
       }
 
       assert {:ok, %PublicKey{id: id} = public_key} = PublicKeys.create(params)
-      assert public_key == Repo.get(PublicKey, id)
+      assert public_key.id == Repo.get(PublicKey, id).id
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [value: {"can't be blank", _}]}} =
+      assert {:error, changeset} =
                PublicKeys.create(%{client_application_id: ctx.client_application.id})
+
+      assert %{value: ["can't be blank"]} = errors_on(changeset)
     end
   end
 
@@ -41,8 +43,8 @@ defmodule ResourceManager.Credentials.PublicKeysTest do
     end
 
     test "fails if params are invalid", ctx do
-      assert {:error, %{errors: [value: {"is invalid", _}]}} =
-               PublicKeys.update(ctx.public_key, %{value: 123})
+      assert {:error, changeset} = PublicKeys.update(ctx.public_key, %{value: 123})
+      assert %{value: ["is invalid"]} = errors_on(changeset)
     end
 
     test "raises if public_key does not exist" do

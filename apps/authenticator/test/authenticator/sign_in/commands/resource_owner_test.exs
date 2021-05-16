@@ -224,18 +224,17 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     test "fails if params are invalid" do
       assert {:error, :invalid_params} == Command.execute(%{})
 
-      assert {:error,
-              %Ecto.Changeset{
-                errors: [
-                  client_assertion_type: {"can't be blank", [validation: :required]},
-                  client_assertion: {"can't be blank", [validation: :required]},
-                  username: {"can't be blank", [validation: :required]},
-                  password: {"can't be blank", [validation: :required]},
-                  client_id: {"can't be blank", [validation: :required]},
-                  ip_address: {"can't be blank", [validation: :required]},
-                  scope: {"can't be blank", [validation: :required]}
-                ]
-              }} = Command.execute(%{grant_type: "password"})
+      assert {:error, changeset} = Command.execute(%{grant_type: "password"})
+
+      assert %{
+               client_assertion_type: ["can't be blank"],
+               client_assertion: ["can't be blank"],
+               username: ["can't be blank"],
+               password: ["can't be blank"],
+               client_id: ["can't be blank"],
+               ip_address: ["can't be blank"],
+               scope: ["can't be blank"]
+             } = errors_on(changeset)
     end
 
     test "fails if client application do not exist" do

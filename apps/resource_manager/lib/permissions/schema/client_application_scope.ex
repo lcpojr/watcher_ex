@@ -3,7 +3,7 @@ defmodule ResourceManager.Permissions.Schemas.ClientApplicationScope do
   Defines the relation between a client application and many scope.
   """
 
-  use Ecto.Schema
+  use ResourceManager.Schema
 
   import Ecto.Changeset
 
@@ -18,6 +18,8 @@ defmodule ResourceManager.Permissions.Schemas.ClientApplicationScope do
           updated_at: NaiveDateTime.t()
         }
 
+  @unique_constraint :client_applications_scopes_client_application_id_scope_id_index
+
   @required_fields [:client_application_id, :scope_id]
   @primary_key false
   schema "client_applications_scopes" do
@@ -30,12 +32,18 @@ defmodule ResourceManager.Permissions.Schemas.ClientApplicationScope do
     timestamps()
   end
 
-  @doc false
-  def changeset_create(%__MODULE__{}, params) do
-    %__MODULE__{}
+  @doc "Generates an `%Ecto.Changeset{}` to be used in insert operations"
+  @spec changeset(params :: map()) :: Ecto.Changeset.t()
+  def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
+
+  @doc "Generates an `%Ecto.Changeset to be used in update operations."
+  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  def changeset(%__MODULE__{} = model, params) when is_map(params) do
+    model
     |> cast(params, @required_fields)
     |> validate_required(@required_fields)
     |> foreign_key_constraint(:scope_id)
     |> foreign_key_constraint(:client_application_id)
+    |> unique_constraint(:client_application, name: @unique_constraint)
   end
 end
