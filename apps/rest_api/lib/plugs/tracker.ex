@@ -14,11 +14,11 @@ defmodule RestAPI.Plugs.Tracker do
 
   @impl true
   def call(%Plug.Conn{} = conn, _opts) do
-    traking_data = %{
-      "ip_address" => get_remote_ip(conn),
-      "user_agent" => get_user_agent(conn),
-      "request_id" => get_request_id(conn)
-    }
+    traking_data = [
+      ip_address: get_remote_ip(conn),
+      user_agent: get_user_agent(conn),
+      request_id: get_request_id(conn)
+    ]
 
     Logger.metadata(traking_data)
 

@@ -26,8 +26,8 @@ defmodule ResourceManager.Credentials.Schemas.Password do
           password_hash: String.t(),
           algorithm: String.t(),
           salt: integer(),
-          inserted_at: Datetime.t(),
-          updated_at: Datetime.t()
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
         }
 
   # Changeset validation arguments
