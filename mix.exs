@@ -70,7 +70,7 @@ defmodule WatcherEx.MixProject do
       plt_add_apps: [:ex_unit],
       plt_core_path: "dialyzer/plts/",
       plt_file: {:no_warn, "dialyzer/plts/watcher_ex.plt"},
-      ignore_warnings: "dialyzer.ignore-warnings"
+      ignore_warnings: ".dialyzer_ignore.exs"
     ]
   end
 
