@@ -4,6 +4,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
   alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
+  @content_type "application/x-www-form-urlencoded"
   @token_endpoint "/api/v1/auth/protocol/openid-connect/token"
   @logout_endpoint "api/v1/auth/protocol/openid-connect/logout"
   @logout_all_endpoint "api/v1/auth/protocol/openid-connect/logout-all-sessions"
@@ -25,6 +26,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
       assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, params)
                |> json_response(200)
     end
@@ -41,6 +43,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
       assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, params)
                |> json_response(200)
     end
@@ -59,6 +62,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
       assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, params)
                |> json_response(200)
     end
@@ -79,6 +83,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                }
              } =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "password"})
                |> json_response(400)
     end
@@ -90,6 +95,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
       assert %{"response" => %{"refresh_token" => ["can't be blank"]}} =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "refresh_token"})
                |> json_response(400)
     end
@@ -108,6 +114,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                }
              } =
                conn
+               |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "client_credentials"})
                |> json_response(400)
     end

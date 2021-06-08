@@ -32,7 +32,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   Sign in an user identity by ResouceOnwer flow.
 
   The application has to be active, using openid-connect protocol and with access_type
-  confidential in order to use this flow.
+  public in order to use this flow.
 
   When the client application has a public_key saved on database we force the use of
   client_assertions on input to avoid passing it's secret open on requests.
@@ -46,10 +46,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
-         {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, Port.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
+         {:public?, true} <- {:public?, app.access_type == "public"},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
          {:ok, access_token, claims} <- generate_access_token(user, app, scope),
          {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
@@ -76,11 +76,6 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
-      {:confidential?, false} ->
-        Logger.info("Client application #{client_id} is not confidential")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
       {:valid_protocol?, false} ->
         Logger.info("Client application #{client_id} protocol is not openid-connect")
         FakeVerifyHash.execute(:argon2)
@@ -93,6 +88,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
       {:user_active?, false} ->
         Logger.info("User #{username} is not active")
+        FakeVerifyHash.execute(:argon2)
+        {:error, :unauthenticated}
+
+      {:public?, false} ->
+        Logger.info("Client application #{client_id} is not public")
         FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
