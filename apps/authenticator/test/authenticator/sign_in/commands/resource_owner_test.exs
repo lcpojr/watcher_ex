@@ -128,7 +128,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     test "succeeds using client_assertions and generates an access_token" do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
-      app = RF.insert!(:client_application)
+      app = RF.insert!(:client_application, access_type: "confidential")
       public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
@@ -176,7 +176,13 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     test "succeeds using client_assertions and generates a refresh_token" do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
-      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+
+      app =
+        RF.insert!(:client_application,
+          access_type: "confidential",
+          grant_flows: ["resource_owner", "refresh_token"]
+        )
+
       public_key = RF.insert!(:public_key, client_application: app, value: get_public_key())
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
@@ -222,9 +228,19 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     end
 
     test "fails if params are invalid" do
-      assert {:error, :invalid_params} == Command.execute(%{})
-
       assert {:error, changeset} = Command.execute(%{grant_type: "password"})
+
+      assert %{
+               client_assertion_type: ["can't be blank"],
+               client_assertion: ["can't be blank"],
+               username: ["can't be blank"],
+               password: ["can't be blank"],
+               client_id: ["can't be blank"],
+               ip_address: ["can't be blank"],
+               scope: ["can't be blank"]
+             } = errors_on(changeset)
+
+      assert {:error, changeset} = Command.execute(%{"grant_type" => "password"})
 
       assert %{
                client_assertion_type: ["can't be blank"],
@@ -290,8 +306,11 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
     end
 
     test "fails if client application secret do not match credential" do
+      user = RF.insert!(:user)
+      app = RF.insert!(:client_application, access_type: "confidential", secret: "another-secret")
+
       input = %{
-        username: "my-username",
+        username: user.username,
         password: "MyPassw@rd234",
         grant_type: "password",
         scope: "admin:read",
@@ -300,27 +319,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         client_secret: Ecto.UUID.generate()
       }
 
-      expect(ResourceManagerMock, :get_identity, fn _ ->
-        {:ok, RF.insert!(:client_application, secret: "another-secret")}
-      end)
-
-      assert {:error, :unauthenticated} == Command.execute(input)
-    end
-
-    test "fails if client application is not confidential" do
-      input = %{
-        username: "my-username",
-        password: "MyPassw@rd234",
-        grant_type: "password",
-        scope: "admin:read",
-        ip_address: "45.232.192.12",
-        client_id: Ecto.UUID.generate(),
-        client_secret: "my-secret"
-      }
-
-      expect(ResourceManagerMock, :get_identity, fn _ ->
-        {:ok, RF.insert!(:client_application, access_type: "public")}
-      end)
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
+      expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, user} end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
     end
@@ -410,7 +410,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       end)
 
       expect(ResourceManagerMock, :get_identity, fn %{username: _} ->
-        user = RF.insert!(:user, status: "blocked")
+        user = RF.insert!(:user)
         hash = RF.gen_hashed_password("AnotherPassword")
         password = RF.insert!(:password, user: user, password_hash: hash)
         {:ok, %{user | password: password}}
