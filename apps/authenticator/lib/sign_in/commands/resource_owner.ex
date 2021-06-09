@@ -5,8 +5,9 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   With the resource owner password credentials grant type, the user provides their
   username and password directly and we uses it to authenticates then.
 
-  The Client application should pass their secret (or client assertion) in order to be authorized
-  to exchange the credentials for an access_token.
+  When dealing with public applications we cannot ensure that the secret is safe so
+  we diden't request it unlike confidential applications where we can request a secret
+  or an client_assertion.
 
   When a public key is registered for the client application this flow will require that
   an assertion is passed instead of the raw secret to avoid sending it on requests.
