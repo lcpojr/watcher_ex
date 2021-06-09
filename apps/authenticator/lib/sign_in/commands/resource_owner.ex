@@ -32,8 +32,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @doc """
   Sign in an user identity by ResouceOnwer flow.
 
-  The application has to be active, using openid-connect protocol and with access_type
-  public in order to use this flow.
+  The application has to be active, using openid-connect in order to use this flow.
 
   When the client application has a public_key saved on database we force the use of
   client_assertions on input to avoid passing it's secret open on requests.
