@@ -7,6 +7,7 @@
     "skip_files": [
         "test/support/data_case.ex",
         "test/support/factory.ex",
+        "lib/ports/resource_manager.ex",
         "lib/sign_in/commands/behaviour.ex",
         "lib/sessions/cache.ex",
         "lib/authenticator.ex",

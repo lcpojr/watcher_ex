@@ -5,7 +5,7 @@
 /cover/
 
 # The directory where the files will be saved on every build.
-/dialyzer/
+/dialyzer/plts/
 
 # The directory Mix downloads your dependencies sources to.
 /deps/

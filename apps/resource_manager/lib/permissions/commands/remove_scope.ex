@@ -9,14 +9,8 @@ defmodule ResourceManager.Permissions.Commands.RemoveScope do
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, UserScope}
   alias ResourceManager.Repo
 
-  @typedoc "All possible identities"
-  @type identities :: User.t() | ClientApplication.t()
-
-  @typedoc "All possible responses"
-  @type possible_response :: {:ok, list(identities())} | {:error, Ecto.Changeset.t()}
-
   @doc "Remove scopes from the identity"
-  @spec execute(identity :: identities(), scopes :: list(String.t())) :: possible_response()
+  @spec execute(identity :: User.t() | ClientApplication.t(), scopes :: list(String.t())) :: :ok
   def execute(%User{} = user, scopes) when is_list(scopes) do
     Logger.debug("Removing scopes from user #{user.id}")
 

@@ -18,8 +18,8 @@ jobs:
     
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23.1]
+        elixir: [1.12]
+        otp: [24.0]
 
     steps:
       - uses: actions/checkout@v2
@@ -54,8 +54,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23.1]
+        elixir: [1.12]
+        otp: [24.0]
       
     steps:
       - uses: actions/checkout@v2
@@ -86,8 +86,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23.1]
+        elixir: [1.12]
+        otp: [24.0]
       
     steps:
       - uses: actions/checkout@v2
@@ -110,7 +110,7 @@ jobs:
         id: plt-cache
         with:
           path: dializer/plts/
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          key: plt-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Generate PLT
         if: steps.plt-cache.outputs.cache-hit != 'true'
@@ -119,7 +119,7 @@ jobs:
           mix dialyzer --plt
 
       - name: Run dialyzer
-        run: mix dialyzer --no-check --halt-exit-status
+        run: mix dialyzer --no-check
         
   tests:
     name: Tests
@@ -128,8 +128,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.11]
-        otp: [23.1]
+        elixir: [1.12]
+        otp: [24.0]
   
     services:
       postgres:

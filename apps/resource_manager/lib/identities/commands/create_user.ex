@@ -47,6 +47,8 @@ defmodule ResourceManager.Identities.Commands.CreateUser do
     |> Users.create()
   end
 
-  defp create_permission(user, %{scopes: scopes}), do: ConsentScope.execute(user, scopes)
-  defp create_permission(_user, _), do: {:ok, :ignore}
+  defp create_permission(user, %{scopes: scopes}) when is_list(scopes),
+    do: ConsentScope.execute(user, scopes)
+
+  defp create_permission(_user, _permission), do: {:ok, :ignore}
 end

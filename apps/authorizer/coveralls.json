@@ -7,13 +7,6 @@
     "skip_files": [
         "test/support/data_case.ex",
         "test/support/factory.ex",
-        "lib/ports/authenticator.ex",
-        "lib/resource_manager.ex",
-        "lib/credentials/ports/*",
-        "lib/application.ex",
-        "lib/schema.ex",
-        "lib/repo.ex",
-        "lib/domain.ex",
-        "lib/input.ex"
+        "lib/ports/resource_manager.ex"
     ]
 }
