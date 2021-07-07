@@ -5,8 +5,9 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   With the resource owner password credentials grant type, the user provides their
   username and password directly and we uses it to authenticates then.
 
-  The Client application should pass their secret (or client assertion) in order to be authorized
-  to exchange the credentials for an access_token.
+  When dealing with public applications we cannot ensure that the secret is safe so
+  we diden't request it unlike confidential applications where we can request a secret
+  or an client_assertion.
 
   When a public key is registered for the client application this flow will require that
   an assertion is passed instead of the raw secret to avoid sending it on requests.
@@ -31,8 +32,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @doc """
   Sign in an user identity by ResouceOnwer flow.
 
-  The application has to be active, using openid-connect protocol and with access_type
-  confidential in order to use this flow.
+  The application has to be active, using openid-connect in order to use this flow.
 
   When the client application has a public_key saved on database we force the use of
   client_assertions on input to avoid passing it's secret open on requests.
@@ -41,20 +41,16 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   to avoid exposing identity existance and time attacks.
   """
   @impl true
-  def execute(%Input{username: username, client_id: client_id, scope: scope} = input) do
+  def execute(%Input{username: username, client_id: client_id} = input) do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
-         {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
-         {:confidential?, true} <- {:confidential?, app.access_type == "confidential"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:user, {:ok, user}} <- {:user, Port.get_identity(%{username: username})},
          {:user_active?, true} <- {:user_active?, user.status == "active"},
-         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)},
-         {:ok, access_token, claims} <- generate_access_token(user, app, scope),
-         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_and_save(input, claims) do
-      {:ok, parse_response(access_token, refresh_token, claims)}
+         {:public?, true, _identities} <- {:public?, app.access_type == "public", {user, app}} do
+      Logger.info("Running public authentication flow for client #{client_id}")
+      run_public_authentication(user, app, input)
     else
       {:app, {:error, :not_found}} ->
         Logger.info("Client application #{client_id} not found")
@@ -68,16 +64,6 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
       {:app_active?, false} ->
         Logger.info("Client application #{client_id} is not active")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
-      {:secret_matches?, false} ->
-        Logger.info("Client application #{client_id} credential didn't matches")
-        FakeVerifyHash.execute(:argon2)
-        {:error, :unauthenticated}
-
-      {:confidential?, false} ->
-        Logger.info("Client application #{client_id} is not confidential")
         FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
@@ -96,10 +82,9 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         FakeVerifyHash.execute(:argon2)
         {:error, :unauthenticated}
 
-      {:pass_matches?, false} ->
-        Logger.info("User #{username} password do not match any credential")
-        generate_attempt(input, false)
-        {:error, :unauthenticated}
+      {:public?, false, {user, app}} ->
+        Logger.info("Running confidential authentication flow for client #{client_id}")
+        run_confidential_authentication(user, app, input)
 
       error ->
         Logger.error("Failed to run command becuase of unknow error", error: inspect(error))
@@ -125,7 +110,44 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  def execute(_any), do: {:error, :invalid_params}
+  defp run_public_authentication(user, app, input) do
+    if VerifyHash.execute(user, input.password) do
+      user
+      |> generate_tokens(app, input)
+      |> parse_response()
+    else
+      Logger.info("User #{user.username} password do not match any credential")
+      generate_attempt(input, false)
+      {:error, :unauthenticated}
+    end
+  end
+
+  defp run_confidential_authentication(user, app, input) do
+    with {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
+         {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)} do
+      user
+      |> generate_tokens(app, input)
+      |> parse_response()
+    else
+      {:secret_matches?, false} ->
+        Logger.info("Client application #{app.client_id} credential didn't matches")
+        FakeVerifyHash.execute(:argon2)
+        {:error, :unauthenticated}
+
+      {:pass_matches?, false} ->
+        Logger.info("User #{user.username} password do not match any credential")
+        generate_attempt(input, false)
+        {:error, :unauthenticated}
+    end
+  end
+
+  defp generate_tokens(user, app, input) do
+    with {:ok, access_token, claims} <- generate_access_token(user, app, input.scope),
+         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
+         {:ok, _session} <- generate_and_save(input, claims) do
+      {:ok, access_token, refresh_token, claims}
+    end
+  end
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
        when is_binary(assertion) do
@@ -223,12 +245,16 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp parse_response(access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}) do
-    %{
+  defp parse_response({:ok, access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}) do
+    payload = %{
       access_token: access_token,
       refresh_token: refresh_token,
       expires_in: ttl,
       token_type: typ
     }
+
+    {:ok, payload}
   end
+
+  defp parse_response({:error, _reason} = error), do: error
 end

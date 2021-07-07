@@ -44,7 +44,7 @@ defmodule ResourceManager.Identities.Schemas.ClientApplication do
     field :status, :string, default: "active"
     field :blocked_until, :naive_datetime
     field :protocol, :string, default: "openid-connect"
-    field :access_type, :string, default: "confidential"
+    field :access_type, :string, default: "public"
     field :is_admin, :boolean, default: false
     field :grant_flows, {:array, :string}
     field :redirect_uri, :string
