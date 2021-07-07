@@ -53,11 +53,6 @@ defmodule ResourceManager.Credentials.TOTPs do
     |> String.pad_leading(totp.digits, "0")
   end
 
-  @doc "Checks if the given totp code matchs the secret"
-  @spec valid_code?(totp :: TOTP.t(), totp_code :: String.t()) :: boolean()
-  def valid_code?(%TOTP{} = totp, totp_code) when is_binary(totp_code),
-    do: generate_totp_code(totp) == totp_code
-
   @doc "Generates an QRCode for the given totp uri encoded in base64"
   @spec generate_qr_code_base64(totp :: TOTP.t()) :: String.t()
   def generate_qr_code_base64(%TOTP{} = totp) do
@@ -66,4 +61,10 @@ defmodule ResourceManager.Credentials.TOTPs do
     |> EQRCode.png()
     |> Base.encode64(padding: false)
   end
+
+    @doc "Checks if the given totp code matchs the secret"
+    @spec valid_code?(totp :: TOTP.t(), totp_code :: String.t()) :: boolean()
+    def valid_code?(%TOTP{} = totp, totp_code) when is_binary(totp_code),
+      do: generate_totp_code(totp) == totp_code
+
 end

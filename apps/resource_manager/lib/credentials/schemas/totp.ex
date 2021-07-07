@@ -33,9 +33,10 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   @acceptable_digits [4, 6]
   @acceptable_period [30, 60]
 
-  @optional_fields [:user_id, :email, :secret, :digits, :period, :issuer]
+  @required_fields [:user_id, :username]
+  @optional_fields [:secret, :digits, :period, :issuer]
   schema "totps" do
-    field :email, :string, virtual: true
+    field :username, :string, virtual: true
     field :secret, :string, redact: true
     field :digits, :integer, default: @default_digits
     field :period, :integer, default: @default_period_in_seconds
@@ -55,7 +56,8 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
-    |> cast(params, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> validate_inclusion(:digits, @acceptable_digits)
     |> validate_inclusion(:period, @acceptable_period)
     |> generate_secret()
@@ -82,7 +84,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   defp generate_otp_uri(%Ecto.Changeset{changes: changes} = changeset) do
     label =
       case changes do
-        %{email: email} when is_binary(email) -> URI.encode("#{@default_issuer}:#{email}")
+        %{username: username} when is_binary(username) -> URI.encode("#{@default_issuer}:#{username}")
         _changes -> URI.encode(@default_issuer)
       end
 
