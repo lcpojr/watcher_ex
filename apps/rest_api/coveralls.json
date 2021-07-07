@@ -6,6 +6,9 @@
     },
     "skip_files": [
         "test/support/conn_case.ex",
+        "lib/ports/authenticator.ex",
+        "lib/ports/authorizer.ex",
+        "lib/ports/resource_manager.ex",
         "lib/application.ex",
         "lib/controller.ex",
         "lib/telemetry.ex",

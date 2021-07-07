@@ -18,6 +18,7 @@ defmodule WatcherEx.MixProject do
       source_url: @url,
       dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
+      elixir: "~> 1.12",
       elixirc_options: [warnings_as_errors: true],
       preferred_cli_env: preferred_cli_env(),
       aliases: aliases(),
@@ -69,8 +70,8 @@ defmodule WatcherEx.MixProject do
     [
       plt_add_apps: [:ex_unit],
       plt_core_path: "dialyzer/plts/",
-      plt_file: {:no_warn, "dialyzer/plts/watcher_ex.plt"},
-      ignore_warnings: "dialyzer.ignore-warnings"
+      plt_file: {:no_warn, "dialyzer/plts/dialyzer.plt"},
+      ignore_warnings: "dialyzer/dialyzer.ignore-warnings"
     ]
   end
 
