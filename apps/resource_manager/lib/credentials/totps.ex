@@ -9,62 +9,61 @@ defmodule ResourceManager.Credentials.TOTPs do
 
   use ResourceManager.Domain, schema_model: ResourceManager.Credentials.Schemas.TOTP
 
+  alias ResourceManager.Credentials.Schemas.TOTP
+
   @doc """
-  1- Backend server generates the secret key
+  Generate Time-Based One-Time Password totp verification code.
 
-  The server shares secret key with the service generating the OTP
-  A hash based message authentication code (HMAC) is generated using the
-    obtained secret key and time. This is done using the cryptographic
-    SHA-1 algorithm.
+  In order to generate the correct verification code we have to follow the steps bellow:
+    - Receive the user local timestamp (or use the server);
+    - Decode the TOTP secret in base32 (it's encoded on totp creation);
+    - Get the moving factor based on the configured period and the actual or given timestamp;
+    - Generates the HMAC using the secret and the moving factor;
+    - Truncate the HMAC in order to get the last 31 bits extracting the offset first;
+    - Parsing the truncated bits into an string with the size of the configured digits;
 
-  Since both the server and the device requesting the OTP, have access to time,
-    which is obviously dynamic, it is taken as a parameter in the algorithm.
-    Here, the Unix timestamp is considered which is independent of time
-    zone i.e. time is calculated in seconds starting from January First 1970.
-
-  Let us consider “0215a7d8c15b492e21116482b6d34fc4e1a9f6ba” as the generated
-    string from the HMAC-SHA1 algorithm.
-
-  The code generated is 20 bytes long and is thus truncated to the desired
-    length suitable for the user to enter. Here dynamic truncation is used.
-    For the 20-byte code “0215a7d8c15b492e21116482b6d34fc4e1a9f6ba”,
-    each character occupies 4 bits. The entire string is taken as 20
-      individual one byte sting. We look at the last character, here a.
-    The decimal value of which is taken to determine the offset from which
-    to begin truncation.
-
-  Starting from the offset value, 10 the next 31 bits are read to obtain
-    the string “6482b6d3″. The last thing left to do, is to take our
-    hexadecimal numerical value, and convert it to decimal,
-    which gives 1686288083.
-
-  All we need now are the last desired length of OTP digits of the obtained
-    decimal string, zero-padded if necessary.
-    This is easily accomplished by taking the decimal string,
-    modulo 10 ^ number of digits required in OTP.
-
-    We end up with “288083” as our TOTP code.
-
-    A counter is used to keep track of the time elapsed and generate a
-      new code after a set interval of time
-
-      OTP generated is delivered to user by the methods described above.
+  ## Options:
+    - `time` - The user local time in unix format. Default is `System.os_time(:second)`
   """
-  def generate_totp(%{secret: secret, period: period, digits: digits}, code) do
-    decoded_secret = Base.decode32!(secret, padding: false)
+  @spec generate_totp_code(totp :: TOTP.t(), opts :: Keyword.t()) :: String.t()
+  def generate_totp_code(%TOTP{} = totp, opts \\ []) do
+    time = opts[:time] || System.os_time(:second)
 
-    time_factor =
-      DateTime.utc_now()
-      |> DateTime.to_unix()
-      |> Integer.floor_div(period)
-      |> Integer.to_string()
+    # Decoding the secret in base32
+    key =
+      totp.secret
+      |> String.upcase()
+      |> Base.decode32!(padding: false)
 
-    with hmac <- :crypto.hmac(:sha, decoded_secret, time_factor),
-         <<_::19-binary, offset::1-binary>> <- hmac,
-         <<_::size(offset)-binary, value::4-binary, _::binary>> <- hmac do
-      value
-    else
-      _ -> :saiu
-    end
+    # Extracting moving factor
+    moving_factor = <<Integer.floor_div(time, totp.period)::64>>
+
+    # Generating hmac from secret and moving factor
+    hmac = :crypto.mac(:hmac, :sha, key, moving_factor)
+
+    # Truncating hmac and extracting verification code
+    <<_::19-binary, _::4, offset::4>> = hmac
+    <<_::size(offset)-binary, p::4-binary, _::binary>> = hmac
+    <<_::1, trucated_bits::31>> = p
+
+    # Parsing truncated bits into verification code
+    trucated_bits
+    |> rem(1_000_000)
+    |> to_string()
+    |> String.pad_leading(totp.digits, "0")
+  end
+
+  @doc "Checks if the given totp code matchs the secret"
+  @spec valid_code?(totp :: TOTP.t(), totp_code :: String.t()) :: boolean()
+  def valid_code?(%TOTP{} = totp, totp_code) when is_binary(totp_code),
+    do: generate_totp_code(totp) == totp_code
+
+  @doc "Generates an QRCode for the given totp uri encoded in base64"
+  @spec generate_qr_code_base64(totp :: TOTP.t()) :: String.t()
+  def generate_qr_code_base64(%TOTP{} = totp) do
+    totp.otp_uri
+    |> EQRCode.encode()
+    |> EQRCode.png()
+    |> Base.encode64(padding: false)
   end
 end

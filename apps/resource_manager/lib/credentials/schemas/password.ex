@@ -41,7 +41,7 @@ defmodule ResourceManager.Credentials.Schemas.Password do
   @optional_fields [:user_id, :value, :algorithm, :salt]
   schema "passwords" do
     field :value, :string, virtual: true, redact: true
-    field :password_hash, :string
+    field :password_hash, :string, redact: true
     field :algorithm, :string, default: @default_algorithm
     field :salt, :integer, default: @default_salt
 

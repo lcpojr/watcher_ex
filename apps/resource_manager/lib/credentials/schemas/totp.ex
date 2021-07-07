@@ -20,25 +20,27 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
           issuer: String.t(),
           user: User.t() | Ecto.Association.NotLoaded.t(),
           user_id: Ecto.UUID.t(),
-          inserted_at: Datetime.t(),
-          updated_at: Datetime.t()
+          inserted_at: NaiveDateTime.t(),
+          updated_at: NaiveDateTime.t()
         }
 
   # Default totp values
   @default_digits 6
-  @default_period_in_seconds 60
+  @default_period_in_seconds 30
   @default_issuer "WatcherEx"
 
   # Changeset validation arguments
   @acceptable_digits [4, 6]
   @acceptable_period [30, 60]
 
-  @optional_fields [:user_id, :secret, :digits, :period, :issuer]
+  @optional_fields [:user_id, :email, :secret, :digits, :period, :issuer]
   schema "totps" do
-    field :secret, :string
+    field :email, :string, virtual: true
+    field :secret, :string, redact: true
     field :digits, :integer, default: @default_digits
     field :period, :integer, default: @default_period_in_seconds
     field :issuer, :string, default: @default_issuer
+    field :otp_uri, :string, redact: true
 
     belongs_to(:user, User)
 
@@ -57,6 +59,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
     |> validate_inclusion(:digits, @acceptable_digits)
     |> validate_inclusion(:period, @acceptable_period)
     |> generate_secret()
+    |> generate_otp_uri()
   end
 
   defp generate_secret(%Ecto.Changeset{valid?: false} = changeset), do: changeset
@@ -66,11 +69,32 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
        do: changeset
 
   defp generate_secret(%Ecto.Changeset{} = changeset) do
-    secret =
-      :sha256
-      |> :crypto.hmac(:crypto.strong_rand_bytes(9), @default_issuer)
-      |> Base.encode32(padding: false)
-
+    secret = Base.encode32(:crypto.strong_rand_bytes(20), padding: false)
     put_change(changeset, :secret, secret)
+  end
+
+  defp generate_otp_uri(%Ecto.Changeset{valid?: false} = changeset), do: changeset
+
+  defp generate_otp_uri(%Ecto.Changeset{changes: %{otp_uri: otp_uri}} = changeset)
+       when is_binary(otp_uri),
+       do: changeset
+
+  defp generate_otp_uri(%Ecto.Changeset{changes: changes} = changeset) do
+    label =
+      case changes do
+        %{email: email} when is_binary(email) -> URI.encode("#{@default_issuer}:#{email}")
+        _changes -> URI.encode(@default_issuer)
+      end
+
+    query =
+      URI.encode_query([
+        {:secret, Map.get(changes, :secret)},
+        {:issuer, Map.get(changes, :issuer, @default_issuer)},
+        {:digits, Map.get(changes, :digits, @default_digits)},
+        {:period, Map.get(changes, :period, @default_period_in_seconds)},
+        {:algorithm, "SHA1"}
+      ])
+
+    put_change(changeset, :otp_uri, "otpauth://totp/#{label}?#{query}")
   end
 end

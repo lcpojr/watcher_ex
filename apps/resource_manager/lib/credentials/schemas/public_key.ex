@@ -34,7 +34,7 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
   @required_fields [:value]
   @optional_fields [:client_application_id, :type, :format]
   schema "public_keys" do
-    field :value, :string
+    field :value, :string, redact: true
     field :type, :string, default: @default_key_type
     field :format, :string, default: @default_key_format
 
