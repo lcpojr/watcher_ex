@@ -53,7 +53,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
 
   @doc "Generates an `%Ecto.Changeset to be used in update operations."
-  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  @spec changeset(model :: %__MODULE__{}, params :: map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
     |> cast(params, @required_fields ++ @optional_fields)
