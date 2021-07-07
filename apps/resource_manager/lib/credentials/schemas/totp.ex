@@ -84,8 +84,11 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   defp generate_otp_uri(%Ecto.Changeset{changes: changes} = changeset) do
     label =
       case changes do
-        %{username: username} when is_binary(username) -> URI.encode("#{@default_issuer}:#{username}")
-        _changes -> URI.encode(@default_issuer)
+        %{username: username} when is_binary(username) ->
+          URI.encode("#{@default_issuer}:#{username}")
+
+        _changes ->
+          URI.encode(@default_issuer)
       end
 
     query =

@@ -28,7 +28,9 @@ defmodule ResourceManager.Credentials.TOTPsTest do
 
   describe "#{TOTPs}.update/2" do
     test "succeed if params are valid", ctx do
-      assert {:ok, %TOTP{id: id} = totp} = TOTPs.update(ctx.totp, %{username: ctx.user.username, issuer: "newIssuer"})
+      assert {:ok, %TOTP{id: id} = totp} =
+               TOTPs.update(ctx.totp, %{username: ctx.user.username, issuer: "newIssuer"})
+
       assert totp.id == Repo.get(TOTP, id).id
     end
 
@@ -39,7 +41,11 @@ defmodule ResourceManager.Credentials.TOTPsTest do
 
     test "raises if totp does not exist" do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
-        TOTPs.update(%TOTP{}, %{user_id: Ecto.UUID.generate(), username: "username", issuer: "any_totp"})
+        TOTPs.update(%TOTP{}, %{
+          user_id: Ecto.UUID.generate(),
+          username: "username",
+          issuer: "any_totp"
+        })
       end
     end
   end

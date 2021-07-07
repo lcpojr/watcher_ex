@@ -113,7 +113,6 @@ defmodule ResourceManager.Factory do
   def gen_hashed_password(password, :pbkdf2) when is_binary(password),
     do: Pbkdf2.hash_pwd_salt(password)
 
-
   @doc "Generates an random totp secret"
   @spec gen_totp_secret() :: String.t()
   def gen_totp_secret, do: Base.encode32(:crypto.strong_rand_bytes(20), padding: false)

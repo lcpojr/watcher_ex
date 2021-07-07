@@ -62,9 +62,8 @@ defmodule ResourceManager.Credentials.TOTPs do
     |> Base.encode64(padding: false)
   end
 
-    @doc "Checks if the given totp code matchs the secret"
-    @spec valid_code?(totp :: TOTP.t(), totp_code :: String.t()) :: boolean()
-    def valid_code?(%TOTP{} = totp, totp_code) when is_binary(totp_code),
-      do: generate_totp_code(totp) == totp_code
-
+  @doc "Checks if the given totp code matchs the secret"
+  @spec valid_code?(totp :: TOTP.t(), totp_code :: String.t()) :: boolean()
+  def valid_code?(%TOTP{} = totp, totp_code) when is_binary(totp_code),
+    do: generate_totp_code(totp) == totp_code
 end
