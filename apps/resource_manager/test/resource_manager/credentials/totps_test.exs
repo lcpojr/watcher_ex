@@ -1,8 +1,8 @@
 defmodule ResourceManager.Credentials.TOTPsTest do
   use ResourceManager.DataCase, async: true
 
-  alias ResourceManager.Credentials.TOTPs
   alias ResourceManager.Credentials.Schemas.TOTP
+  alias ResourceManager.Credentials.TOTPs
 
   setup do
     user = insert!(:user)
