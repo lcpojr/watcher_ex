@@ -110,14 +110,14 @@ jobs:
         id: plt-cache
         with:
           path: dializer/plts/
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          key: plt-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Generate PLT
         if: steps.plt-cache.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
 
       - name: Run dialyzer
-        run: mix dialyzer --no-check --halt-exit-status
+        run: mix dialyzer --no-check
         
   tests:
     name: Tests
