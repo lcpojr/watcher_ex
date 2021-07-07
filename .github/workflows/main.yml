@@ -114,7 +114,9 @@ jobs:
 
       - name: Generate PLT
         if: steps.plt-cache.outputs.cache-hit != 'true'
-        run: mix dialyzer --plt
+        run: |
+          mkdir -p dialyzer/plts/
+          mix dialyzer --plt
 
       - name: Run dialyzer
         run: mix dialyzer --no-check
