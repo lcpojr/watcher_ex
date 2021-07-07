@@ -26,8 +26,8 @@ defmodule ResourceManager.Credentials.Schemas.Password do
           password_hash: String.t(),
           algorithm: String.t(),
           salt: integer(),
-          inserted_at: Datetime.t(),
-          updated_at: Datetime.t()
+          inserted_at: NaiveDatetime.t(),
+          updated_at: NaiveDatetime.t()
         }
 
   # Changeset validation arguments
@@ -51,7 +51,7 @@ defmodule ResourceManager.Credentials.Schemas.Password do
   def changeset(params) when is_map(params), do: changeset(%__MODULE__{}, params)
 
   @doc "Generates an `%Ecto.Changeset to be used in update operations."
-  @spec changeset(model :: __MODULE__.t(), params :: map()) :: Ecto.Changeset.t()
+  @spec changeset(model :: %__MODULE__{}, params :: map()) :: Ecto.Changeset.t()
   def changeset(%__MODULE__{} = model, params) when is_map(params) do
     model
     |> cast(params, @optional_fields)

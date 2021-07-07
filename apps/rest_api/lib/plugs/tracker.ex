@@ -20,9 +20,7 @@ defmodule RestAPI.Plugs.Tracker do
       "request_id" => get_request_id(conn)
     }
 
-    Logger.metadata(traking_data)
-
-    put_private(conn, :tracking, traking_data)
+    append_tracking_data(conn, traking_data)
   end
 
   defp get_remote_ip(conn) do
@@ -47,5 +45,13 @@ defmodule RestAPI.Plugs.Tracker do
       [] -> nil
       [request_id | _] -> request_id
     end
+  end
+
+  defp append_tracking_data(conn, traking_data) do
+    traking_data
+    |> Enum.map(fn {key, value} -> {String.to_atom(key), value} end)
+    |> Logger.metadata()
+
+    put_private(conn, :tracking, traking_data)
   end
 end

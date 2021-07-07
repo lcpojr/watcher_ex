@@ -12,7 +12,7 @@ defmodule Authenticator.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.11",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),

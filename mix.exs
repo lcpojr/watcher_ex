@@ -18,7 +18,6 @@ defmodule WatcherEx.MixProject do
       source_url: @url,
       dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
-      elixir: "~> 1.12",
       elixirc_options: [warnings_as_errors: true],
       preferred_cli_env: preferred_cli_env(),
       aliases: aliases(),
@@ -37,7 +36,7 @@ defmodule WatcherEx.MixProject do
       # Tools
       {:junit_formatter, "~> 3.2", only: [:test]},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: true},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:excoveralls, "~> 0.14", only: :test},
       {:mox, "~> 0.5", only: :test}
@@ -71,7 +70,7 @@ defmodule WatcherEx.MixProject do
       plt_add_apps: [:ex_unit],
       plt_core_path: "dialyzer/plts/",
       plt_file: {:no_warn, "dialyzer/plts/dialyzer.plt"},
-      ignore_warnings: "dialyzer/dialyzer.ignore-warnings"
+      ignore_warnings: "dialyzer/ignore-warnings.exs"
     ]
   end
 

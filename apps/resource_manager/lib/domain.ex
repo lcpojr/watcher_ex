@@ -7,6 +7,8 @@ defmodule ResourceManager.Domain do
     quote do
       alias ResourceManager.Repo
 
+      require Logger
+
       @schema unquote(opts[:schema_model])
 
       @typedoc "Possible response types"
@@ -18,6 +20,15 @@ defmodule ResourceManager.Domain do
         params
         |> @schema.changeset()
         |> Repo.insert()
+        |> case do
+          {:ok, _model} = response ->
+            Logger.debug("#{inspect(@schema)} created with success")
+            response
+
+          {:error, reason} = response ->
+            Logger.debug("#{inspect(@schema)} creation failed because #{inspect(reason)}")
+            response
+        end
       end
 
       @doc "Updates a #{@schema} with the given params"
@@ -26,11 +37,32 @@ defmodule ResourceManager.Domain do
         model
         |> @schema.changeset(params)
         |> Repo.update()
+        |> case do
+          {:ok, _model} = response ->
+            Logger.debug("#{inspect(@schema)} updated with success")
+            response
+
+          {:error, reason} = response ->
+            Logger.debug("#{inspect(@schema)} update failed because #{inspect(reason)}")
+            response
+        end
       end
 
       @doc "Deletes a #{@schema} from the database"
       @spec delete(model :: @schema.t()) :: {:ok, @schema.t()}
-      def delete(%@schema{} = model), do: Repo.delete(model)
+      def delete(%@schema{} = model) do
+        model
+        |> Repo.delete()
+        |> case do
+          {:ok, _model} = response ->
+            Logger.debug("#{inspect(@schema)} deleted with success")
+            response
+
+          {:error, reason} = response ->
+            Logger.debug("#{inspect(@schema)} delete failed because #{inspect(reason)}")
+            response
+        end
+      end
 
       @doc "Checks if a #{@schema} exists with the given fields"
       @spec exists?(fields :: Keyword.t()) :: boolean()

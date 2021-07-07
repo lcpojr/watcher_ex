@@ -32,21 +32,12 @@ defmodule ResourceManager.Identities.Commands.CreateUser do
     end)
   end
 
-  def execute(params) when is_map(params) do
-    params
-    |> CreateUser.cast_and_apply()
-    |> case do
-      {:ok, %CreateUser{} = input} -> execute(input)
-      error -> error
-    end
-  end
-
   defp create_user(input) do
     input
     |> CreateUser.cast_to_map()
     |> Users.create()
   end
 
-  defp create_permission(user, %{scopes: scopes}), do: ConsentScope.execute(user, scopes)
-  defp create_permission(_user, _), do: {:ok, :ignore}
+  defp create_permission(user, %{scopes: scopes}) when is_list(scopes), do: ConsentScope.execute(user, scopes)
+  defp create_permission(_user, %{scopes: nil}), do: {:ok, :ignore}
 end
