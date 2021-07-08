@@ -1,7 +1,7 @@
 defmodule ResourceManager.Factory do
   @moduledoc false
 
-  alias ResourceManager.Credentials.Schemas.{Password, PublicKey}
+  alias ResourceManager.Credentials.Schemas.{Password, PublicKey, TOTP}
   alias ResourceManager.Identities.Schemas.{ClientApplication, User}
   alias ResourceManager.Permissions.Schemas.{ClientApplicationScope, Scope, UserScope}
   alias ResourceManager.Repo
@@ -35,6 +35,13 @@ defmodule ResourceManager.Factory do
   def build(:password) do
     %Password{
       password_hash: gen_hashed_password()
+    }
+  end
+
+  def build(:totp) do
+    %TOTP{
+      secret: gen_totp_secret(),
+      otp_uri: "otpauth://totp/:label?:query"
     }
   end
 
@@ -105,6 +112,10 @@ defmodule ResourceManager.Factory do
 
   def gen_hashed_password(password, :pbkdf2) when is_binary(password),
     do: Pbkdf2.hash_pwd_salt(password)
+
+  @doc "Generates an random totp secret"
+  @spec gen_totp_secret() :: String.t()
+  def gen_totp_secret, do: Base.encode32(:crypto.strong_rand_bytes(20), padding: false)
 
   @doc "Returns the mocked public key"
   @spec get_public_key() :: String.t()

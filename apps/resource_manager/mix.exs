@@ -46,6 +46,7 @@ defmodule ResourceManager.MixProject do
       {:pbkdf2_elixir, "~> 1.4"},
       {:nebulex, "~> 1.2"},
       {:jason, "~> 1.2"},
+      {:eqrcode, "~> 0.1.8"},
 
       # Database
       {:postgrex, "~> 0.15"},

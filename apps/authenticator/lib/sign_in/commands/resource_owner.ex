@@ -161,10 +161,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp secret_matches?(%{public_key: nil, secret: app_secret}, %{client_secret: input_secret})
-       when is_binary(app_secret) and is_binary(input_secret),
-       do: app_secret == input_secret
-
+  defp secret_matches?(%{public_key: nil, secret: secret}, %{client_secret: secret}), do: true
   defp secret_matches?(_application, _input), do: false
 
   defp get_signer_context(%{value: pem, type: "rsa", format: "pem"}),
