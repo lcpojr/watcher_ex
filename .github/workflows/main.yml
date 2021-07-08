@@ -106,7 +106,9 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Run dialyzer
-        run: mix dialyzer --no-check
+        run: |
+          mkdir -p dialyzer/plts/
+          mix dialyzer --no-check
         
   tests:
     name: Tests
