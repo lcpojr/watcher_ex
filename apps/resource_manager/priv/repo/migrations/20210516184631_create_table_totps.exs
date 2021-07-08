@@ -8,6 +8,7 @@ defmodule ResourceManager.Repo.Migrations.CreateTableTotps do
       add :digits, :integer, null: false, default: 6
       add :period, :integer, null: false, default: 60
       add :issuer, :string, null: false, default: "WatcherEx"
+      add :algorithm, :string, null: false, default: "SHA1"
       add :otp_uri, :string, null: false
 
       add :user_id, references(:users, type: :uuid), null: false

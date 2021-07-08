@@ -28,10 +28,12 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   @default_digits 6
   @default_period_in_seconds 30
   @default_issuer "WatcherEx"
+  @default_algorithm "SHA1"
 
   # Changeset validation arguments
   @acceptable_digits [4, 6]
   @acceptable_period [30, 60]
+  @acceptable_algorithms ["SHA1"]
 
   @required_fields [:user_id, :username]
   @optional_fields [:secret, :digits, :period, :issuer]
@@ -41,6 +43,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
     field :digits, :integer, default: @default_digits
     field :period, :integer, default: @default_period_in_seconds
     field :issuer, :string, default: @default_issuer
+    field :algorithm, :string, default: @default_algorithm
     field :otp_uri, :string, redact: true
 
     belongs_to(:user, User)
@@ -60,6 +63,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
     |> validate_required(@required_fields)
     |> validate_inclusion(:digits, @acceptable_digits)
     |> validate_inclusion(:period, @acceptable_period)
+    |> validate_inclusion(:algorithm, @acceptable_algorithms)
     |> generate_secret()
     |> generate_otp_uri()
   end
@@ -97,7 +101,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
         {:issuer, Map.get(changes, :issuer, @default_issuer)},
         {:digits, Map.get(changes, :digits, @default_digits)},
         {:period, Map.get(changes, :period, @default_period_in_seconds)},
-        {:algorithm, "SHA1"}
+        {:algorithm, @default_algorithm}
       ])
 
     put_change(changeset, :otp_uri, "otpauth://totp/#{label}?#{query}")
