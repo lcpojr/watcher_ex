@@ -17,7 +17,6 @@ defmodule ResourceManager do
   @doc "Delegates to #{GetIdentity}.execute/1"
   defdelegate get_identity(input), to: GetIdentity, as: :execute
 
-
   @doc "Delegates to #{ConsentScope}.execute/2"
   defdelegate consent_scope(identity, scopes), to: ConsentScope, as: :execute
 
