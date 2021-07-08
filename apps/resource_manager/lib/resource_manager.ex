@@ -4,6 +4,7 @@ defmodule ResourceManager do
   """
 
   alias ResourceManager.Credentials.Commands.PasswordIsAllowed
+  alias ResourceManager.Credentials.TOTPs
   alias ResourceManager.Identities.Commands.{CreateClientApplication, CreateUser, GetIdentity}
   alias ResourceManager.Permissions.Commands.{ConsentScope, RemoveScope}
 
@@ -16,6 +17,7 @@ defmodule ResourceManager do
   @doc "Delegates to #{GetIdentity}.execute/1"
   defdelegate get_identity(input), to: GetIdentity, as: :execute
 
+
   @doc "Delegates to #{ConsentScope}.execute/2"
   defdelegate consent_scope(identity, scopes), to: ConsentScope, as: :execute
 
@@ -24,4 +26,7 @@ defmodule ResourceManager do
 
   @doc "Delegates to #{PasswordIsAllowed}.execute/1"
   defdelegate password_allowed?(password), to: PasswordIsAllowed, as: :execute
+
+  @doc "Delegates to #{TOTP}.valid_code?/2"
+  defdelegate valid_totp?(user_or_totp, code), to: TOTP, as: :valid_code?
 end

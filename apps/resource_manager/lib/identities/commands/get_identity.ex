@@ -27,7 +27,7 @@ defmodule ResourceManager.Identities.Commands.GetIdentity do
     input
     |> GetUser.cast_to_list()
     |> Users.get_by()
-    |> Repo.preload([:password, :scopes])
+    |> Repo.preload([:password, :totp, :scopes])
     |> case do
       %User{} = user ->
         Logger.info("User identity #{user.id} got with success")
