@@ -38,7 +38,7 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
 
     end
 
-    test "succeeds gettin subject session from cache if it exists", ctx do
+    test "succeeds getting subject session from cache if it exists", ctx do
       Cache.set(ctx.session.jti, ctx.session)
 
       input = %{
