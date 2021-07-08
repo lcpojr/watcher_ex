@@ -12,7 +12,7 @@ defmodule Authenticator.Sessions do
 
   @doc "Converts an expiration to a NaiveDateTime"
   @spec convert_expiration(expiration :: integer()) :: NaiveDateTime.t()
-  def convert_expiration(expiration) do
+  def convert_expiration(expiration) when is_integer(expiration) do
     expiration
     |> DateTime.from_unix!(:second)
     |> DateTime.to_naive()

@@ -90,4 +90,14 @@ defmodule Authenticator.Sessions.SessionsTest do
       end
     end
   end
+
+  describe "#{Sessions}.convert_expiration/1" do
+    test "succeeds if input is integer" do
+      assert %NaiveDateTime{} = Sessions.convert_expiration(123_456_789)
+    end
+
+    test "raises if non integer input" do
+      Sessions.convert_expiration(1.5)
+    end
+  end
 end
