@@ -115,7 +115,7 @@ jobs:
       - name: Run dialyzer
         run: |
           mkdir -p dialyzer/plts/
-          mix dialyzer --no-check
+          mix dialyzer
         
   tests:
     name: Tests
