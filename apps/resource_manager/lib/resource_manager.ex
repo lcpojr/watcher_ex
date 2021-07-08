@@ -28,5 +28,5 @@ defmodule ResourceManager do
   defdelegate password_allowed?(password), to: PasswordIsAllowed, as: :execute
 
   @doc "Delegates to #{TOTP}.valid_code?/2"
-  defdelegate valid_totp?(user_or_totp, code), to: TOTP, as: :valid_code?
+  defdelegate valid_totp?(totp, code), to: TOTPs, as: :valid_code?
 end

@@ -10,7 +10,7 @@ defmodule ResourceManager.Identities.Schemas.User do
 
   import Ecto.Changeset
 
-  alias ResourceManager.Credentials.Schemas.Password
+  alias ResourceManager.Credentials.Schemas.{Password, TOTP}
   alias ResourceManager.Permissions.Schemas.Scope
 
   @typedoc "User schema fields"
@@ -37,6 +37,7 @@ defmodule ResourceManager.Identities.Schemas.User do
     field :blocked_until, :naive_datetime
 
     has_one :password, Password
+    has_one :totp, TOTP
     many_to_many :scopes, Scope, join_through: "users_scopes"
 
     timestamps()
