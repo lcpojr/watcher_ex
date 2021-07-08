@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.ApplicationAttemptsTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.SignIn.ApplicationAttempts

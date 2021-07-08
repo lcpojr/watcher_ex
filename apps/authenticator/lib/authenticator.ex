@@ -6,8 +6,15 @@ defmodule Authenticator do
   alias Authenticator.Crypto.Commands.{FakeVerifyHash, GenerateHash, VerifyHash}
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Tokens.AccessToken
-  alias Authenticator.SignIn.Commands.{ClientCredentials, RefreshToken, ResourceOwner}
-  alias Authenticator.SignOut.Commands.{SignOutAllSessions, SignOutSession}
+
+  alias Authenticator.SignIn.Commands.{
+    AuthorizationCode,
+    ClientCredentials,
+    RefreshToken,
+    ResourceOwner
+  }
+
+  alias Authenticator.SignOut.Commands.{RevokeTokens, SignOutAllSessions, SignOutSession}
 
   @doc "Delegates to #{ResourceOwner}.execute/1"
   defdelegate sign_in_resource_owner(input), to: ResourceOwner, as: :execute
@@ -18,11 +25,17 @@ defmodule Authenticator do
   @doc "Delegates to #{ClientCredentials}.execute/1"
   defdelegate sign_in_client_credentials(input), to: ClientCredentials, as: :execute
 
+  @doc "Delegates to #{AuthorizationCode}.execute/1"
+  defdelegate sign_in_authorization_code(input), to: AuthorizationCode, as: :execute
+
   @doc "Delegates to #{GetSession}.execute/1"
   defdelegate get_session(input), to: GetSession, as: :execute
 
   @doc "Delegates to #{AccessToken}.verify_and_validate/1"
   defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
+
+  @doc "Delegates to #{RevokeTokens}.execute/1"
+  defdelegate revoke_tokens(input), to: RevokeTokens, as: :execute
 
   @doc "Delegates to #{SignOutSession}.execute/1"
   defdelegate sign_out_session(session_or_jti), to: SignOutSession, as: :execute

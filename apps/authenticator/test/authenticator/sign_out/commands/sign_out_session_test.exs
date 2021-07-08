@@ -1,4 +1,6 @@
-defmodule Authenticator.SignIn.Commands.SignOutSessionTest do
+defmodule Authenticator.SignOut.Commands.SignOutSessionTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.SignOut.Commands.SignOutSession, as: Commands
@@ -6,18 +8,18 @@ defmodule Authenticator.SignIn.Commands.SignOutSessionTest do
   describe "#{Commands}.execute/1" do
     test "succeeds if session is valid" do
       session = insert!(:session)
-      assert {:ok, %{id: id, status: "invalidated"}} = Commands.execute(session)
+      assert {:ok, %{id: id, status: "revoked"}} = Commands.execute(session)
       assert session.id == id
     end
 
     test "succeeds if valid jti was passed and session active" do
       session = insert!(:session)
-      assert {:ok, %{id: id, status: "invalidated"}} = Commands.execute(session.jti)
+      assert {:ok, %{id: id, status: "revoked"}} = Commands.execute(session.jti)
       assert session.id == id
     end
 
     test "fails if session not active" do
-      session = insert!(:session, status: "invalidated")
+      session = insert!(:session, status: "revoked")
       assert {:error, :not_active} == Commands.execute(session.jti)
     end
 

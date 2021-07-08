@@ -1,4 +1,6 @@
 defmodule Authorizer.Policies.AdminAllowedTest do
+  @moduledoc false
+
   use Authorizer.DataCase, async: true
 
   alias Authorizer.Policies.AdminAllowed

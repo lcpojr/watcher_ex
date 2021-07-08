@@ -116,7 +116,7 @@ defmodule Authenticator.Sessions.Manager do
 
     [status: "active", created_after: create_after, expires_before: now]
     |> Session.query()
-    |> Repo.update_all(set: [status: "expired"])
+    |> Repo.update_all(set: [status: "expired", updated_at: NaiveDateTime.utc_now()])
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Session manager expired #{inspect(count)} sessions")
@@ -156,9 +156,9 @@ defmodule Authenticator.Sessions.Manager do
     end
   end
 
-  defp build_cache(%Session{jti: jti, claims: %{"exp" => exp}} = session) do
+  defp build_cache(%Session{jti: jti, type: type, claims: %{"exp" => exp}} = session) do
     %Nebulex.Object{
-      key: jti,
+      key: {jti, type},
       value: session,
       version: 1,
       expire_at: exp

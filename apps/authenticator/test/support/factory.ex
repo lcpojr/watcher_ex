@@ -3,7 +3,7 @@ defmodule Authenticator.Factory do
 
   alias Authenticator.Repo
   alias Authenticator.Sessions.Schemas.Session
-  alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
+  alias Authenticator.Sessions.Tokens.{AccessToken, AuthorizationCode, RefreshToken}
   alias Authenticator.SignIn.Schemas.{ApplicationAttempt, UserAttempt}
 
   @doc "Builds a default struct from the requested model"
@@ -13,6 +13,7 @@ defmodule Authenticator.Factory do
 
     %Session{
       jti: jti,
+      type: "access_token",
       subject_id: Ecto.UUID.generate(),
       subject_type: "user",
       claims: %{
@@ -84,6 +85,12 @@ defmodule Authenticator.Factory do
   @doc "Returns an mocked refresh token using the given claims"
   @spec build_refresh_token(claims :: map()) :: {:ok, token :: String.t(), claims :: map()}
   def build_refresh_token(claims) when is_map(claims), do: RefreshToken.generate_and_sign(claims)
+
+  @doc "Returns an mocked authorization code token using the given claims"
+  @spec build_authorization_code_token(claims :: map()) ::
+          {:ok, token :: String.t(), claims :: map()}
+  def build_authorization_code_token(claims) when is_map(claims),
+    do: AuthorizationCode.generate_and_sign(claims)
 
   @doc "Returns an default token expiration"
   @spec default_expiration() :: NaiveDateTime.t()

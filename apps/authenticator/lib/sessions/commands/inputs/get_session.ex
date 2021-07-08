@@ -11,16 +11,18 @@ defmodule Authenticator.Sessions.Commands.Inputs.GetSession do
   @type t :: %__MODULE__{
           id: String.t(),
           jti: String.t(),
+          type: String.t(),
           subject_id: String.t(),
           subject_type: String.t(),
           status: String.t(),
           grant_flow: String.t()
         }
 
-  @optional [:id, :jti, :subject_id, :subject_type, :status, :grant_flow]
+  @optional [:id, :jti, :type, :subject_id, :subject_type, :status, :grant_flow]
   embedded_schema do
     field :id, Ecto.UUID
     field :jti, :string
+    field :type, :string
     field :subject_id, :string
     field :subject_type, :string
     field :status, :string
@@ -31,6 +33,7 @@ defmodule Authenticator.Sessions.Commands.Inputs.GetSession do
   def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @optional)
+    |> validate_inclusion(:type, Session.possible_types())
     |> validate_inclusion(:status, Session.possible_statuses())
     |> validate_inclusion(:subject_type, Session.possible_subject_types())
     |> validate_inclusion(:grant_flow, Session.possible_grant_flows())

@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Inputs.RefreshToken do
+defmodule Authenticator.SignIn.Commands.Inputs.RefreshToken do
   @moduledoc """
   Input schema to be used in Refresh Token flow.
   """

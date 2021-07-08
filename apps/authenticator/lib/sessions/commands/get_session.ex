@@ -15,10 +15,10 @@ defmodule Authenticator.Sessions.Commands.GetSession do
 
   @doc "Returns a session using the given filters"
   @spec execute(input :: GetSession.t() | map()) :: possible_responses()
-  def execute(%GetSession{jti: jti} = input) do
+  def execute(%GetSession{jti: jti, type: type} = input) do
     Logger.info("Getting subject session")
 
-    jti
+    {jti, type}
     |> Cache.get()
     |> case do
       nil ->

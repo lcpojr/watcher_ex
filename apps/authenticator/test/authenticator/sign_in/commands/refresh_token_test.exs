@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Ports.ResourceManagerMock
@@ -28,16 +30,31 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: subject_id, subject_type: "user", claims: claims)
+      insert!(:session,
+        jti: jti,
+        type: "access_token",
+        subject_id: subject_id,
+        subject_type: "user",
+        claims: claims
+      )
 
       refresh_token_claims = %{
         "aud" => client_id,
         "azp" => app.name,
         "typ" => "Bearer",
+        "sub" => subject_id,
         "ati" => jti
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        type: "refresh_token",
+        subject_id: subject_id,
+        subject_type: "user",
+        claims: claims
+      )
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
@@ -66,7 +83,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => jti,
+                "jti" => ati,
                 "nbf" => _,
                 "scope" => ^scope,
                 "identity" => "user",
@@ -74,22 +91,27 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                 "typ" => ^typ
               }} = AccessToken.verify_and_validate(access_token)
 
+      assert %Session{jti: ^ati, status: "active", type: "access_token"} =
+               Repo.get_by(Session, jti: ati)
+
       assert {:ok,
               %{
                 "aud" => ^client_id,
-                "ati" => ^jti,
+                "ati" => ^ati,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => _,
+                "jti" => jti,
                 "nbf" => _,
-                "typ" => ^typ
+                "typ" => ^typ,
+                "sub" => _
               }} = RefreshToken.verify_and_validate(refresh_token)
 
-      assert %Session{jti: ^jti, status: "active"} = Repo.get_by(Session, jti: jti)
+      assert %Session{jti: ^jti, status: "active", type: "refresh_token"} =
+               Repo.get_by(Session, jti: jti)
     end
 
-    test "succeeds even if session is expired" do
+    test "succeeds even if access token session is expired" do
       scopes = RF.insert_list!(:scope, 3)
       user = RF.insert!(:user)
       app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
@@ -115,17 +137,27 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         subject_id: subject_id,
         subject_type: "user",
         claims: claims,
-        status: "expired"
+        status: "expired",
+        type: "access_token"
       )
 
       refresh_token_claims = %{
         "aud" => client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => subject_id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: subject_id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
         assert app.client_id == client_id
@@ -180,7 +212,87 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
     test "fails if params are invalid" do
       assert {:error, :invalid_params} == Command.execute(%{})
       assert {:error, changeset} = Command.execute(%{grant_type: "refresh_token"})
-      assert %{refresh_token: ["can't be blank"]} = errors_on(changeset)
+      assert %{refresh_token: ["can't be blank"]} == errors_on(changeset)
+    end
+
+    test "fails if refresh_token is invalid" do
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{grant_type: "refresh_token", refresh_token: "invalid"})
+    end
+
+    test "fails if client application does not exist" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+
+      subject_id = user.id
+      client_id = "client_id"
+      client_name = "name"
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      access_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "sub" => subject_id,
+        "typ" => "Bearer",
+        "identity" => "user",
+        "scope" => scope
+      }
+
+      {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
+
+      insert!(:session, jti: jti, subject_id: subject_id, subject_type: "user", claims: claims)
+
+      refresh_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "typ" => "Bearer",
+        "ati" => jti
+      }
+
+      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+    end
+
+    test "fails if refresh_token is invalid" do
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{grant_type: "refresh_token", refresh_token: "invalid"})
+    end
+
+    test "fails if client application does not exist" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+
+      subject_id = user.id
+      client_id = "client_id"
+      client_name = "name"
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      access_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "sub" => subject_id,
+        "typ" => "Bearer",
+        "identity" => "user",
+        "scope" => scope
+      }
+
+      {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
+
+      insert!(:session, jti: jti, subject_id: subject_id, subject_type: "user", claims: claims)
+
+      refresh_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "typ" => "Bearer",
+        "ati" => jti
+      }
+
+      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
     test "fails if session does not exist" do
@@ -195,13 +307,23 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         "scope" => "admin:read"
       }
 
-      {:ok, _token, %{"jti" => jti}} = build_access_token(access_token_claims)
+      {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user_id,
+        subject_type: "user",
+        claims: claims,
+        status: "expired",
+        type: "access_token"
+      )
 
       refresh_token_claims = %{
         "aud" => app_id,
         "azp" => "My application",
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user_id
       }
 
       {:ok, token, _} = build_refresh_token(refresh_token_claims)
@@ -210,7 +332,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if session was invalidated" do
+    test "fails if refresh token session was revoked" do
       app_id = Ecto.UUID.generate()
       user_id = Ecto.UUID.generate()
 
@@ -230,17 +352,28 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         subject_id: user_id,
         subject_type: "user",
         claims: claims,
-        status: "invalidated"
+        status: "expired",
+        type: "access_token"
       )
 
       refresh_token_claims = %{
         "aud" => app_id,
         "azp" => "My application",
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user_id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user_id,
+        subject_type: "user",
+        claims: claims,
+        status: "revoked",
+        type: "refresh_token"
+      )
 
       assert {:error, :unauthenticated} ==
                Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
@@ -266,17 +399,28 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         subject_id: user_id,
         subject_type: "user",
         claims: claims,
-        status: "refreshed"
+        status: "expired",
+        type: "access_token"
       )
 
       refresh_token_claims = %{
         "aud" => app_id,
         "azp" => "My application",
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user_id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user_id,
+        subject_type: "user",
+        claims: claims,
+        status: "refreshed",
+        type: "refresh_token"
+      )
 
       assert {:error, :unauthenticated} ==
                Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
@@ -298,16 +442,31 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "access_token"
+      )
 
       refresh_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user.id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
@@ -337,16 +496,31 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "access_token"
+      )
 
       refresh_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user.id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
@@ -376,16 +550,31 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
 
       {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
 
-      insert!(:session, jti: jti, subject_id: user.id, subject_type: "user", claims: claims)
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "access_token"
+      )
 
       refresh_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user.id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
 
@@ -414,17 +603,27 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         jti: jti,
         subject_id: subject_id,
         subject_type: "user",
-        claims: claims
+        claims: claims,
+        type: "access_token"
       )
 
       refresh_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => subject_id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: subject_id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
       expect(ResourceManagerMock, :get_identity, fn _ -> {:error, :not_found} end)
@@ -453,17 +652,27 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         jti: jti,
         subject_id: user.id,
         subject_type: "user",
-        claims: claims
+        claims: claims,
+        type: "access_token"
       )
 
       refresh_token_claims = %{
         "aud" => app.client_id,
         "azp" => app.name,
         "typ" => "Bearer",
-        "ati" => jti
+        "ati" => jti,
+        "sub" => user.id
       }
 
-      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+      {:ok, token, %{"jti" => jti} = claims} = build_refresh_token(refresh_token_claims)
+
+      insert!(:session,
+        jti: jti,
+        subject_id: user.id,
+        subject_type: "user",
+        claims: claims,
+        type: "refresh_token"
+      )
 
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, app} end)
       expect(ResourceManagerMock, :get_identity, fn _ -> {:ok, user} end)

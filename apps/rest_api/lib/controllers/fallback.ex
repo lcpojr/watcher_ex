@@ -35,6 +35,10 @@ defmodule RestAPI.Controllers.Fallback do
     |> render("403.json")
   end
 
+  def call(conn, {:error, :not_active}) do
+    call(conn, {:error, :unauthenticated})
+  end
+
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)

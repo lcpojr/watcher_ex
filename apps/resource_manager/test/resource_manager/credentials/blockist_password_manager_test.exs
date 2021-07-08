@@ -1,4 +1,6 @@
 defmodule ResourceManager.Credentials.BlocklistPasswordManagerTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Credentials.{BlocklistPasswordCache, BlocklistPasswordManager}

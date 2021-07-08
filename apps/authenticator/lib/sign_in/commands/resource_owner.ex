@@ -22,7 +22,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
-  alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.ResourceOwner, as: Input
   alias Authenticator.SignIn.UserAttempts
   alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes
@@ -110,11 +110,9 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp run_public_authentication(user, app, input) do
-    if VerifyHash.execute(user, input.password) do
-      user
-      |> generate_tokens(app, input)
-      |> parse_response()
+  defp run_public_authentication(user, app, %{password: password, otp: otp} = input) do
+    if VerifyHash.execute(user, password) and valid_totp?(user, otp) do
+      geretate_tokens_and_parse_response(user, app, input)
     else
       Logger.info("User #{user.username} password do not match any credential")
       generate_attempt(input, false)
@@ -122,12 +120,14 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
+  defp valid_totp?(%{totp: nil}, nil), do: true
+  defp valid_totp?(%{totp: nil}, code) when is_binary(code), do: false
+  defp valid_totp?(%{totp: totp}, code) when is_binary(code), do: Port.valid_totp?(totp, code)
+
   defp run_confidential_authentication(user, app, input) do
     with {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)} do
-      user
-      |> generate_tokens(app, input)
-      |> parse_response()
+      geretate_tokens_and_parse_response(user, app, input)
     else
       {:secret_matches?, false} ->
         Logger.info("Client application #{app.client_id} credential didn't matches")
@@ -141,12 +141,21 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
+  defp geretate_tokens_and_parse_response(user, app, input) do
+    user
+    |> generate_tokens(app, input)
+    |> parse_response()
+  end
+
   defp generate_tokens(user, app, input) do
-    with {:ok, access_token, claims} <- generate_access_token(user, app, input.scope),
-         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_and_save(input, claims) do
-      {:ok, access_token, refresh_token, claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, access_token, access_claims} <- generate_access_token(user, app, input.scope),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+           {:ok, _session} <- generate_session(input, access_claims, "access_token"),
+           {:ok, _session} <- generate_session(input, refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
@@ -161,10 +170,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp secret_matches?(%{public_key: nil, secret: app_secret}, %{client_secret: input_secret})
-       when is_binary(app_secret) and is_binary(input_secret),
-       do: app_secret == input_secret
-
+  defp secret_matches?(%{public_key: nil, secret: secret}, %{client_secret: secret}), do: true
   defp secret_matches?(_application, _input), do: false
 
   defp get_signer_context(%{value: pem, type: "rsa", format: "pem"}),
@@ -196,10 +202,16 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp generate_refresh_token(application, %{"aud" => aud, "azp" => azp, "jti" => jti}) do
+  defp generate_refresh_token(application, %{
+         "aud" => aud,
+         "azp" => azp,
+         "jti" => jti,
+         "sub" => sub
+       }) do
     if "refresh_token" in application.grant_flows do
       RefreshToken.generate_and_sign(%{
         "aud" => aud,
+        "sub" => sub,
         "azp" => azp,
         "ati" => jti,
         "typ" => "Bearer"
@@ -210,19 +222,36 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp generate_and_save(input, claims) do
+  defp generate_session(_input, nil, _type), do: {:ok, :ignored}
+
+  defp generate_session(input, claims, "access_token" = type) do
     Multi.new()
     |> Multi.run(:save_attempt, fn _repo, _changes -> generate_attempt(input, true) end)
-    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims) end)
+    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims, type) end)
     |> Repo.transaction()
     |> case do
       {:ok, %{generate: session}} ->
-        Logger.info("Succeeds in creating session", id: session.id)
+        Logger.info("Succeeds in access token creating session", id: session.id)
         {:ok, session}
 
       {:error, step, reason, _changes} ->
-        Logger.error("Failed to create session in step #{inspect(step)}", reason: reason)
+        Logger.error("Failed to create access token session in step #{inspect(step)}",
+          reason: reason
+        )
+
         {:error, reason}
+    end
+  end
+
+  defp generate_session(_input, claims, "refresh_token" = type) do
+    case generate_session(claims, type) do
+      {:ok, session} ->
+        Logger.info("Succeeds in creating refresh token session", id: session.id)
+        {:ok, session}
+
+      {:error, reason} = error ->
+        Logger.error("Failed to create refresh token session", reason: reason)
+        error
     end
   end
 
@@ -234,9 +263,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do
+  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims, type) do
     Sessions.create(%{
       jti: jti,
+      type: type,
       subject_id: sub,
       subject_type: "user",
       claims: claims,
@@ -245,7 +275,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp parse_response({:ok, access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}) do
+  defp parse_response({:ok, {access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}}) do
     payload = %{
       access_token: access_token,
       refresh_token: refresh_token,

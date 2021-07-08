@@ -16,7 +16,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.RefreshToken, as: Input
   alias Ecto.Multi
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
@@ -25,22 +25,20 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   Sign in an user identity by RefreshToken flow.
 
   The application has to be active and using openid-connect protocol.
-  If the session was invalidated the flow will fail.
+  If the session was revoked the flow will fail.
   """
   @impl true
   def execute(%Input{refresh_token: token}) do
     with {:token, {:ok, claims}} <- {:token, RefreshToken.verify_and_validate(token)},
-         {:session, {:ok, session}} <- {:session, GetSession.execute(%{jti: claims["ati"]})},
-         {:valid?, true} <- {:valid?, session.status not in ["invalidated", "refreshed"]},
+         {:session, {:ok, session}} <- {:session, get_session(claims["jti"], "refresh_token")},
+         {:valid?, true} <- {:valid?, session.status not in ["revoked", "refreshed"]},
          {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: claims["aud"]})},
          {:flow_enabled?, true} <- {:flow_enabled?, "refresh_token" in app.grant_flows},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:subject, {:ok, subject}} <- {:subject, get_subject(session)},
          {:sub_active?, true} <- {:sub_active?, subject.status == "active"},
-         {:ok, access_token, claims} <- generate_access_token(session.claims),
-         {:ok, refresh_token, _} <- generate_refresh_token(claims),
-         {:ok, _session} <- generate_session(session, claims) do
+         {:ok, {access_token, refresh_token, claims}} <- generate_tokens(session) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:token, {:error, reason}} ->
@@ -52,7 +50,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
         {:error, :unauthenticated}
 
       {:valid?, false} ->
-        Logger.info("Session was invalidated")
+        Logger.info("Session was revoked")
         {:error, :unauthenticated}
 
       {:app, {:error, :not_found}} ->
@@ -105,11 +103,25 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
 
   def execute(_any), do: {:error, :invalid_params}
 
+  defp get_session(jti, type), do: GetSession.execute(%{jti: jti, type: type})
+
   defp get_subject(%{subject_id: subject_id, subject_type: "user"}),
     do: Port.get_identity(%{username: nil, id: subject_id})
 
   defp get_subject(%{subject_id: subject_id, subject_type: "application"}),
     do: Port.get_identity(%{client_id: nil, id: subject_id})
+
+  defp generate_tokens(%{claims: %{"ati" => ati}} = refresh_session) do
+    Repo.execute_transaction(fn ->
+      with {:ok, %{claims: claims} = access_session} <- get_session(ati, "access_token"),
+           {:ok, access_token, access_claims} <- generate_access_token(claims),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(access_claims),
+           {:ok, _session} <- generate_session(access_session, access_claims, "access_token"),
+           {:ok, _session} <- generate_session(refresh_session, refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
+  end
 
   defp generate_access_token(%{
          "aud" => aud,
@@ -128,16 +140,39 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     })
   end
 
-  defp generate_refresh_token(%{"aud" => aud, "azp" => azp, "jti" => jti}) do
+  defp generate_refresh_token(%{"aud" => aud, "azp" => azp, "jti" => jti, "sub" => sub}) do
     RefreshToken.generate_and_sign(%{
       "aud" => aud,
       "azp" => azp,
+      "sub" => sub,
       "ati" => jti,
       "typ" => "Bearer"
     })
   end
 
-  defp generate_session(session, %{"jti" => jti, "exp" => exp} = claims) do
+  defp generate_session(session, %{"jti" => jti, "exp" => exp} = claims, "access_token" = type) do
+    %{
+      jti: jti,
+      type: type,
+      subject_id: session.subject_id,
+      subject_type: session.subject_type,
+      claims: claims,
+      expires_at: Sessions.convert_expiration(exp),
+      grant_flow: "refresh_token"
+    }
+    |> Sessions.create()
+    |> case do
+      {:ok, %Session{} = session} ->
+        Logger.info("Succeeds in generating a refresh token session", id: session.id)
+        {:ok, session}
+
+      {:error, reason} = error ->
+        Logger.error("Failed to generate a refresh token session", reason: reason)
+        error
+    end
+  end
+
+  defp generate_session(session, %{"jti" => jti, "exp" => exp} = claims, "refresh_token" = type) do
     Multi.new()
     |> Multi.run(:update, fn _repo, _changes ->
       Sessions.update(session, %{status: "refreshed"})
@@ -145,6 +180,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     |> Multi.run(:create, fn _repo, _changes ->
       Sessions.create(%{
         jti: jti,
+        type: type,
         subject_id: session.subject_id,
         subject_type: session.subject_type,
         claims: claims,
@@ -155,11 +191,14 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     |> Repo.transaction()
     |> case do
       {:ok, %{create: %Session{} = session}} ->
-        Logger.info("Succeeds in generating a session", id: session.id)
+        Logger.info("Succeeds in generating a refresh token session", id: session.id)
         {:ok, session}
 
       {:error, step, reason, _changes} ->
-        Logger.error("Failed to generate a session in step #{inspect(step)}", reason: reason)
+        Logger.error("Failed to generate a refresh token session in step #{inspect(step)}",
+          reason: reason
+        )
+
         {:error, reason}
     end
   end

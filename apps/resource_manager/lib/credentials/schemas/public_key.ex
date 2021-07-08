@@ -23,6 +23,10 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
           updated_at: NaiveDateTime.t()
         }
 
+  # Default Key values
+  @default_key_type "rsa"
+  @default_key_format "pem"
+
   # Changeset validation arguments
   @acceptable_types ~w(rsa)
   @acceptable_formats ~w(pem)
@@ -30,9 +34,9 @@ defmodule ResourceManager.Credentials.Schemas.PublicKey do
   @required_fields [:value]
   @optional_fields [:client_application_id, :type, :format]
   schema "public_keys" do
-    field :value, :string
-    field :type, :string, default: "rsa"
-    field :format, :string, default: "pem"
+    field :value, :string, redact: true
+    field :type, :string, default: @default_key_type
+    field :format, :string, default: @default_key_format
 
     belongs_to :client_application, ClientApplication
 

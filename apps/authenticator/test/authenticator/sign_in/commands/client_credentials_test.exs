@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Ports.ResourceManagerMock
@@ -54,7 +56,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
               }} = AccessToken.verify_and_validate(access_token)
 
       assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
-      assert %Session{jti: ^jti} = Repo.one(Session)
+      assert %Session{jti: ^jti, type: "access_token"} = Repo.one(Session)
     end
 
     test "succeeds and generates a refresh_token" do
@@ -85,22 +87,24 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                 token_type: typ
               }} = Command.execute(input)
 
-      assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
+      assert {:ok, %{"jti" => ati}} = RefreshToken.verify_and_validate(access_token)
 
       assert {:ok,
               %{
                 "aud" => ^client_id,
-                "ati" => ^jti,
+                "ati" => ^ati,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => _,
+                "jti" => jti,
                 "nbf" => _,
                 "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
-      assert %Session{jti: ^jti} = Repo.one(Session)
+
+      assert [%Session{type: "access_token"}, %Session{jti: ^jti, type: "refresh_token"}] =
+               Repo.all(Session)
     end
 
     test "succeeds using client_assertions and generates an access_token" do
@@ -190,10 +194,10 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
     end
 
-    test "fails if client application do not exist" do
+    test "fails if client application does not exist" do
       input = %{
         grant_type: "client_credentials",
         scope: "admin:read",
@@ -246,17 +250,46 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application secret do not match credential" do
+    test "fails if client application protocol is not valid" do
+      scopes = RF.insert_list!(:scope, 3)
+
+      app =
+        RF.insert!(:client_application, grant_flows: ["client_credentials"], protocol: "invalid")
+
       input = %{
         grant_type: "client_credentials",
         scope: "admin:read",
-        client_id: Ecto.UUID.generate(),
-        client_secret: Ecto.UUID.generate(),
+        client_id: app.client_id,
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil, scopes: scopes}}
+      end)
+
+      assert {:error, :unauthenticated} == Command.execute(input)
+    end
+
+    test "fails if client application secret do not match credential" do
+      app =
+        RF.insert!(:client_application,
+          grant_flows: ["client_credentials"],
+          secret: "53CR3T",
+          protocol: "openid-connect"
+        )
+
+      input = %{
+        grant_type: "client_credentials",
+        scope: "admin:read",
+        client_id: app.client_id,
+        client_secret: "wrong",
         ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
-        {:ok, RF.insert!(:client_application, secret: "another-secret")}
+        {:ok, app}
       end)
 
       assert {:error, :unauthenticated} == Command.execute(input)

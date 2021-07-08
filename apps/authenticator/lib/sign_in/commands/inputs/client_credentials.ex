@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Inputs.ClientCredentials do
+defmodule Authenticator.SignIn.Commands.Inputs.ClientCredentials do
   @moduledoc """
   Input schema to be used in Client Credentials flow.
   """

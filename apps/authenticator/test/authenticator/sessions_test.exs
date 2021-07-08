@@ -1,4 +1,6 @@
 defmodule Authenticator.Sessions.SessionsTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Sessions
@@ -12,6 +14,7 @@ defmodule Authenticator.Sessions.SessionsTest do
     test "succeed if params are valid" do
       params = %{
         jti: Ecto.UUID.generate(),
+        type: "access_token",
         subject_id: Ecto.UUID.generate(),
         subject_type: "user",
         claims: %{},
@@ -28,13 +31,14 @@ defmodule Authenticator.Sessions.SessionsTest do
       assert {:error, changeset} = Sessions.create(%{})
 
       assert %{
+               type: ["can't be blank"],
                claims: ["can't be blank"],
                expires_at: ["can't be blank"],
                grant_flow: ["can't be blank"],
                jti: ["can't be blank"],
                subject_id: ["can't be blank"],
                subject_type: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
     end
   end
 
@@ -48,7 +52,7 @@ defmodule Authenticator.Sessions.SessionsTest do
 
     test "fails if params are invalid", ctx do
       assert {:error, changeset} = Sessions.update(ctx.session, %{status: 123})
-      assert %{status: ["is invalid"]} = errors_on(changeset)
+      assert %{status: ["is invalid"]} == errors_on(changeset)
     end
 
     test "raises if session does not exist" do
@@ -87,6 +91,18 @@ defmodule Authenticator.Sessions.SessionsTest do
     test "raises if session does not exist" do
       assert_raise Ecto.NoPrimaryKeyValueError, fn ->
         Sessions.delete(%Session{})
+      end
+    end
+  end
+
+  describe "#{Sessions}.convert_expiration/1" do
+    test "succeeds if input is integer" do
+      assert %NaiveDateTime{} = Sessions.convert_expiration(123_456_789)
+    end
+
+    test "raises if non integer input" do
+      assert_raise FunctionClauseError, fn ->
+        Sessions.convert_expiration(1.5)
       end
     end
   end

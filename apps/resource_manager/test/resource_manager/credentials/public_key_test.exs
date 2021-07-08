@@ -1,4 +1,6 @@
 defmodule ResourceManager.Credentials.PublicKeysTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Credentials.PublicKeys

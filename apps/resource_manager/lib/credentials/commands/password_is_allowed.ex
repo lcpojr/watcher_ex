@@ -7,6 +7,8 @@ defmodule ResourceManager.Credentials.Commands.PasswordIsAllowed do
 
   alias ResourceManager.Credentials.BlocklistPasswordCache
 
+  @minimum_password_size 6
+
   @doc "Checks if the given password is strong enough to be used"
   @spec execute(password :: String.t()) :: boolean()
   def execute(password) when is_binary(password) do
@@ -27,8 +29,8 @@ defmodule ResourceManager.Credentials.Commands.PasswordIsAllowed do
     end
   end
 
-  defp is_strong?(password) when byte_size(password) >= 6, do: true
-  defp is_strong?(password) when byte_size(password) < 6, do: false
+  defp is_strong?(password) when byte_size(password) >= @minimum_password_size, do: true
+  defp is_strong?(password) when byte_size(password) < @minimum_password_size, do: false
 
   defp is_blocklisted?(password) do
     password

@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Ports.ResourceManagerMock
@@ -38,7 +40,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
         assert username == input_username
-        {:ok, %{user | password: password, scopes: scopes}}
+        {:ok, %{user | password: password, totp: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -66,6 +68,73 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
       assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
       assert %Session{jti: ^jti} = Repo.one(Session)
+    end
+
+    test "succeeds and generates an access_token validating totp" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      totp = RF.insert!(:totp, user: user)
+      app = RF.insert!(:client_application)
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      username = user.username
+      subject_id = user.id
+      client_id = app.client_id
+      client_name = app.name
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      input = %{
+        username: username,
+        password: "MyPassw@rd234",
+        otp: "1234",
+        grant_type: "password",
+        ip_address: "45.232.192.12",
+        scope: scope,
+        client_id: client_id,
+        client_secret: app.secret
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
+        assert username == input_username
+        {:ok, %{user | password: password, totp: totp, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :valid_totp?, fn %{id: totp_id}, "1234" ->
+        assert totp.id == totp_id
+        true
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: nil,
+                expires_in: 7200,
+                token_type: typ
+              }} = Command.execute(input)
+
+      assert {:ok,
+              %{
+                "aud" => ^client_id,
+                "azp" => ^client_name,
+                "exp" => _,
+                "iat" => _,
+                "iss" => "WatcherEx",
+                "jti" => jti,
+                "nbf" => _,
+                "scope" => ^scope,
+                "identity" => "user",
+                "sub" => ^subject_id,
+                "typ" => ^typ
+              }} = AccessToken.verify_and_validate(access_token)
+
+      assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
+      assert %Session{jti: ^jti, type: "access_token"} = Repo.one(Session)
     end
 
     test "succeeds and generates a refresh_token" do
@@ -96,7 +165,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
       expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
         assert username == input_username
-        {:ok, %{user | password: password, scopes: scopes}}
+        {:ok, %{user | password: password, totp: nil, scopes: scopes}}
       end)
 
       assert {:ok,
@@ -107,22 +176,93 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                 token_type: typ
               }} = Command.execute(input)
 
-      assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
+      assert {:ok, %{"jti" => ati}} = RefreshToken.verify_and_validate(access_token)
 
       assert {:ok,
               %{
                 "aud" => ^client_id,
-                "ati" => ^jti,
+                "ati" => ^ati,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => _,
+                "jti" => jti,
                 "nbf" => _,
-                "typ" => ^typ
+                "typ" => ^typ,
+                "sub" => _
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
-      assert %Session{jti: ^jti} = Repo.one(Session)
+
+      assert [%Session{type: "access_token"}, %Session{jti: ^jti, type: "refresh_token"}] =
+               Repo.all(Session)
+    end
+
+    test "succeeds and generates a refresh_token validating totp" do
+      scopes = RF.insert_list!(:scope, 3)
+      %{username: username} = user = RF.insert!(:user)
+      totp = RF.insert!(:totp, user: user)
+
+      %{client_id: client_id} =
+        app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      input = %{
+        "username" => username,
+        "password" => "MyPassw@rd234",
+        "otp" => "1234",
+        "grant_type" => "password",
+        "ip_address" => "45.232.192.12",
+        "scope" => scope,
+        "client_id" => client_id,
+        "client_secret" => app.secret
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
+        assert username == input_username
+        {:ok, %{user | password: password, totp: totp, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :valid_totp?, fn %{id: totp_id}, "1234" ->
+        assert totp.id == totp_id
+        true
+      end)
+
+      assert {:ok,
+              %{
+                access_token: access_token,
+                refresh_token: refresh_token,
+                expires_in: 7200,
+                token_type: typ
+              }} = Command.execute(input)
+
+      assert {:ok, %{"jti" => ati}} = RefreshToken.verify_and_validate(access_token)
+
+      assert {:ok,
+              %{
+                "aud" => ^client_id,
+                "ati" => ^ati,
+                "exp" => _,
+                "iat" => _,
+                "iss" => "WatcherEx",
+                "jti" => jti,
+                "nbf" => _,
+                "typ" => ^typ,
+                "sub" => _
+              }} = RefreshToken.verify_and_validate(refresh_token)
+
+      assert %UserAttempt{username: ^username} = Repo.one(UserAttempt)
+
+      assert [%Session{type: "access_token"}, %Session{jti: ^jti, type: "refresh_token"}] =
+               Repo.all(Session)
     end
 
     test "succeeds using client_assertions and generates an access_token" do
@@ -238,7 +378,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
 
       assert {:error, changeset} = Command.execute(%{"grant_type" => "password"})
 
@@ -250,7 +390,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
     end
 
     test "fails if client application do not exist" do
@@ -414,6 +554,47 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
         hash = RF.gen_hashed_password("AnotherPassword")
         password = RF.insert!(:password, user: user, password_hash: hash)
         {:ok, %{user | password: password}}
+      end)
+
+      assert {:error, :unauthenticated} == Command.execute(input)
+    end
+
+    test "fails if user totp do not match credential" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+      totp = RF.insert!(:totp, user: user)
+      app = RF.insert!(:client_application)
+      hash = RF.gen_hashed_password("MyPassw@rd234")
+      password = RF.insert!(:password, user: user, password_hash: hash)
+
+      username = user.username
+      client_id = app.client_id
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      input = %{
+        username: username,
+        password: "MyPassw@rd234",
+        otp: "4321",
+        grant_type: "password",
+        ip_address: "45.232.192.12",
+        scope: scope,
+        client_id: client_id,
+        client_secret: app.secret
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :get_identity, fn %{username: input_username} ->
+        assert username == input_username
+        {:ok, %{user | password: password, totp: totp, scopes: scopes}}
+      end)
+
+      expect(ResourceManagerMock, :valid_totp?, fn %{id: totp_id}, "4321" ->
+        assert totp.id == totp_id
+        false
       end)
 
       assert {:error, :unauthenticated} == Command.execute(input)

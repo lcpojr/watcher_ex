@@ -16,9 +16,12 @@
     {"lib/credentials/public_keys.ex", :unknown_type},
     {"lib/credentials/schemas/password.ex", :no_return},
     {"lib/credentials/schemas/password.ex", :unknown_type},
+    {"lib/credentials/schemas/totp.ex", :no_return},
+    {"lib/credentials/schemas/totp.ex", :unknown_type},
     {"lib/credentials/schemas/public_key.ex", :no_return},
     {"lib/credentials/schemas/public_key.ex", :unknown_type},
     {"lib/credentials/passwords.ex", :unknown_type},
+    {"lib/credentials/totps.ex", :unknown_type},
     {"lib/permissions/scopes.ex", :no_return},
     {"lib/permissions/scopes.ex", :unknown_type},
     {"lib/permissions/schemas/scope.ex", :no_return},
@@ -29,5 +32,7 @@
     {"lib/permissions/schemas/client_application_scope.ex", :unknown_type},
     {"lib/permissions/commands/consent_scope.ex", :unknown_type},
     {"lib/permissions/commands/remove_scope.ex", :unknown_type},
-    {"lib/phoenix/router.ex", :pattern_match, 402}
+    {"lib/controllers/public/admin.ex"},
+    {"lib/controllers/public/auth.ex"},
+    {"lib/phoenix/router.ex"}
 ]
