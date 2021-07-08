@@ -36,7 +36,7 @@ defmodule ResourceManager.Credentials.Schemas.TOTP do
   @acceptable_algorithms ["SHA1"]
 
   @required_fields [:user_id, :username]
-  @optional_fields [:secret, :digits, :period, :issuer]
+  @optional_fields [:secret, :digits, :period, :issuer, :algorithm]
   schema "totps" do
     field :username, :string, virtual: true
     field :secret, :string, redact: true
