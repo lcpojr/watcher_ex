@@ -200,8 +200,6 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
-      username = user.username
-      client_id = app.client_id
       scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
 
       input = %{
