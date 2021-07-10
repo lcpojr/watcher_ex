@@ -196,7 +196,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
       scopes = RF.insert_list!(:scope, 3)
       %{username: username} = user = RF.insert!(:user)
       totp = RF.insert!(:totp, user: user)
-      app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
+      %{client_id: client_id} = app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
       hash = RF.gen_hashed_password("MyPassw@rd234")
       password = RF.insert!(:password, user: user, password_hash: hash)
 
