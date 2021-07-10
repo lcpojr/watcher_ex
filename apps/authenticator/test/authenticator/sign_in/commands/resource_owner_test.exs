@@ -194,7 +194,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
 
     test "succeeds and generates a refresh_token validating totp" do
       scopes = RF.insert_list!(:scope, 3)
-      user = RF.insert!(:user)
+      %{username: username} = user = RF.insert!(:user)
       totp = RF.insert!(:totp, user: user)
       app = RF.insert!(:client_application, grant_flows: ["resource_owner", "refresh_token"])
       hash = RF.gen_hashed_password("MyPassw@rd234")
