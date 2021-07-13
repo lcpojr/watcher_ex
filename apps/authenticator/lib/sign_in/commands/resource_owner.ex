@@ -110,8 +110,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp run_public_authentication(user, app, input) do
-    if VerifyHash.execute(user, input.password) and valid_totp?(user, input.otp) do
+  defp run_public_authentication(user, app, %{password: password, otp: otp} = input) do
+    if VerifyHash.execute(user, password) and valid_totp?(user, otp) do
       user
       |> generate_tokens(app, input)
       |> parse_response()
