@@ -9,8 +9,8 @@ We have an initial implementation of some oauth2 most common flows as:
 
 ## Requirements
 
-- Elixir `1.11`;
-- Erlang `23.1`;
+- Elixir `1.12`;
+- Erlang `24.0`;
 - Docker-compose (Just when running in dev enviroment);
 
 ## Running it locally
