@@ -20,7 +20,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
     RefreshToken
   }
 
-  alias Authenticator.SignIn.Inputs.AuthorizationCode, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.AuthorizationCode, as: Input
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
 

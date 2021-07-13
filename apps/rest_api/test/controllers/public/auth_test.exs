@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.Public.AuthTest do
   use RestAPI.ConnCase, async: true
 
-  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Commands.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
   @content_type "application/x-www-form-urlencoded"

@@ -3,7 +3,13 @@ defmodule RestAPI.Controllers.Public.Auth do
 
   use RestAPI.Controller, :controller
 
-  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Commands.Inputs.{
+    AuthorizationCode,
+    ClientCredentials,
+    RefreshToken,
+    ResourceOwner
+  }
+
   alias RestAPI.Ports.Authenticator, as: Commands
   alias RestAPI.Views.Public.SignIn
 
@@ -47,6 +53,18 @@ defmodule RestAPI.Controllers.Public.Auth do
 
     with {:ok, input} <- ClientCredentials.cast_and_apply(params),
          {:ok, response} <- Commands.sign_in_client_credentials(input) do
+      conn
+      |> put_view(SignIn)
+      |> put_status(200)
+      |> render("sign_in.json", response: response)
+    end
+  end
+
+  def sign_in(conn, %{"grant_type" => "authorization_code"} = params) do
+    params = Map.merge(params, conn.private.tracking)
+
+    with {:ok, input} <- AuthorizationCode.cast_and_apply(params),
+         {:ok, response} <- Commands.sign_in_authorization_code(input) do
       conn
       |> put_view(SignIn)
       |> put_status(200)

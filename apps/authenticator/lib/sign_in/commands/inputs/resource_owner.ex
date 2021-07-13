@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Inputs.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.Inputs.ResourceOwner do
   @moduledoc """
   Input schema to be used in Resource Owner flow.
   """

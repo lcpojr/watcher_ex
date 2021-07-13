@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Inputs.AuthorizationCode do
+defmodule Authenticator.SignIn.Commands.Inputs.AuthorizationCode do
   @moduledoc """
   Input schema to be used in Authorization Code flow.
   """

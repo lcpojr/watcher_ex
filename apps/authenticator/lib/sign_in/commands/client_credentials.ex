@@ -19,7 +19,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
   alias Authenticator.SignIn.ApplicationAttempts
-  alias Authenticator.SignIn.Inputs.ClientCredentials, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.ClientCredentials, as: Input
   alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes
 

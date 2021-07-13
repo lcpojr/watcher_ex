@@ -22,7 +22,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
-  alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.ResourceOwner, as: Input
   alias Authenticator.SignIn.UserAttempts
   alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes

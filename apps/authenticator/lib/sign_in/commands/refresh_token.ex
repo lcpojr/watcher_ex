@@ -16,7 +16,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   alias Authenticator.Sessions.Commands.GetSession
   alias Authenticator.Sessions.Schemas.Session
   alias Authenticator.Sessions.Tokens.{AccessToken, RefreshToken}
-  alias Authenticator.SignIn.Inputs.RefreshToken, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.RefreshToken, as: Input
   alias Ecto.Multi
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
