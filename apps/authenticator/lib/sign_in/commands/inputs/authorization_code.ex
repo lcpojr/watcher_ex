@@ -19,7 +19,7 @@ defmodule Authenticator.SignIn.Inputs.AuthorizationCode do
   @possible_grant_type ~w(authorization_code)
   @acceptable_assertion_types ~w(urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 
-  @required [:code, :ip_address, :client_id, :grant_type]
+  @required [:code, :client_id, :grant_type]
   @optional [:redirect_uri, :client_secret, :client_assertion, :client_assertion_type]
   embedded_schema do
     field :code, :string
@@ -31,9 +31,6 @@ defmodule Authenticator.SignIn.Inputs.AuthorizationCode do
     field :client_secret, :string
     field :client_assertion, :string
     field :client_assertion_type, :string
-
-    # Extras
-    field :ip_address, :string
   end
 
   @doc false
