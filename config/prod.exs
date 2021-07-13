@@ -25,3 +25,16 @@ config :authenticator, Authenticator.Repo,
   hostname: System.fetch_env!("DATABASE_HOSTNAME"),
   port: System.fetch_env!("DATABASE_PORT"),
   pool_size: String.to_integer(System.fetch_env!("DATABASE_POOL_SIZE"))
+
+##########
+# Rest API
+##########
+
+config :rest_api, RestAPI.Endpoint,
+  https: [
+    port: 4001,
+    cipher_suite: :strong,
+    certfile: System.fetch_env!("TLS_CERT_FILE"),
+    keyfile: System.fetch_env!("TLS_KEY_FILE"),
+  ],
+  force_ssl: [hsts: true]
