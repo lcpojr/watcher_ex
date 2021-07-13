@@ -35,11 +35,11 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   @impl true
   def execute(%Input{code: token, client_id: client_id, redirect_uri: redirect_uri} = input) do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
-         {:flow_enabled?, true} <- {:flow_enabled?, "resource_owner" in app.grant_flows},
+         {:flow_enabled?, true} <- {:flow_enabled?, "authorization_code" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:token, {:ok, claims}} <- {:token, AuthorizationCode.verify_and_validate(token)},
-         {:same_client?, true} <- {:same_client?, client_id == client_id},
+         {:same_client?, true} <- {:same_client?, client_id == claims["aud"]},
          {:same_redirect?, true} <- {:same_redirect?, claims["redirect_uri"] == redirect_uri},
          {:user, {:ok, user}, _} <- {:user, Port.get_identity(%{id: claims["sub"]}), claims},
          {:user_active?, true, _} <- {:user_active?, user.status == "active", claims},
