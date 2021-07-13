@@ -30,7 +30,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   @behaviour Authenticator.SignIn.Commands.Behaviour
 
   @doc """
-  Sign in an user identity by ResouceOnwer flow.
+  Sign in an user identity by ResouceOwner flow.
 
   The application has to be active, using openid-connect in order to use this flow.
 
