@@ -45,7 +45,13 @@ config :authorizer, Authorizer.Ports.ResourceManager, domain: Authorizer.Ports.R
 ##########
 
 config :rest_api, RestAPI.Endpoint,
-  http: [port: 4002],
+  http: [port: 4000],
+  https: [
+    port: 4001,
+    cipher_suite: :strong,
+    certfile: "priv/cert/selfsigned.pem",
+    keyfile: "priv/cert/selfsigned_key.pem"
+  ],
   server: false
 
 config :rest_api, RestAPI.Ports.Authenticator, domain: RestAPI.Ports.AuthenticatorMock
