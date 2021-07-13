@@ -1,34 +1,31 @@
-defmodule Authenticator.SignIn.Inputs.ResourceOwner do
+defmodule Authenticator.SignIn.Inputs.AuthorizationCode do
   @moduledoc """
-  Input schema to be used in Resource Owner flow.
+  Input schema to be used in Authorization Code flow.
   """
 
   use Authenticator.Input
 
-  @typedoc "Resource owner flow input fields"
+  @typedoc "Authorization code flow input fields"
   @type t :: %__MODULE__{
-          username: String.t(),
-          password: String.t(),
           grant_type: String.t(),
-          scope: String.t(),
+          code: String.t(),
+          redirect_uri: String.t() | nil,
           client_id: String.t(),
           client_secret: String.t() | nil,
           client_assertion: String.t() | nil,
           client_assertion_type: String.t() | nil
         }
 
-  @possible_grant_type ~w(password)
+  @possible_grant_type ~w(authorization_code)
   @acceptable_assertion_types ~w(urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 
-  @required [:username, :password, :client_id, :ip_address, :scope, :grant_type]
-  @optional [:otp, :client_secret, :client_assertion, :client_assertion_type]
+  @required [:code, :ip_address, :client_id, :grant_type]
+  @optional [:redirect_uri, :client_secret, :client_assertion, :client_assertion_type]
   embedded_schema do
-    field :username, :string
-    field :password, :string
-    field :otp, :string
+    field :code, :string
     field :grant_type, :string
-    field :scope, :string
     field :client_id, :string
+    field :redirect_uri, :string
 
     # Application credentials
     field :client_secret, :string
@@ -43,11 +40,7 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
   def changeset(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required ++ @optional)
-    |> validate_length(:username, min: 1)
-    |> validate_length(:password, min: 1)
-    |> validate_format(:otp, ~r(\d{4,6}))
     |> validate_inclusion(:grant_type, @possible_grant_type)
-    |> validate_length(:scope, min: 1)
     |> validate_length(:client_id, min: 1)
     |> validate_length(:client_secret, min: 1)
     |> validate_required(@required)
