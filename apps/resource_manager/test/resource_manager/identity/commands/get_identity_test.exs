@@ -19,7 +19,7 @@ defmodule ResourceManager.Identities.Commands.GetIdentityTest do
       }
 
       assert {:ok, %User{} = user} = GetIdentity.execute(input)
-      assert user == User |> Repo.one() |> Repo.preload([:password, :scopes])
+      assert user == User |> Repo.one() |> Repo.preload([:password, :scopes, :totp])
     end
 
     test "succeeds in getting client application identity if params are valid", ctx do

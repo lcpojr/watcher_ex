@@ -110,8 +110,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp run_public_authentication(user, app, input) do
-    if VerifyHash.execute(user, input.password) do
+  defp run_public_authentication(user, app, %{password: password, otp: otp} = input) do
+    if VerifyHash.execute(user, password) and valid_totp?(user, otp) do
       user
       |> generate_tokens(app, input)
       |> parse_response()
@@ -121,6 +121,10 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
       {:error, :unauthenticated}
     end
   end
+
+  defp valid_totp?(%{totp: nil}, nil), do: true
+  defp valid_totp?(%{totp: nil}, code) when is_binary(code), do: false
+  defp valid_totp?(%{totp: totp}, code) when is_binary(code), do: Port.valid_totp?(totp, code)
 
   defp run_confidential_authentication(user, app, input) do
     with {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
