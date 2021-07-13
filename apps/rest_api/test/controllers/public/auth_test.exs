@@ -31,6 +31,28 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> json_response(200)
     end
 
+    test "suceeds in Resource Owner Flow with totp if params are valid", %{conn: conn} do
+      params = %{
+        "username" => "my-username",
+        "password" => "my-password",
+        "otp" => "1234",
+        "grant_type" => "password",
+        "scope" => "admin:read admin:write",
+        "client_id" => "2e455bb1-0604-4812-9756-36f7ab23b8d9",
+        "client_secret" => "w3MehAvgztbMYpnhneVLQhkoZbxAXBGUCFe"
+      }
+
+      expect(AuthenticatorMock, :sign_in_resource_owner, fn _input ->
+        {:ok, success_payload()}
+      end)
+
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
+               conn
+               |> put_req_header("content-type", @content_type)
+               |> post(@token_endpoint, params)
+               |> json_response(200)
+    end
+
     test "suceeds in Refresh Token Flow if params are valid", %{conn: conn} do
       params = %{
         "refresh_token" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
@@ -73,18 +95,22 @@ defmodule RestAPI.Controllers.Public.AuthTest do
       end)
 
       assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "bad_request",
+               "status" => 400,
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
                  "client_assertion" => ["can't be blank"],
                  "client_assertion_type" => ["can't be blank"],
                  "password" => ["can't be blank"],
-                 "username" => ["can't be blank"]
+                 "username" => ["can't be blank"],
+                 "otp" => ["is invalid"]
                }
-             } =
+             } ==
                conn
                |> put_req_header("content-type", @content_type)
-               |> post(@token_endpoint, %{"grant_type" => "password"})
+               |> post(@token_endpoint, %{"grant_type" => "password", "otp" => 123})
                |> json_response(400)
     end
 
@@ -93,7 +119,12 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         RefreshToken.cast_and_apply(input)
       end)
 
-      assert %{"response" => %{"refresh_token" => ["can't be blank"]}} =
+      assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "bad_request",
+               "status" => 400,
+               "response" => %{"refresh_token" => ["can't be blank"]}
+             } ==
                conn
                |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "refresh_token"})
@@ -106,13 +137,16 @@ defmodule RestAPI.Controllers.Public.AuthTest do
       end)
 
       assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "bad_request",
+               "status" => 400,
                "response" => %{
                  "scope" => ["can't be blank"],
                  "client_id" => ["can't be blank"],
                  "client_assertion" => ["can't be blank"],
                  "client_assertion_type" => ["can't be blank"]
                }
-             } =
+             } ==
                conn
                |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "client_credentials"})

@@ -9,9 +9,16 @@ defmodule Authenticator.Ports.ResourceManager do
   @doc "Delegates to ResourceManager.get_identity/1"
   @callback get_identity(input :: map()) :: possible_responses()
 
-  @doc "Authenticates the subject using Resource Owner Flow"
+  @doc "Delegates to ResourceManager.valid_totp?/2"
+  @callback valid_totp?(totp :: struct(), code :: String.t()) :: possible_responses()
+
+  @doc "Gets the subject identity by its username or client_id"
   @spec get_identity(input :: map()) :: possible_responses()
   def get_identity(input), do: implementation().get_identity(input)
+
+  @doc "Verifies if the given totp code matches the generated for the user"
+  @spec valid_totp?(totp :: struct(), code :: String.t()) :: boolean()
+  def valid_totp?(totp, code), do: implementation().valid_totp?(totp, code)
 
   defp implementation do
     :authenticator

@@ -4,6 +4,7 @@ defmodule ResourceManager do
   """
 
   alias ResourceManager.Credentials.Commands.PasswordIsAllowed
+  alias ResourceManager.Credentials.TOTPs
   alias ResourceManager.Identities.Commands.{CreateClientApplication, CreateUser, GetIdentity}
   alias ResourceManager.Permissions.Commands.{ConsentScope, RemoveScope}
 
@@ -24,4 +25,7 @@ defmodule ResourceManager do
 
   @doc "Delegates to #{PasswordIsAllowed}.execute/1"
   defdelegate password_allowed?(password), to: PasswordIsAllowed, as: :execute
+
+  @doc "Delegates to #{TOTP}.valid_code?/2"
+  defdelegate valid_totp?(totp, code), to: TOTPs, as: :valid_code?
 end
