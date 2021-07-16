@@ -193,7 +193,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
              } = errors_on(changeset)
     end
 
-    test "fails if client application do not exist" do
+    test "fails if client application does not exist" do
       input = %{
         grant_type: "client_credentials",
         scope: "admin:read",
@@ -246,17 +246,46 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
       assert {:error, :unauthenticated} == Command.execute(input)
     end
 
-    test "fails if client application secret do not match credential" do
+    test "fails if client application protocol is not valid" do
+      scopes = RF.insert_list!(:scope, 3)
+
+      app =
+        RF.insert!(:client_application, grant_flows: ["client_credentials"], protocol: "invalid")
+
       input = %{
         grant_type: "client_credentials",
         scope: "admin:read",
-        client_id: Ecto.UUID.generate(),
-        client_secret: Ecto.UUID.generate(),
+        client_id: app.client_id,
+        client_secret: "my-secret",
+        ip_address: "45.232.192.12"
+      }
+
+      expect(ResourceManagerMock, :get_identity, fn %{client_id: client_id} ->
+        assert app.client_id == client_id
+        {:ok, %{app | public_key: nil, scopes: scopes}}
+      end)
+
+      assert {:error, :unauthenticated} == Command.execute(input)
+    end
+
+    test "fails if client application secret do not match credential" do
+      app =
+        RF.insert!(:client_application,
+          grant_flows: ["client_credentials"],
+          secret: "53CR3T",
+          protocol: "openid-connect"
+        )
+
+      input = %{
+        grant_type: "client_credentials",
+        scope: "admin:read",
+        client_id: app.client_id,
+        client_secret: "wrong",
         ip_address: "45.232.192.12"
       }
 
       expect(ResourceManagerMock, :get_identity, fn _ ->
-        {:ok, RF.insert!(:client_application, secret: "another-secret")}
+        {:ok, app}
       end)
 
       assert {:error, :unauthenticated} == Command.execute(input)
