@@ -12,6 +12,7 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
   setup do
     current_level = Logger.level()
     Logger.configure(level: :info)
+
     on_exit(fn ->
       Logger.configure(level: current_level)
       Cache.flush()
@@ -31,11 +32,9 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
       }
 
       assert capture_log(fn ->
-        assert {:ok, %Session{} = session} = GetSession.execute(input)
-        assert session == Repo.one(Session)
-      end) =~ "Session not found on cache"
-
-
+               assert {:ok, %Session{} = session} = GetSession.execute(input)
+               assert session == Repo.one(Session)
+             end) =~ "Session not found on cache"
     end
 
     test "succeeds getting subject session from cache if it exists", ctx do
@@ -50,9 +49,9 @@ defmodule Authenticator.Sessions.Commands.GetSessionTest do
       }
 
       assert capture_log(fn ->
-        assert {:ok, %Session{} = session} = GetSession.execute(input)
-        assert session == Repo.one(Session)
-      end) =~ "Session #{ctx.session.id} found on cache"
+               assert {:ok, %Session{} = session} = GetSession.execute(input)
+               assert session == Repo.one(Session)
+             end) =~ "Session #{ctx.session.id} found on cache"
     end
 
     test "fails if session does not exist" do
