@@ -118,7 +118,13 @@ defmodule ResourceManager.Identities.Manager do
   defp block_user_identities(usernames) when is_list(usernames) do
     [usernames: usernames, status: "active"]
     |> User.query()
-    |> Repo.update_all(set: [status: "temporary_blocked", blocked_until: blocked_until()])
+    |> Repo.update_all(
+      set: [
+        status: "temporary_blocked",
+        blocked_until: blocked_until(),
+        updated_at: NaiveDateTime.utc_now()
+      ]
+    )
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Identities manager blocked #{inspect(count)} user identities")
@@ -133,7 +139,13 @@ defmodule ResourceManager.Identities.Manager do
   defp unblock_user_identities do
     [status: "temporary_blocked", blocked_before: NaiveDateTime.utc_now()]
     |> User.query()
-    |> Repo.update_all(set: [status: "active", blocked_until: nil])
+    |> Repo.update_all(
+      set: [
+        status: "active",
+        blocked_until: nil,
+        updated_at: NaiveDateTime.utc_now()
+      ]
+    )
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Identities manager unblocked #{inspect(count)} user identities")
@@ -149,7 +161,13 @@ defmodule ResourceManager.Identities.Manager do
   defp block_application_identities(client_ids) when is_list(client_ids) do
     [client_ids: client_ids, status: "active"]
     |> ClientApplication.query()
-    |> Repo.update_all(set: [status: "temporary_blocked", blocked_until: blocked_until()])
+    |> Repo.update_all(
+      set: [
+        status: "temporary_blocked",
+        blocked_until: blocked_until(),
+        updated_at: NaiveDateTime.utc_now()
+      ]
+    )
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Identities manager blocked #{inspect(count)} app identities")
@@ -164,7 +182,13 @@ defmodule ResourceManager.Identities.Manager do
   defp unblock_application_identities do
     [status: "temporary_blocked", blocked_before: NaiveDateTime.utc_now()]
     |> ClientApplication.query()
-    |> Repo.update_all(set: [status: "active", blocked_until: nil])
+    |> Repo.update_all(
+      set: [
+        status: "active",
+        blocked_until: nil,
+        updated_at: NaiveDateTime.utc_now()
+      ]
+    )
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Identities manager unblocked #{inspect(count)} app identities")

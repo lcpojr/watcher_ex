@@ -116,7 +116,7 @@ defmodule Authenticator.Sessions.Manager do
 
     [status: "active", created_after: create_after, expires_before: now]
     |> Session.query()
-    |> Repo.update_all(set: [status: "expired"])
+    |> Repo.update_all(set: [status: "expired", updated_at: NaiveDateTime.utc_now()])
     |> case do
       {count, _} when is_integer(count) ->
         Logger.debug("Session manager expired #{inspect(count)} sessions")
