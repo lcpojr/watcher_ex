@@ -97,7 +97,9 @@ defmodule Authenticator.Sessions.SessionsTest do
     end
 
     test "raises if non integer input" do
-      Sessions.convert_expiration(1.5)
+      assert_raise FunctionClauseError, fn ->
+        Sessions.convert_expiration(1.5)
+      end
     end
   end
 end
