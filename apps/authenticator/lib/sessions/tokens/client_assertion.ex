@@ -9,7 +9,7 @@ defmodule Authenticator.Sessions.Tokens.ClientAssertion do
   add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(iss)
 
   # Two hours in seconds
-  @max_exp 60 * 60 * 2
+  @exp_in_seconds 60 * 60 * 2
 
   @default_audience "WatcherEx"
   @default_type "Bearer"
@@ -24,6 +24,8 @@ defmodule Authenticator.Sessions.Tokens.ClientAssertion do
     |> add_claim("typ", nil, fn value, _, _ -> value == @default_type end)
   end
 
-  defp gen_exp, do: current_time() + @max_exp
-  defp valid_expiration?(exp), do: exp >= current_time() && exp <= current_time() + @max_exp
+  defp gen_exp, do: current_time() + @exp_in_seconds
+
+  defp valid_expiration?(exp),
+    do: exp >= current_time() && exp <= current_time() + @exp_in_seconds
 end
