@@ -11,7 +11,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   }
 
   alias RestAPI.Ports.Authenticator, as: Commands
-  alias RestAPI.Views.Public.SignIn
+  alias RestAPI.Views.Public.Auth
 
   action_fallback RestAPI.Controllers.Fallback
 
@@ -30,7 +30,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     with {:ok, input} <- ResourceOwner.cast_and_apply(params),
          {:ok, response} <- Commands.sign_in_resource_owner(input) do
       conn
-      |> put_view(SignIn)
+      |> put_view(Auth)
       |> put_status(200)
       |> render("token.json", response: response)
     end
@@ -42,7 +42,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     with {:ok, input} <- RefreshToken.cast_and_apply(params),
          {:ok, response} <- Commands.sign_in_refresh_token(input) do
       conn
-      |> put_view(SignIn)
+      |> put_view(Auth)
       |> put_status(200)
       |> render("token.json", response: response)
     end
@@ -54,7 +54,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     with {:ok, input} <- ClientCredentials.cast_and_apply(params),
          {:ok, response} <- Commands.sign_in_client_credentials(input) do
       conn
-      |> put_view(SignIn)
+      |> put_view(Auth)
       |> put_status(200)
       |> render("token.json", response: response)
     end
@@ -66,7 +66,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     with {:ok, input} <- AuthorizationCode.cast_and_apply(params),
          {:ok, response} <- Commands.sign_in_authorization_code(input) do
       conn
-      |> put_view(SignIn)
+      |> put_view(Auth)
       |> put_status(200)
       |> render("token.json", response: response)
     end

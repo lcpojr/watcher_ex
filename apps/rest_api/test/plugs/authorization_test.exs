@@ -18,6 +18,9 @@ defmodule RestAPI.Plugs.AuthorizationTest do
 
     test "succeeds and authorizer the subject in public endpoint", ctx do
       conn = %{ctx.conn | private: %{session: ctx.session}}
+
+      expect(AuthorizerMock, :authorize_public, fn _conn -> :ok end)
+
       assert %Plug.Conn{private: %{session: _}} = Authorization.call(conn, type: "public")
     end
 
@@ -42,8 +45,10 @@ defmodule RestAPI.Plugs.AuthorizationTest do
       conn = %{ctx.conn | private: %{session: ctx.session}}
 
       expect(AuthorizerMock, :authorize_admin, fn _conn -> {:error, :unauthorized} end)
+      expect(AuthorizerMock, :authorize_public, fn _conn -> {:error, :unauthorized} end)
 
       assert %Plug.Conn{status: 401} = Authorization.call(conn, type: "admin")
+      assert %Plug.Conn{status: 401} = Authorization.call(conn, type: "public")
     end
   end
 

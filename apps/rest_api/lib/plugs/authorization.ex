@@ -41,6 +41,15 @@ defmodule RestAPI.Plugs.Authorization do
     end
   end
 
+  defp authorized?(conn, "public") do
+    conn
+    |> Authorizer.authorize_public()
+    |> case do
+      :ok -> true
+      {:error, :unauthorized} -> false
+    end
+  end
+
   # We will start to authorize public endpoint on a next PR
   defp authorized?(_conn, _type), do: true
 end
