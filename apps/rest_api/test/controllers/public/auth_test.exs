@@ -49,7 +49,11 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> json_response(200)
     end
 
-    test "redirects response if params are valid", %{conn: conn, access_token: access_token, claims: claims} do
+    test "redirects response if params are valid", %{
+      conn: conn,
+      access_token: access_token,
+      claims: claims
+    } do
       params = %{
         "client_id" => Ecto.UUID.generate(),
         "response_type" => "code",
@@ -81,7 +85,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                |> put_req_header("content-type", @content_type)
                |> post(@authorization_code_endpoint, params)
 
-      assert "https://localhost:4000/authorization-redirect?code=my-code&state=my-state" == redirected_to(conn)
+      assert "https://localhost:4000/authorization-redirect?code=my-code&state=my-state" ==
+               redirected_to(conn)
     end
 
     test "fails if params are invalid", %{conn: conn, access_token: access_token, claims: claims} do
@@ -142,7 +147,11 @@ defmodule RestAPI.Controllers.Public.AuthTest do
         {:error, :unauthorized}
       end)
 
-      assert %{"detail" => "Not authorized to perform such action", "error" => "unauthorized", "status" => 401} ==
+      assert %{
+               "detail" => "Not authorized to perform such action",
+               "error" => "unauthorized",
+               "status" => 401
+             } ==
                conn
                |> put_req_header("authorization", "Bearer #{access_token}")
                |> put_req_header("content-type", @content_type)

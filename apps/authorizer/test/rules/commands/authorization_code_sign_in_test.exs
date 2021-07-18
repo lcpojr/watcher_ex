@@ -141,7 +141,7 @@ defmodule Authorizer.SignIn.Commands.AuthorizationCodeTest do
 
       app =
         RF.insert!(:client_application,
-        status: "inactive",
+          status: "inactive",
           redirect_uri: "https://redirect-test.com"
         )
 
