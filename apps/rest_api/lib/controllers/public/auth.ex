@@ -77,7 +77,10 @@ defmodule RestAPI.Controllers.Public.Auth do
   def logout(%{private: %{session: session}} = conn, _params) do
     session.jti
     |> Commands.sign_out_session()
-    |> parse_sign_out_response(conn)
+    |> case do
+      {:ok, _any} -> send_resp(conn, :no_content, "")
+      {:error, _reason} = error -> error
+    end
   end
 
   @doc "Logout subject authenticated sessions."
@@ -85,11 +88,9 @@ defmodule RestAPI.Controllers.Public.Auth do
   def logout_all_sessions(%{private: %{session: session}} = conn, _params) do
     session.subject_id
     |> Commands.sign_out_all_sessions(session.subject_type)
-    |> parse_sign_out_response(conn)
+    |> case do
+      {:ok, _any} -> send_resp(conn, :no_content, "")
+      {:error, _reason} = error -> error
+    end
   end
-
-  defp parse_sign_out_response({:ok, _any}, conn), do: send_resp(conn, :no_content, "")
-  defp parse_sign_out_response({:error, :not_active}, conn), do: send_resp(conn, :forbidden, "")
-  defp parse_sign_out_response({:error, :not_found}, conn), do: send_resp(conn, :not_found, "")
-  defp parse_sign_out_response({:error, _any} = error, _conn), do: error
 end
