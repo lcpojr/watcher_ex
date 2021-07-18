@@ -1,4 +1,4 @@
-defmodule RestAPI.Views.Public.SignIn do
+defmodule RestAPI.Views.Public.Auth do
   @moduledoc false
 
   use RestAPI.View
