@@ -28,7 +28,7 @@ defmodule Authorizer.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -41,10 +41,15 @@ defmodule Authorizer.MixProject do
     [
       # Umbrella
       {:resource_manager, in_umbrella: true},
+      {:authenticator, in_umbrella: true},
 
       # Domain
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.0"},
+
+      # Database
+      {:postgrex, "~> 0.15"},
+      {:ecto_sql, "~> 3.6"},
 
       # Tools
       {:junit_formatter, "~> 3.2", only: [:test]},

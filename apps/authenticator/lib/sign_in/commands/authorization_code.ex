@@ -21,6 +21,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   }
 
   alias Authenticator.SignIn.Commands.Inputs.AuthorizationCode, as: Input
+  alias ResourceManager.Identities.Commands.Inputs.GetUser, as: User
 
   @behaviour Authenticator.SignIn.Commands.Behaviour
 
@@ -41,7 +42,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
          {:token, {:ok, claims}} <- {:token, AuthorizationCode.verify_and_validate(token)},
          {:same_client?, true} <- {:same_client?, client_id == claims["aud"]},
          {:same_redirect?, true} <- {:same_redirect?, claims["redirect_uri"] == redirect_uri},
-         {:user, {:ok, user}, _} <- {:user, Port.get_identity(%{id: claims["sub"]}), claims},
+         {:user, {:ok, user}, _} <- {:user, Port.get_identity(%User{id: claims["sub"]}), claims},
          {:user_active?, true, _} <- {:user_active?, user.status == "active", claims},
          {:public?, true, _} <- {:public?, public_app?(app), {user, app, input, claims}} do
       geretate_tokens_and_parse_response(user, app, claims)
