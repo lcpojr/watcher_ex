@@ -35,6 +35,6 @@ config :rest_api, RestAPI.Endpoint,
     port: 4001,
     cipher_suite: :strong,
     certfile: System.fetch_env!("TLS_CERT_FILE"),
-    keyfile: System.fetch_env!("TLS_KEY_FILE"),
+    keyfile: System.fetch_env!("TLS_KEY_FILE")
   ],
   force_ssl: [hsts: true]
