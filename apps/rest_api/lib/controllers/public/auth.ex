@@ -15,9 +15,6 @@ defmodule RestAPI.Controllers.Public.Auth do
 
   action_fallback RestAPI.Controllers.Fallback
 
-  def authorize_token(conn, _params) do
-  end
-
   @doc """
   Sign in an identity by using one of the accepted flows.
 
