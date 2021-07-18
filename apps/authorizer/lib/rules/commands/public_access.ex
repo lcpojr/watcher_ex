@@ -1,28 +1,23 @@
-defmodule Authorizer.Rules.Commands.AdminAccess do
+defmodule Authorizer.Rules.Commands.PublicAccess do
   @moduledoc """
-  Rule for authorizing a subject to do any action on admin endpoints.
+  Rule for authorizing a subject to do any action on public endpoints.
 
   In order to authorize we have to execute an verification if the subject matches some
   requirements as:
-    - It has admin flag enabled;
     - It is status is active;
   """
 
   require Logger
 
-  alias Authorizer.Policies.{AdminAllowed, SubjectActive}
+  alias Authorizer.Policies.SubjectActive
   alias Plug.Conn
 
-  @steps [
-    SubjectActive,
-    AdminAllowed
-  ]
+  @steps [SubjectActive]
 
   @doc """
   Run the authorization flow in order to verify if the subject matches all requirements.
   This will call the following policies:
     - #{SubjectActive};
-    - #{AdminAllowed};
   """
   @spec execute(conn :: Conn.t()) :: :ok | {:error, :unauthorized}
   def execute(%Conn{} = conn) do
