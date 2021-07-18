@@ -1,4 +1,4 @@
-defmodule Authenticator.Sessions.Tokens.AccessToken do
+defmodule Authenticator.Sessions.Tokens.AuthorizationCode do
   @moduledoc """
   Access token configurations.
   """
@@ -13,7 +13,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
 
   @default_issuer "WatcherEx"
   @default_type "Bearer"
-  @identity_types ~w(user application)
+  @identity_types ~w(user)
 
   @impl true
   def token_config do
@@ -26,6 +26,7 @@ defmodule Authenticator.Sessions.Tokens.AccessToken do
     |> add_claim("sub", & &1, &is_binary/1)
     |> add_claim("typ", nil, fn value, _, _ -> value == @default_type end)
     |> add_claim("identity", & &1, fn value, _, _ -> value in @identity_types end)
+    |> add_claim("redirect_uri", & &1, &is_binary/1)
     |> add_claim("scope", nil, &is_binary/1)
   end
 

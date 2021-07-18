@@ -1,7 +1,7 @@
 defmodule RestAPI.Controllers.Public.AuthTest do
   use RestAPI.ConnCase, async: true
 
-  alias Authenticator.SignIn.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
+  alias Authenticator.SignIn.Commands.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}
   alias RestAPI.Ports.AuthenticatorMock
 
   @content_type "application/x-www-form-urlencoded"
@@ -60,6 +60,26 @@ defmodule RestAPI.Controllers.Public.AuthTest do
       }
 
       expect(AuthenticatorMock, :sign_in_refresh_token, fn _input ->
+        {:ok, success_payload()}
+      end)
+
+      assert %{"access_token" => _, "refresh_token" => _, "token_type" => _, "expires_in" => _} =
+               conn
+               |> put_req_header("content-type", @content_type)
+               |> post(@token_endpoint, params)
+               |> json_response(200)
+    end
+
+    test "suceeds in Authorization Code Flow if params are valid", %{conn: conn} do
+      params = %{
+        "code" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+        "grant_type" => "authorization_code",
+        "redirect_uri" => "https://redirect-test.com",
+        "client_id" => Ecto.UUID.generate(),
+        "client_secret" => "my-secret"
+      }
+
+      expect(AuthenticatorMock, :sign_in_authorization_code, fn _input ->
         {:ok, success_payload()}
       end)
 
@@ -150,6 +170,28 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                conn
                |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "client_credentials"})
+               |> json_response(400)
+    end
+
+    test "fails in Authorization Code Flow if params are invalid", %{conn: conn} do
+      expect(AuthenticatorMock, :sign_in_authorization_code, fn input when is_map(input) ->
+        ClientCredentials.cast_and_apply(input)
+      end)
+
+      assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "bad_request",
+               "response" => %{
+                 "client_assertion" => ["can't be blank"],
+                 "client_assertion_type" => ["can't be blank"],
+                 "client_id" => ["can't be blank"],
+                 "code" => ["can't be blank"]
+               },
+               "status" => 400
+             } ==
+               conn
+               |> put_req_header("content-type", @content_type)
+               |> post(@token_endpoint, %{"grant_type" => "authorization_code"})
                |> json_response(400)
     end
   end

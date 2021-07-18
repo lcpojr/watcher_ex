@@ -22,7 +22,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   alias Authenticator.Ports.ResourceManager, as: Port
   alias Authenticator.{Repo, Sessions}
   alias Authenticator.Sessions.Tokens.{AccessToken, ClientAssertion, RefreshToken}
-  alias Authenticator.SignIn.Inputs.ResourceOwner, as: Input
+  alias Authenticator.SignIn.Commands.Inputs.ResourceOwner, as: Input
   alias Authenticator.SignIn.UserAttempts
   alias Ecto.Multi
   alias ResourceManager.Permissions.Scopes
@@ -112,9 +112,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
   defp run_public_authentication(user, app, %{password: password, otp: otp} = input) do
     if VerifyHash.execute(user, password) and valid_totp?(user, otp) do
-      user
-      |> generate_tokens(app, input)
-      |> parse_response()
+      geretate_tokens_and_parse_response(user, app, input)
     else
       Logger.info("User #{user.username} password do not match any credential")
       generate_attempt(input, false)
@@ -129,9 +127,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   defp run_confidential_authentication(user, app, input) do
     with {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
          {:pass_matches?, true} <- {:pass_matches?, VerifyHash.execute(user, input.password)} do
-      user
-      |> generate_tokens(app, input)
-      |> parse_response()
+      geretate_tokens_and_parse_response(user, app, input)
     else
       {:secret_matches?, false} ->
         Logger.info("Client application #{app.client_id} credential didn't matches")
@@ -143,6 +139,12 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
         generate_attempt(input, false)
         {:error, :unauthenticated}
     end
+  end
+
+  defp geretate_tokens_and_parse_response(user, app, input) do
+    user
+    |> generate_tokens(app, input)
+    |> parse_response()
   end
 
   defp generate_tokens(user, app, input) do

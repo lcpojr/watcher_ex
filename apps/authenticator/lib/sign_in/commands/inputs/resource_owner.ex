@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Inputs.ResourceOwner do
+defmodule Authenticator.SignIn.Commands.Inputs.ResourceOwner do
   @moduledoc """
   Input schema to be used in Resource Owner flow.
   """
@@ -12,7 +12,9 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
           grant_type: String.t(),
           scope: String.t(),
           client_id: String.t(),
-          client_secret: String.t()
+          client_secret: String.t() | nil,
+          client_assertion: String.t() | nil,
+          client_assertion_type: String.t() | nil
         }
 
   @possible_grant_type ~w(password)
@@ -27,12 +29,14 @@ defmodule Authenticator.SignIn.Inputs.ResourceOwner do
     field :grant_type, :string
     field :scope, :string
     field :client_id, :string
-    field :ip_address, :string
 
     # Application credentials
     field :client_secret, :string
     field :client_assertion, :string
     field :client_assertion_type, :string
+
+    # Extras
+    field :ip_address, :string
   end
 
   @doc false

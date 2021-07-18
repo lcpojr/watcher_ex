@@ -9,7 +9,7 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
   add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(aud)
 
   # Thirty days in seconds
-  @max_exp 60 * 60 * 24 * 30
+  @exp_in_seconds 60 * 60 * 24 * 30
 
   @default_issuer "WatcherEx"
   @default_type "Bearer"
@@ -25,7 +25,9 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
     |> add_claim("ati", nil, &is_binary/1)
   end
 
-  defp gen_ttl, do: @max_exp
-  defp gen_exp, do: current_time() + @max_exp
-  defp valid_expiration?(exp), do: exp >= current_time() && exp <= current_time() + @max_exp
+  defp gen_ttl, do: @exp_in_seconds
+  defp gen_exp, do: current_time() + @exp_in_seconds
+
+  defp valid_expiration?(exp),
+    do: exp >= current_time() && exp <= current_time() + @exp_in_seconds
 end
