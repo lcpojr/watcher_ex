@@ -10,10 +10,6 @@ defmodule RestAPI.Routers.Admin do
     plug Tracker
   end
 
-  pipeline :authorized_as_user do
-    plug Authorization, type: "public"
-  end
-
   pipeline :authorized_as_admin do
     plug Authorization, type: "admin"
   end
