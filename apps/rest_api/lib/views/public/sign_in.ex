@@ -3,7 +3,7 @@ defmodule RestAPI.Views.Public.SignIn do
 
   use RestAPI.View
 
-  def render("sign_in.json", %{response: response}) do
+  def render("token.json", %{response: response}) do
     %{
       access_token: response.access_token,
       refresh_token: response.refresh_token,
