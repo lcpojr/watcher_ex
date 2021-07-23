@@ -91,8 +91,7 @@ defmodule Authorizer.Rules.Commands.AuthorizationCodeSignIn do
 
     scopes
     |> Scopes.convert_to_list()
-    |> Enum.filter(&(&1 in app_scopes))
-    |> Enum.filter(&(&1 in user_scopes))
+    |> Enum.filter(&(&1 in app_scopes or &1 in user_scopes))
     |> Scopes.convert_to_string()
     |> case do
       "" -> nil
