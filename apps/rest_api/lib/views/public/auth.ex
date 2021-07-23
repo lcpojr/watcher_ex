@@ -11,4 +11,11 @@ defmodule RestAPI.Views.Public.Auth do
       token_type: response.token_type
     }
   end
+
+  def render("authorize.json", %{response: response, state: state}) do
+    %{
+      code: response.authorization_code,
+      state: state
+    }
+  end
 end

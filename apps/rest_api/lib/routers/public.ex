@@ -4,11 +4,15 @@ defmodule RestAPI.Routers.Public do
   use RestAPI.Router
 
   alias RestAPI.Controllers.Public
-  alias RestAPI.Plugs.{Authentication, Tracker}
+  alias RestAPI.Plugs.{Authentication, Authorization, Tracker}
 
   pipeline :rest_api do
     plug :accepts, ["json"]
     plug Tracker
+  end
+
+  pipeline :authorized_as_user do
+    plug Authorization, type: "public"
   end
 
   pipeline :authenticated do
@@ -20,6 +24,13 @@ defmodule RestAPI.Routers.Public do
 
     scope "/auth/protocol/openid-connect" do
       post "/token", Auth, :token
+
+      scope "/authorize" do
+        pipe_through :authenticated
+        pipe_through :authorized_as_user
+
+        post "/", Auth, :authorize
+      end
 
       scope "/" do
         pipe_through :authenticated

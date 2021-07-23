@@ -10,7 +10,9 @@ defmodule RestAPI.Controllers.Public.Auth do
     ResourceOwner
   }
 
-  alias RestAPI.Ports.Authenticator, as: Commands
+  alias Authorizer.Rules.Commands.Inputs.AuthorizationCodeSignIn
+
+  alias RestAPI.Ports.{Authenticator, Authorizer}
   alias RestAPI.Views.Public.Auth
 
   action_fallback RestAPI.Controllers.Fallback
@@ -28,7 +30,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     params = Map.merge(params, conn.private.tracking)
 
     with {:ok, input} <- ResourceOwner.cast_and_apply(params),
-         {:ok, response} <- Commands.sign_in_resource_owner(input) do
+         {:ok, response} <- Authenticator.sign_in_resource_owner(input) do
       conn
       |> put_view(Auth)
       |> put_status(200)
@@ -40,7 +42,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     params = Map.merge(params, conn.private.tracking)
 
     with {:ok, input} <- RefreshToken.cast_and_apply(params),
-         {:ok, response} <- Commands.sign_in_refresh_token(input) do
+         {:ok, response} <- Authenticator.sign_in_refresh_token(input) do
       conn
       |> put_view(Auth)
       |> put_status(200)
@@ -52,7 +54,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     params = Map.merge(params, conn.private.tracking)
 
     with {:ok, input} <- ClientCredentials.cast_and_apply(params),
-         {:ok, response} <- Commands.sign_in_client_credentials(input) do
+         {:ok, response} <- Authenticator.sign_in_client_credentials(input) do
       conn
       |> put_view(Auth)
       |> put_status(200)
@@ -64,7 +66,7 @@ defmodule RestAPI.Controllers.Public.Auth do
     params = Map.merge(params, conn.private.tracking)
 
     with {:ok, input} <- AuthorizationCode.cast_and_apply(params),
-         {:ok, response} <- Commands.sign_in_authorization_code(input) do
+         {:ok, response} <- Authenticator.sign_in_authorization_code(input) do
       conn
       |> put_view(Auth)
       |> put_status(200)
@@ -72,11 +74,34 @@ defmodule RestAPI.Controllers.Public.Auth do
     end
   end
 
+  @doc """
+  Authorize an client to sign in the user later by using an authorization code.
+
+  This flow should only be used on authorization code grants.
+  """
+  @spec authorize(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
+  def authorize(%{private: %{session: session}} = conn, params) do
+    with {:ok, input} <- AuthorizationCodeSignIn.cast_and_apply(params),
+         {:ok, resp} <- Authorizer.authorize_authorization_code_sign_in(input, session.subject_id) do
+      if not is_nil(input.redirect_uri) and not is_nil(input.state) do
+        redirect(
+          conn,
+          external: "#{input.redirect_uri}?code=#{resp.authorization_code}&state=#{input.state}"
+        )
+      else
+        conn
+        |> put_view(Auth)
+        |> put_status(200)
+        |> render("authorize.json", response: resp, state: input.state)
+      end
+    end
+  end
+
   @doc "Logout the authenticated subject session."
   @spec logout(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def logout(%{private: %{session: session}} = conn, _params) do
     session.jti
-    |> Commands.sign_out_session()
+    |> Authenticator.sign_out_session()
     |> case do
       {:ok, _any} -> send_resp(conn, :no_content, "")
       {:error, _reason} = error -> error
@@ -87,7 +112,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   @spec logout_all_sessions(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def logout_all_sessions(%{private: %{session: session}} = conn, _params) do
     session.subject_id
-    |> Commands.sign_out_all_sessions(session.subject_type)
+    |> Authenticator.sign_out_all_sessions(session.subject_type)
     |> case do
       {:ok, _any} -> send_resp(conn, :no_content, "")
       {:error, _reason} = error -> error

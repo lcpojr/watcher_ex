@@ -3,6 +3,8 @@ defmodule Authorizer.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   using do
     quote do
       import Ecto
@@ -10,8 +12,23 @@ defmodule Authorizer.DataCase do
       import Mox
       import Authorizer.{DataCase, Factory}
 
+      alias Authenticator.Factory, as: AF
+      alias ResourceManager.Factory, as: RF
+
       setup :verify_on_exit!
     end
+  end
+
+  setup tags do
+    :ok = Sandbox.checkout(Authenticator.Repo)
+    :ok = Sandbox.checkout(ResourceManager.Repo)
+
+    unless tags[:async] do
+      Sandbox.mode(Authenticator.Repo, {:shared, self()})
+      Sandbox.mode(ResourceManager.Repo, {:shared, self()})
+    end
+
+    :ok
   end
 
   @doc """
