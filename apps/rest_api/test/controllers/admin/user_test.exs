@@ -1,4 +1,4 @@
-defmodule RestAPI.Controllers.Admin.User do
+defmodule RestAPI.Controllers.Admin.UsersTest do
   @moduledoc false
 
   use RestAPI.ConnCase, async: true

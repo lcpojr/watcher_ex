@@ -1,4 +1,4 @@
-defmodule RestAPI.Controller.Admin.User do
+defmodule RestAPI.Controllers.Admin.Users do
   @moduledoc false
 
   use RestAPI.Controller, :controller
