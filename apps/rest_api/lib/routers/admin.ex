@@ -10,19 +10,19 @@ defmodule RestAPI.Routers.Admin do
     plug Tracker
   end
 
-  pipeline :authorized_as_admin do
+  pipeline :authorized do
     plug Authorization, type: "admin"
   end
 
   scope "/v1", RestAPI.Controllers.Admin do
     pipe_through :authenticated
-    pipe_through :authorized_as_admin
+    pipe_through :authorized
 
     resources "/users", Users, except: [:new]
 
     scope "/sessions" do
-      post "/self/logout", Sessions, :logout
-      post "/self/logout-all-sessions", Sessions, :logout_all_sessions
+      post "/logout", Sessions, :logout
+      post "/logout-all-sessions", Sessions, :logout_all_sessions
     end
   end
 end

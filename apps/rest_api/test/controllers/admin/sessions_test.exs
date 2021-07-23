@@ -5,8 +5,8 @@ defmodule RestAPI.Controllers.Admin.SessionsTest do
 
   alias RestAPI.Ports.{AuthenticatorMock, AuthorizerMock}
 
-  @logout_endpoint "/admin/v1/sessions/self/logout"
-  @logout_all_endpoint "/admin/v1/sessions/self/logout-all-sessions"
+  @logout_endpoint "/admin/v1/sessions/logout"
+  @logout_all_endpoint "/admin/v1/sessions/logout-all-sessions"
 
   describe "POST #{@logout_endpoint}" do
     setup do
