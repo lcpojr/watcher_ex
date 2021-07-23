@@ -19,5 +19,10 @@ defmodule RestAPI.Routers.Admin do
     pipe_through :authorized_as_admin
 
     resources "/users", Users, except: [:new]
+
+    scope "/sessions" do
+      post "/self/logout", Sessions, :logout
+      post "/self/logout-all-sessions", Sessions, :logout_all_sessions
+    end
   end
 end
