@@ -26,7 +26,7 @@ defmodule Authenticator.Sessions.Schemas.Session do
           updated_at: NaiveDateTime.t()
         }
 
-  @possible_statuses ~w(active expired invalidated refreshed)
+  @possible_statuses ~w(active expired revoked refreshed)
   @possible_subject_types ~w(user application)
   @possible_grant_flows ~w(client_credentials resource_owner refresh_token)
 

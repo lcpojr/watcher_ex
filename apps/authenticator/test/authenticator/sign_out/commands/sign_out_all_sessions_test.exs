@@ -10,7 +10,7 @@ defmodule Authenticator.SignIn.Commands.SignOutAllSessionsTest do
     test "succeeds if session is valid" do
       session = insert!(:session)
       assert {:ok, 1} == Commands.execute(session.subject_id, session.subject_type)
-      assert %{status: "invalidated"} = Repo.get_by(Session, id: session.id)
+      assert %{status: "revoked"} = Repo.get_by(Session, id: session.id)
     end
 
     test "fails if not found any active session" do

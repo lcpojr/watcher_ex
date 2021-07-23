@@ -25,13 +25,13 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
   Sign in an user identity by RefreshToken flow.
 
   The application has to be active and using openid-connect protocol.
-  If the session was invalidated the flow will fail.
+  If the session was revoked the flow will fail.
   """
   @impl true
   def execute(%Input{refresh_token: token}) do
     with {:token, {:ok, claims}} <- {:token, RefreshToken.verify_and_validate(token)},
          {:session, {:ok, session}} <- {:session, GetSession.execute(%{jti: claims["ati"]})},
-         {:valid?, true} <- {:valid?, session.status not in ["invalidated", "refreshed"]},
+         {:valid?, true} <- {:valid?, session.status not in ["revoked", "refreshed"]},
          {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: claims["aud"]})},
          {:flow_enabled?, true} <- {:flow_enabled?, "refresh_token" in app.grant_flows},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
@@ -52,7 +52,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
         {:error, :unauthenticated}
 
       {:valid?, false} ->
-        Logger.info("Session was invalidated")
+        Logger.info("Session was revoked")
         {:error, :unauthenticated}
 
       {:app, {:error, :not_found}} ->

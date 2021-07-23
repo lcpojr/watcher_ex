@@ -44,9 +44,9 @@ defmodule Authenticator.Sessions.ManagerTest do
             |> NaiveDateTime.truncate(:second)
         )
 
-      invalidated_session =
+      revoked_session =
         insert!(:session,
-          status: "invalidated",
+          status: "revoked",
           inserted_at:
             NaiveDateTime.utc_now()
             |> NaiveDateTime.add(-120)
@@ -59,7 +59,7 @@ defmodule Authenticator.Sessions.ManagerTest do
 
       assert {:ok, :sessions_updated} == Manager.execute()
       assert %Session{status: "refreshed"} = Repo.get(Session, refreshed_session.id)
-      assert %Session{status: "invalidated"} = Repo.get(Session, invalidated_session.id)
+      assert %Session{status: "revoked"} = Repo.get(Session, revoked_session.id)
       assert %Session{status: "active"} = Repo.get(Session, ctx.active_session.id)
     end
   end

@@ -212,7 +212,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
-    test "fails if session was invalidated" do
+    test "fails if session was revoked" do
       app_id = Ecto.UUID.generate()
       user_id = Ecto.UUID.generate()
 
@@ -232,7 +232,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
         subject_id: user_id,
         subject_type: "user",
         claims: claims,
-        status: "invalidated"
+        status: "revoked"
       )
 
       refresh_token_claims = %{

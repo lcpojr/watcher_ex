@@ -17,7 +17,7 @@ defmodule Authenticator.SignOut.Commands.SignOutAllSessions do
     |> Multi.run(:invalidate, fn _repo, _changes ->
       [status: "active", subject_id: subject_id, subject_type: subject_type]
       |> Session.query()
-      |> Repo.update_all(set: [status: "invalidated"])
+      |> Repo.update_all(set: [status: "revoked"])
       |> case do
         {count, _} when is_integer(count) -> {:ok, count}
         {:error, _reason} = error -> error

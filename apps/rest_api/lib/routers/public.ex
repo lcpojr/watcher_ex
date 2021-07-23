@@ -24,6 +24,7 @@ defmodule RestAPI.Routers.Public do
 
     scope "/auth/protocol/openid-connect" do
       post "/token", Auth, :token
+      post "/revoke", Auth, :revoke
 
       scope "/authorize" do
         pipe_through :authenticated
