@@ -75,7 +75,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   end
 
   @doc "Revoke the given tokens sessions"
-  @spec logout(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
+  @spec revoke(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def revoke(conn, params) do
     with {:ok, input} <- RevokeTokens.cast_and_apply(params),
          {:ok, _any} <- Commands.revoke_tokens(input) do
