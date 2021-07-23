@@ -1,4 +1,6 @@
 defmodule Authenticator.Sessions.Commands.GetSessionTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Repo

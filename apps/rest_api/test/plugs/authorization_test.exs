@@ -1,4 +1,6 @@
 defmodule RestAPI.Plugs.AuthorizationTest do
+  @moduledoc false
+
   use RestAPI.ConnCase, async: true
 
   alias RestAPI.Plugs.Authorization

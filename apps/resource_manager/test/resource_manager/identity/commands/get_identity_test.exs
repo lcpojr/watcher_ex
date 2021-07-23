@@ -1,4 +1,6 @@
 defmodule ResourceManager.Identities.Commands.GetIdentityTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identities.Commands.GetIdentity

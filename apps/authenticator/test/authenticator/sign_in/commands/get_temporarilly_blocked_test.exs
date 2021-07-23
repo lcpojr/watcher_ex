@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.GetTemporarillyBlockedTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.SignIn.Commands.GetTemporarillyBlocked

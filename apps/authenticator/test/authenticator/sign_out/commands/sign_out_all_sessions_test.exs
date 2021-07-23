@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.SignOutAllSessionsTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Sessions.Schemas.Session

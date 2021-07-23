@@ -1,4 +1,6 @@
 defmodule Authorizer.SignIn.Commands.AuthorizationCodeTest do
+  @moduledoc false
+
   use Authorizer.DataCase, async: true
 
   alias Authenticator.Sessions.Tokens.AuthorizationCode

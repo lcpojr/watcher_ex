@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.VerifyHashTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Crypto.Commands.VerifyHash

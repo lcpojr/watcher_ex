@@ -1,4 +1,6 @@
 defmodule Authorizer.Rules.Commands.AdminAccessTest do
+  @moduledoc false
+
   use Authorizer.DataCase, async: true
 
   alias Authorizer.Ports.ResourceManagerMock

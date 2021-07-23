@@ -1,4 +1,6 @@
 defmodule ResourceManager.Permissions.Commands.RemoveScopeTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Permissions.Commands.RemoveScope
