@@ -32,5 +32,7 @@
     {"lib/permissions/schemas/client_application_scope.ex", :unknown_type},
     {"lib/permissions/commands/consent_scope.ex", :unknown_type},
     {"lib/permissions/commands/remove_scope.ex", :unknown_type},
-    {"lib/phoenix/router.ex", :pattern_match, 402}
+    {"lib/controllers/public/admin.ex"},
+    {"lib/controllers/public/auth.ex"},
+    {"lib/phoenix/router.ex"}
 ]

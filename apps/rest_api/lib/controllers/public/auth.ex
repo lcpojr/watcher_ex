@@ -81,17 +81,16 @@ defmodule RestAPI.Controllers.Public.Auth do
   """
   @spec authorize(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def authorize(%{private: %{session: session}} = conn, params) do
-    with {:ok, input} <- AuthorizationCodeSignIn.cast_and_apply(params),
+    with {:ok, %{redirect_uri: uri, state: state}} = input <-
+           AuthorizationCodeSignIn.cast_and_apply(params),
          {:ok, resp} <- Authorizer.authorize_authorization_code_sign_in(input, session.subject_id) do
-      if input.redirect_uri do
-        redirect(conn,
-          external: "#{input.redirect_uri}?code=#{resp.authorization_code}&state=#{input.state}"
-        )
+      if uri and state do
+        redirect(conn, external: "#{uri}?code=#{resp.authorization_code}&state=#{state}")
       else
         conn
         |> put_view(Auth)
         |> put_status(200)
-        |> render("authorize.json", response: resp, state: input.state)
+        |> render("authorize.json", response: resp, state: state)
       end
     end
   end
