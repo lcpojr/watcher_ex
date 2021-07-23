@@ -11,7 +11,7 @@ defmodule RestAPI.Routers.Public do
     plug Tracker
   end
 
-  pipeline :authorized_as_user do
+  pipeline :authorized do
     plug Authorization, type: "public"
   end
 
@@ -27,16 +27,9 @@ defmodule RestAPI.Routers.Public do
 
       scope "/authorize" do
         pipe_through :authenticated
-        pipe_through :authorized_as_user
+        pipe_through :authorized
 
         post "/", Auth, :authorize
-      end
-
-      scope "/" do
-        pipe_through :authenticated
-
-        post "/logout", Auth, :logout
-        post "/logout-all-sessions", Auth, :logout_all_sessions
       end
     end
   end

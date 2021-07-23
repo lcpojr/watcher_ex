@@ -114,7 +114,7 @@ curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-conn
 **Request**:
 
 ```sh
-curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/logout-all-sessions \
+curl -X POST https://watcherex.gigalixirapp.com/admin/v1/sessions/logout-all-sessions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMTE1NzEyNCwiaWF0IjoxNjAxMTQ5OTI0LCJpZGVudGl0eSI6InVzZXIiLCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3M2cW5zN2ZxYjFvOGhrZDQwMDAxNTQiLCJuYmYiOjE2MDExNDk5MjQsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjIyZTk2MTA4LThkZDYtNGZiZS1iMjExLTY4OTM0YmJhNWJkNyIsInR0bCI6NzIwMCwidHlwIjoiQmVhcmVyIn0.EuIJtx_AGLrL2O7E7cBfsvEQymalO_A5-J0BX4PODwk"
 ```
@@ -128,7 +128,7 @@ curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-conn
 **Request**:
 
 ```sh
-curl -X POST https://watcherex.gigalixirapp.com/api/v1/auth/protocol/openid-connect/logout \
+curl -X POST https://watcherex.gigalixirapp.com/admin/v1/sessions/logout \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyZTQ1NWJiMS0wNjA0LTQ4MTItOTc1Ni0zNmY3YWIyM2I4ZDkiLCJhenAiOiJhZG1pbiIsImV4cCI6MTYwMDgyMzMxNiwiaWF0IjoxNjAwODE2MTE2LCJpc3MiOiJXYXRjaGVyRXgiLCJqdGkiOiIyb3JqcmhuMHNxdDlncjk3ZXMwMDAzMDMiLCJuYmYiOjE2MDA4MTYxMTYsInNjb3BlIjoiYWRtaW46cmVhZCBhZG1pbjp3cml0ZSIsInN1YiI6IjdmNWViOWRjLWI1NTAtNDU4Ni05MWRjLTNjNzAxZWIzYjliYyIsInR5cCI6IkJlYXJlciJ9.NxFH6MIOFGc54UR9EVLPFB0m-6b-YMyXhZrOuGxErdw"
 ```
