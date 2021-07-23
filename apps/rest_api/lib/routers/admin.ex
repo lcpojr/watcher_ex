@@ -14,10 +14,10 @@ defmodule RestAPI.Routers.Admin do
     plug Authorization, type: "admin"
   end
 
-  scope "/v1", RestAPI.Controller.Admin do
+  scope "/v1", RestAPI.Controllers.Admin do
     pipe_through :authenticated
     pipe_through :authorized_as_admin
 
-    resources "/users", User, except: [:new]
+    resources "/users", Users, except: [:new]
   end
 end
