@@ -1,4 +1,6 @@
 defmodule RestAPI.Controllers.Admin.User do
+  @moduledoc false
+
   use RestAPI.ConnCase, async: true
 
   alias ResourceManager.Identities.Commands.Inputs.CreateUser

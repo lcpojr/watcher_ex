@@ -1,4 +1,6 @@
 defmodule ResourceManager.Identities.Commands.CreateClientApplicationTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identities.Commands.CreateClientApplication

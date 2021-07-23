@@ -1,4 +1,6 @@
 defmodule Authorizer.Policies.SubjectActiveTest do
+  @moduledoc false
+
   use Authorizer.DataCase, async: true
 
   alias Authorizer.Policies.SubjectActive

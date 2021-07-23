@@ -1,4 +1,6 @@
 defmodule RestAPI.Controllers.Public.AuthTest do
+  @moduledoc false
+
   use RestAPI.ConnCase, async: true
 
   alias Authenticator.SignIn.Commands.Inputs.{ClientCredentials, RefreshToken, ResourceOwner}

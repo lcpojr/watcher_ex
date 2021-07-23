@@ -1,4 +1,6 @@
 defmodule ResourceManager.Identities.UsersTest do
+  @moduledoc false
+
   use ResourceManager.DataCase, async: true
 
   alias ResourceManager.Identities.Schemas.User

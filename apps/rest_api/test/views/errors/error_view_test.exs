@@ -1,4 +1,6 @@
 defmodule RestAPI.RestAPI.Views.Errors.DefaultTest do
+  @moduledoc false
+
   use RestAPI.ConnCase, async: true
 
   import Phoenix.View

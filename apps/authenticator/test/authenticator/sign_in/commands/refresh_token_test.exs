@@ -1,4 +1,6 @@
 defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
+  @moduledoc false
+
   use Authenticator.DataCase, async: true
 
   alias Authenticator.Ports.ResourceManagerMock
