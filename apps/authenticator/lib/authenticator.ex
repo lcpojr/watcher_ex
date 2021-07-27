@@ -35,7 +35,7 @@ defmodule Authenticator do
   defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
 
   @doc "Delegates to #{RevokeTokens}.execute/1"
-  defdelegate revoke_tokens, to: RevokeTokens, as: :execute
+  defdelegate revoke_tokens(input), to: RevokeTokens, as: :execute
 
   @doc "Delegates to #{SignOutSession}.execute/1"
   defdelegate sign_out_session(session_or_jti), to: SignOutSession, as: :execute

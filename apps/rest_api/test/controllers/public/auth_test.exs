@@ -8,6 +8,7 @@ defmodule RestAPI.Controllers.Public.AuthTest do
 
   @content_type "application/x-www-form-urlencoded"
   @token_endpoint "/api/v1/auth/protocol/openid-connect/token"
+  @revoke_endpoint "/api/v1/auth/protocol/openid-connect/revoke"
   @authorization_code_endpoint "/api/v1/auth/protocol/openid-connect/authorize"
 
   describe "POST #{@authorization_code_endpoint}" do
@@ -343,6 +344,43 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                conn
                |> put_req_header("content-type", @content_type)
                |> post(@token_endpoint, %{"grant_type" => "authorization_code"})
+               |> json_response(400)
+    end
+  end
+
+  describe "POST #{@revoke_endpoint}" do
+    test "suceeds when parameters are valid", %{conn: conn} do
+      params = %{
+        "access_token" => "my_access_token",
+        "refresh_token" => "refresh_token"
+      }
+
+      expect(AuthenticatorMock, :revoke_tokens, fn _input -> {:ok, {%{}, %{}}} end)
+
+      assert conn
+             |> put_req_header("content-type", @content_type)
+             |> post(@revoke_endpoint, params)
+             |> response(200)
+    end
+
+    test "fails if params are invalid", %{conn: conn} do
+      params = %{
+        "access_token" => 123,
+        "refresh_token" => 432
+      }
+
+      assert %{
+               "detail" => "The given params failed in validation",
+               "error" => "bad_request",
+               "response" => %{
+                 "access_token" => ["is invalid"],
+                 "refresh_token" => ["is invalid"]
+               },
+               "status" => 400
+             } ==
+               conn
+               |> put_req_header("content-type", @content_type)
+               |> post(@revoke_endpoint, params)
                |> json_response(400)
     end
   end

@@ -39,7 +39,8 @@ defmodule RestAPI.Ports.Authenticator do
 
   @doc "Delegates to Authenticator.revoke_tokens/1"
   @callback revoke_tokens(input :: map() | struct()) ::
-    {:ok, session :: struct()} | possible_logout_failures()
+              {:ok, {access_session :: struct() | nil, refresh_session :: struct() | nil}}
+              | possible_logout_failures()
 
   @doc "Delegates to Authenticator.sign_out_session/1"
   @callback sign_out_session(session_or_jti :: struct() | String.t()) ::
@@ -77,7 +78,9 @@ defmodule RestAPI.Ports.Authenticator do
   def get_session(input), do: implementation().get_session(input)
 
   @doc "Revoke the given token sessions"
-  @spec revoke_tokens(session_or_jti :: map()) :: {:ok, struct()} | possible_logout_failures()
+  @spec revoke_tokens(input :: map()) ::
+          {:ok, {access_session :: struct() | nil, refresh_session :: struct() | nil}}
+          | possible_logout_failures()
   def revoke_tokens(input), do: implementation().revoke_tokens(input)
 
   @doc "Invalidates a given session"

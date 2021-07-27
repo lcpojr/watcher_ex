@@ -11,16 +11,12 @@ defmodule Authenticator.SignOut.Commands.Inputs.RevokeTokens do
           refresh_token: String.t() | nil
         }
 
-  @required [:access_token, :refresh_token]
+  @optional [:access_token, :refresh_token]
   embedded_schema do
     field :access_token, :string
     field :refresh_token, :string
   end
 
   @doc false
-  def changeset(params) when is_map(params) do
-    %__MODULE__{}
-    |> cast(params, @required ++ @optional)
-    |> validate_required(@required)
-  end
+  def changeset(params) when is_map(params), do: cast(%__MODULE__{}, params, @optional)
 end

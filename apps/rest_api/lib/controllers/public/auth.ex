@@ -78,7 +78,7 @@ defmodule RestAPI.Controllers.Public.Auth do
   @spec revoke(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
   def revoke(conn, params) do
     with {:ok, input} <- RevokeTokens.cast_and_apply(params),
-         {:ok, _any} <- Commands.revoke_tokens(input) do
+         {:ok, _sessions} <- Authenticator.revoke_tokens(input) do
       send_resp(conn, :ok, "")
     end
   end

@@ -1,4 +1,4 @@
-defmodule Authenticator.SignIn.Commands.SignOutSessionTest do
+defmodule Authenticator.SignOut.Commands.SignOutSessionTest do
   @moduledoc false
 
   use Authenticator.DataCase, async: true
