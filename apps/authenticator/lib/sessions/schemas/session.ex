@@ -16,6 +16,7 @@ defmodule Authenticator.Sessions.Schemas.Session do
   @type t :: %__MODULE__{
           id: Ecto.UUID.t(),
           jti: String.t(),
+          type: String.t(),
           subject_id: String.t(),
           subject_type: String.t(),
           claims: map(),
@@ -26,14 +27,16 @@ defmodule Authenticator.Sessions.Schemas.Session do
           updated_at: NaiveDateTime.t()
         }
 
+  @possible_types ~w(access_token refresh_token)
   @possible_statuses ~w(active expired revoked refreshed)
   @possible_subject_types ~w(user application)
   @possible_grant_flows ~w(client_credentials resource_owner refresh_token)
 
-  @required_fields [:jti, :subject_id, :subject_type, :claims, :expires_at, :grant_flow]
+  @required_fields [:jti, :type, :subject_id, :subject_type, :claims, :expires_at, :grant_flow]
   @optional_fields [:status]
   schema "sessions" do
     field :jti, :string
+    field :type, :string
     field :subject_id, :string
     field :subject_type, :string
     field :claims, :map
@@ -48,6 +51,7 @@ defmodule Authenticator.Sessions.Schemas.Session do
   def changeset_create(params) when is_map(params) do
     %__MODULE__{}
     |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_inclusion(:type, @possible_types)
     |> validate_inclusion(:status, @possible_statuses)
     |> validate_inclusion(:subject_type, @possible_subject_types)
     |> validate_inclusion(:grant_flow, @possible_grant_flows)
@@ -60,6 +64,9 @@ defmodule Authenticator.Sessions.Schemas.Session do
     |> cast(params, @optional_fields)
     |> validate_inclusion(:status, @possible_statuses)
   end
+
+  @doc false
+  def possible_types, do: @possible_types
 
   @doc false
   def possible_statuses, do: @possible_statuses

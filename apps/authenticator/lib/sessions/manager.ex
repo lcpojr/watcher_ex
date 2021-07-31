@@ -156,9 +156,9 @@ defmodule Authenticator.Sessions.Manager do
     end
   end
 
-  defp build_cache(%Session{jti: jti, claims: %{"exp" => exp}} = session) do
+  defp build_cache(%Session{jti: jti, type: type, claims: %{"exp" => exp}} = session) do
     %Nebulex.Object{
-      key: jti,
+      key: {jti, type},
       value: session,
       version: 1,
       expire_at: exp
