@@ -202,16 +202,16 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
 
   defp generate_refresh_token(application, %{
          "aud" => aud,
-         "sub" => sub,
          "azp" => azp,
-         "jti" => jti
+         "jti" => jti,
+         "sub" => sub
        }) do
     if "refresh_token" in application.grant_flows do
       RefreshToken.generate_and_sign(%{
         "aud" => aud,
+        "sub" => sub,
         "azp" => azp,
         "ati" => jti,
-        "sub" => sub,
         "typ" => "Bearer"
       })
     else

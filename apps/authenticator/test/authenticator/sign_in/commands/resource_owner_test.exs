@@ -378,7 +378,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
 
       assert {:error, changeset} = Command.execute(%{"grant_type" => "password"})
 
@@ -390,7 +390,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwnerTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
     end
 
     test "fails if client application do not exist" do

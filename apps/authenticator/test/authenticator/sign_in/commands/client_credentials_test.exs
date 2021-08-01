@@ -56,7 +56,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
               }} = AccessToken.verify_and_validate(access_token)
 
       assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
-      assert %Session{jti: ^jti} = Repo.one(Session)
+      assert %Session{jti: ^jti, type: "access_token"} = Repo.one(Session)
     end
 
     test "succeeds and generates a refresh_token" do
@@ -87,22 +87,24 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                 token_type: typ
               }} = Command.execute(input)
 
-      assert {:ok, %{"jti" => jti}} = RefreshToken.verify_and_validate(access_token)
+      assert {:ok, %{"jti" => ati}} = RefreshToken.verify_and_validate(access_token)
 
       assert {:ok,
               %{
                 "aud" => ^client_id,
-                "ati" => ^jti,
+                "ati" => ^ati,
                 "exp" => _,
                 "iat" => _,
                 "iss" => "WatcherEx",
-                "jti" => _,
+                "jti" => jti,
                 "nbf" => _,
                 "typ" => ^typ
               }} = RefreshToken.verify_and_validate(refresh_token)
 
       assert %ApplicationAttempt{client_id: ^client_id} = Repo.one(ApplicationAttempt)
-      assert %Session{jti: ^jti} = Repo.one(Session)
+
+      assert [%Session{type: "access_token"}, %Session{jti: ^jti, type: "refresh_token"}] =
+               Repo.all(Session)
     end
 
     test "succeeds using client_assertions and generates an access_token" do
@@ -192,7 +194,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentialsTest do
                client_id: ["can't be blank"],
                ip_address: ["can't be blank"],
                scope: ["can't be blank"]
-             } = errors_on(changeset)
+             } == errors_on(changeset)
     end
 
     test "fails if client application do not exist" do

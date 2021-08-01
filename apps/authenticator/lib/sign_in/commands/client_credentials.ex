@@ -37,15 +37,13 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   to avoid exposing identity existance and time attacks.
   """
   @impl true
-  def execute(%Input{client_id: client_id, scope: scope} = input) do
+  def execute(%Input{client_id: client_id} = input) do
     with {:app, {:ok, app}} <- {:app, Port.get_identity(%{client_id: client_id})},
          {:flow_enabled?, true} <- {:flow_enabled?, "client_credentials" in app.grant_flows},
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
-         {:ok, access_token, claims} <- generate_access_token(app, scope),
-         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_and_save(input, claims) do
+         {:ok, access_token, refresh_token, claims} <- generate_tokens(app, input) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
@@ -129,6 +127,15 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     end
   end
 
+  defp generate_tokens(app, input) do
+    with {:ok, access_token, access_claims} <- generate_access_token(app, input.scope),
+         {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+         {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
+         {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
+      {:ok, access_token, refresh_token, access_claims}
+    end
+  end
+
   defp generate_access_token(application, scope) do
     AccessToken.generate_and_sign(%{
       "aud" => application.client_id,
@@ -140,10 +147,16 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     })
   end
 
-  defp generate_refresh_token(application, %{"aud" => aud, "azp" => azp, "jti" => jti}) do
+  defp generate_refresh_token(application, %{
+         "aud" => aud,
+         "azp" => azp,
+         "jti" => jti,
+         "sub" => sub
+       }) do
     if "refresh_token" in application.grant_flows do
       RefreshToken.generate_and_sign(%{
         "aud" => aud,
+        "sub" => sub,
         "azp" => azp,
         "ati" => jti,
         "typ" => "Bearer"
@@ -154,10 +167,12 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     end
   end
 
-  defp generate_and_save(input, claims) do
+  defp generate_and_save(_input, nil, _type), do: {:ok, :ignore}
+
+  defp generate_and_save(input, claims, "access_token" = type) do
     Multi.new()
     |> Multi.run(:save_attempt, fn _repo, _changes -> generate_attempt(input, true) end)
-    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims) end)
+    |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims, type) end)
     |> Repo.transaction()
     |> case do
       {:ok, %{generate: session}} ->
@@ -170,6 +185,18 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     end
   end
 
+  defp generate_and_save(_input, claims, "refresh_token" = type) do
+    case generate_session(claims, type) do
+      {:ok, session} ->
+        Logger.info("Succeeds in creating refresh token session", id: session.id)
+        {:ok, session}
+
+      {:error, reason} = error ->
+        Logger.error("Failed to create refresh token session", reason: reason)
+        error
+    end
+  end
+
   defp generate_attempt(%{client_id: client_id, ip_address: ip_address}, success?) do
     ApplicationAttempts.create(%{
       client_id: client_id,
@@ -178,9 +205,10 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
     })
   end
 
-  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do
+  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims, type) do
     Sessions.create(%{
       jti: jti,
+      type: type,
       subject_id: sub,
       subject_type: "application",
       claims: claims,

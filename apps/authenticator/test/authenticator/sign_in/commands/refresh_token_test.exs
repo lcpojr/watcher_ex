@@ -212,7 +212,7 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
     test "fails if params are invalid" do
       assert {:error, :invalid_params} == Command.execute(%{})
       assert {:error, changeset} = Command.execute(%{grant_type: "refresh_token"})
-      assert %{refresh_token: ["can't be blank"]} = errors_on(changeset)
+      assert %{refresh_token: ["can't be blank"]} == errors_on(changeset)
     end
 
     test "fails if resfresh token session does not exist" do
