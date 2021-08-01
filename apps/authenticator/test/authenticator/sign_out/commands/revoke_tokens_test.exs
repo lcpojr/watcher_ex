@@ -78,7 +78,7 @@ defmodule Authenticator.SignOut.Commands.RevokeTokensTest do
 
       {:ok, access_token, _claims} = build_access_token(access_token_claims)
 
-      assert {:error, :not_found} == Commands.execute(%Input{access_token: access_token})
+      assert {:error, :anauthenticated} == Commands.execute(%Input{access_token: access_token})
     end
   end
 end

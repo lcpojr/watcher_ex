@@ -42,12 +42,13 @@ defmodule Authenticator.SignOut.Commands.SignOutSession do
     end
   end
 
+  def execute(%Session{}), do: {:error, :not_active}
+
   def execute(jti) when is_binary(jti) do
     [jti: jti]
     |> Sessions.get_by()
     |> case do
-      %Session{status: "active"} = session -> execute(session)
-      %Session{} -> {:error, :not_active}
+      %Session{} = session -> execute(session)
       _any -> {:error, :not_found}
     end
   end
