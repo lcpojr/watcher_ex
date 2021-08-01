@@ -11,7 +11,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   require Logger
 
   alias Authenticator.Ports.ResourceManager, as: Port
-  alias Authenticator.Sessions
+  alias Authenticator.{Repo, Sessions}
 
   alias Authenticator.Sessions.Tokens.{
     AccessToken,
@@ -130,12 +130,14 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   end
 
   defp generate_tokens(user, app, %{"scope" => scope}) do
-    with {:ok, access_token, access_claims} <- generate_access_token(user, app, scope),
-         {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
-         {:ok, _session} <- generate_session(access_claims, "access_token"),
-         {:ok, _session} <- generate_session(refresh_claims, "refresh_token") do
-      {:ok, access_token, refresh_token, access_claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, access_token, access_claims} <- generate_access_token(user, app, scope),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+           {:ok, _session} <- generate_session(access_claims, "access_token"),
+           {:ok, _session} <- generate_session(refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
@@ -201,7 +203,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
     })
   end
 
-  defp parse_response({:ok, access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}) do
+  defp parse_response({:ok, {access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}}) do
     payload = %{
       access_token: access_token,
       refresh_token: refresh_token,

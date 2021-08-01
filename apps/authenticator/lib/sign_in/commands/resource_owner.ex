@@ -148,12 +148,14 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
   end
 
   defp generate_tokens(user, app, input) do
-    with {:ok, access_token, access_claims} <- generate_access_token(user, app, input.scope),
-         {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
-         {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
-         {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
-      {:ok, access_token, refresh_token, access_claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, access_token, access_claims} <- generate_access_token(user, app, input.scope),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+           {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
+           {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
@@ -273,7 +275,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     })
   end
 
-  defp parse_response({:ok, access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}) do
+  defp parse_response({:ok, {access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}}) do
     payload = %{
       access_token: access_token,
       refresh_token: refresh_token,

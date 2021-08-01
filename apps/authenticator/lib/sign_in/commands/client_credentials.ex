@@ -43,7 +43,7 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:valid_protocol?, true} <- {:valid_protocol?, app.protocol == "openid-connect"},
          {:secret_matches?, true} <- {:secret_matches?, secret_matches?(app, input)},
-         {:ok, access_token, refresh_token, claims} <- generate_tokens(app, input) do
+         {:ok, {access_token, refresh_token, claims}} <- generate_tokens(app, input) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:app, {:error, :not_found}} ->
@@ -128,12 +128,14 @@ defmodule Authenticator.SignIn.Commands.ClientCredentials do
   end
 
   defp generate_tokens(app, input) do
-    with {:ok, access_token, access_claims} <- generate_access_token(app, input.scope),
-         {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
-         {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
-         {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
-      {:ok, access_token, refresh_token, access_claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, access_token, access_claims} <- generate_access_token(app, input.scope),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+           {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
+           {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp generate_access_token(application, scope) do

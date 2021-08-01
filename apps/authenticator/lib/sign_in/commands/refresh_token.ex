@@ -38,7 +38,7 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
          {:app_active?, true} <- {:app_active?, app.status == "active"},
          {:subject, {:ok, subject}} <- {:subject, get_subject(session)},
          {:sub_active?, true} <- {:sub_active?, subject.status == "active"},
-         {:ok, access_token, refresh_token, claims} <- generate_tokens(session) do
+         {:ok, {access_token, refresh_token, claims}} <- generate_tokens(session) do
       {:ok, parse_response(access_token, refresh_token, claims)}
     else
       {:token, {:error, reason}} ->
@@ -112,13 +112,15 @@ defmodule Authenticator.SignIn.Commands.RefreshToken do
     do: Port.get_identity(%{client_id: nil, id: subject_id})
 
   defp generate_tokens(%{claims: %{"ati" => ati}} = refresh_session) do
-    with {:ok, %{claims: claims} = access_session} <- get_session(ati, "access_token"),
-         {:ok, access_token, access_claims} <- generate_access_token(claims),
-         {:ok, refresh_token, refresh_claims} <- generate_refresh_token(access_claims),
-         {:ok, _session} <- generate_session(access_session, access_claims, "access_token"),
-         {:ok, _session} <- generate_session(refresh_session, refresh_claims, "refresh_token") do
-      {:ok, access_token, refresh_token, access_claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, %{claims: claims} = access_session} <- get_session(ati, "access_token"),
+           {:ok, access_token, access_claims} <- generate_access_token(claims),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(access_claims),
+           {:ok, _session} <- generate_session(access_session, access_claims, "access_token"),
+           {:ok, _session} <- generate_session(refresh_session, refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp generate_access_token(%{
