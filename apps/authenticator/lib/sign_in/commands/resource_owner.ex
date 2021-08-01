@@ -151,8 +151,8 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     Repo.execute_transaction(fn ->
       with {:ok, access_token, access_claims} <- generate_access_token(user, app, input.scope),
            {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
-           {:ok, _session} <- generate_and_save(input, access_claims, "access_token"),
-           {:ok, _session} <- generate_and_save(input, refresh_claims, "refresh_token") do
+           {:ok, _session} <- generate_session(input, access_claims, "access_token"),
+           {:ok, _session} <- generate_session(input, refresh_claims, "refresh_token") do
         {:ok, {access_token, refresh_token, access_claims}}
       end
     end)
@@ -222,9 +222,9 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp generate_and_save(_input, nil, _type), do: {:ok, :ignored}
+  defp generate_session(_input, nil, _type), do: {:ok, :ignored}
 
-  defp generate_and_save(input, claims, "access_token" = type) do
+  defp generate_session(input, claims, "access_token" = type) do
     Multi.new()
     |> Multi.run(:save_attempt, fn _repo, _changes -> generate_attempt(input, true) end)
     |> Multi.run(:generate, fn _repo, _changes -> generate_session(claims, type) end)
@@ -243,7 +243,7 @@ defmodule Authenticator.SignIn.Commands.ResourceOwner do
     end
   end
 
-  defp generate_and_save(_input, claims, "refresh_token" = type) do
+  defp generate_session(_input, claims, "refresh_token" = type) do
     case generate_session(claims, type) do
       {:ok, session} ->
         Logger.info("Succeeds in creating refresh token session", id: session.id)
