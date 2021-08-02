@@ -5,8 +5,8 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
 
   use Joken.Config
 
-  add_hook Joken.Hooks.RequiredClaims, ~w(exp iat nbf iss azp aud jti typ)
-  add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(aud)
+  add_hook Joken.Hooks.RequiredClaims, ~w(exp iat nbf iss azp aud jti typ sub)
+  add_hook Authenticator.Sessions.Tokens.Hooks.ValidateUUID, ~w(aud sub)
 
   # Thirty days in seconds
   @exp_in_seconds 60 * 60 * 24 * 30
@@ -23,6 +23,7 @@ defmodule Authenticator.Sessions.Tokens.RefreshToken do
     |> add_claim("exp", &gen_exp/0, fn exp, _, _ -> is_integer(exp) and valid_expiration?(exp) end)
     |> add_claim("typ", nil, fn type, _, _ -> type == @default_type end)
     |> add_claim("ati", nil, &is_binary/1)
+    |> add_claim("sub", nil, &is_binary/1)
   end
 
   defp gen_ttl, do: @exp_in_seconds

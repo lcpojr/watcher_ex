@@ -13,6 +13,7 @@ defmodule Authenticator.Factory do
 
     %Session{
       jti: jti,
+      type: "access_token",
       subject_id: Ecto.UUID.generate(),
       subject_type: "user",
       claims: %{

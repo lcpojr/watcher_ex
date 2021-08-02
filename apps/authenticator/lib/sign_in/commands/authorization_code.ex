@@ -11,7 +11,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   require Logger
 
   alias Authenticator.Ports.ResourceManager, as: Port
-  alias Authenticator.Sessions
+  alias Authenticator.{Repo, Sessions}
 
   alias Authenticator.Sessions.Tokens.{
     AccessToken,
@@ -130,11 +130,14 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
   end
 
   defp generate_tokens(user, app, %{"scope" => scope}) do
-    with {:ok, access_token, claims} <- generate_access_token(user, app, scope),
-         {:ok, refresh_token, _} <- generate_refresh_token(app, claims),
-         {:ok, _session} <- generate_session(claims) do
-      {:ok, access_token, refresh_token, claims}
-    end
+    Repo.execute_transaction(fn ->
+      with {:ok, access_token, access_claims} <- generate_access_token(user, app, scope),
+           {:ok, refresh_token, refresh_claims} <- generate_refresh_token(app, access_claims),
+           {:ok, _session} <- generate_session(access_claims, "access_token"),
+           {:ok, _session} <- generate_session(refresh_claims, "refresh_token") do
+        {:ok, {access_token, refresh_token, access_claims}}
+      end
+    end)
   end
 
   defp secret_matches?(%{client_id: id, public_key: public_key}, %{client_assertion: assertion})
@@ -166,10 +169,16 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
     })
   end
 
-  defp generate_refresh_token(application, %{"aud" => aud, "azp" => azp, "jti" => jti}) do
+  defp generate_refresh_token(application, %{
+         "aud" => aud,
+         "azp" => azp,
+         "jti" => jti,
+         "sub" => sub
+       }) do
     if "refresh_token" in application.grant_flows do
       RefreshToken.generate_and_sign(%{
         "aud" => aud,
+        "sub" => sub,
         "azp" => azp,
         "ati" => jti,
         "typ" => "Bearer"
@@ -180,9 +189,12 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
     end
   end
 
-  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims) do
+  defp generate_session(nil, _type), do: {:ok, :ignore}
+
+  defp generate_session(%{"jti" => jti, "sub" => sub, "exp" => exp} = claims, type) do
     Sessions.create(%{
       jti: jti,
+      type: type,
       subject_id: sub,
       subject_type: "user",
       claims: claims,
@@ -191,7 +203,7 @@ defmodule Authenticator.SignIn.Commands.AuthorizationCode do
     })
   end
 
-  defp parse_response({:ok, access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}) do
+  defp parse_response({:ok, {access_token, refresh_token, %{"ttl" => ttl, "typ" => typ}}}) do
     payload = %{
       access_token: access_token,
       refresh_token: refresh_token,

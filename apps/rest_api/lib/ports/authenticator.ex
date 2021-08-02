@@ -20,22 +20,27 @@ defmodule RestAPI.Ports.Authenticator do
   @type possible_logout_failures :: {:error, Ecto.Changeset.t() | :not_found | :not_active}
 
   @doc "Delegates to Authenticator.sign_in_resource_owner/1"
-  @callback sign_in_resource_owner(input :: map()) :: possible_sign_in_responses()
+  @callback sign_in_resource_owner(input :: map() | struct()) :: possible_sign_in_responses()
 
   @doc "Delegates to Authenticator.sign_in_refresh_token/1"
-  @callback sign_in_refresh_token(input :: map()) :: possible_sign_in_responses()
+  @callback sign_in_refresh_token(input :: map() | struct()) :: possible_sign_in_responses()
 
   @doc "Delegates to Authenticator.sign_in_client_credentials/1"
-  @callback sign_in_client_credentials(input :: map()) :: possible_sign_in_responses()
+  @callback sign_in_client_credentials(input :: map() | struct()) :: possible_sign_in_responses()
 
   @doc "Delegates to Authenticator.sign_in_authorization_code/1"
-  @callback sign_in_authorization_code(input :: map()) :: possible_sign_in_responses()
+  @callback sign_in_authorization_code(input :: map() | struct()) :: possible_sign_in_responses()
 
   @doc "Delegates to Authenticator.get_session/1"
-  @callback get_session(input :: map()) :: struct()
+  @callback get_session(input :: map() | struct()) :: struct()
 
   @doc "Delegates to Authenticator.validate_access_token/1"
   @callback validate_access_token(token :: String.t()) :: {:ok, map()} | {:error, Keyword.t()}
+
+  @doc "Delegates to Authenticator.revoke_tokens/1"
+  @callback revoke_tokens(input :: map() | struct()) ::
+              {:ok, {access_session :: struct() | nil, refresh_session :: struct() | nil}}
+              | possible_logout_failures()
 
   @doc "Delegates to Authenticator.sign_out_session/1"
   @callback sign_out_session(session_or_jti :: struct() | String.t()) ::
@@ -71,6 +76,12 @@ defmodule RestAPI.Ports.Authenticator do
   @doc "Get's a session by the given input filters"
   @spec get_session(input :: map()) :: {:ok, struct()} | {:error, :not_found}
   def get_session(input), do: implementation().get_session(input)
+
+  @doc "Revoke the given token sessions"
+  @spec revoke_tokens(input :: map()) ::
+          {:ok, {access_session :: struct() | nil, refresh_session :: struct() | nil}}
+          | possible_logout_failures()
+  def revoke_tokens(input), do: implementation().revoke_tokens(input)
 
   @doc "Invalidates a given session"
   @spec sign_out_session(session_or_jti :: map()) :: {:ok, struct()} | possible_logout_failures()

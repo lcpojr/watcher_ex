@@ -20,7 +20,7 @@ defmodule Authenticator.SignOut.Commands.SignOutSession do
   def execute(%Session{status: "active"} = session) do
     Multi.new()
     |> Multi.run(:invalidate, fn _repo, _changes ->
-      Sessions.update(session, %{status: "invalidated"})
+      Sessions.update(session, %{status: "revoked"})
     end)
     |> Multi.run(:delete_cache, fn _repo, %{invalidate: session} ->
       session.jti
@@ -42,12 +42,13 @@ defmodule Authenticator.SignOut.Commands.SignOutSession do
     end
   end
 
+  def execute(%Session{}), do: {:error, :not_active}
+
   def execute(jti) when is_binary(jti) do
     [jti: jti]
     |> Sessions.get_by()
     |> case do
-      %Session{status: "active"} = session -> execute(session)
-      %Session{} -> {:error, :not_active}
+      %Session{} = session -> execute(session)
       _any -> {:error, :not_found}
     end
   end

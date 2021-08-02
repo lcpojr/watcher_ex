@@ -14,7 +14,7 @@ defmodule Authenticator do
     ResourceOwner
   }
 
-  alias Authenticator.SignOut.Commands.{SignOutAllSessions, SignOutSession}
+  alias Authenticator.SignOut.Commands.{RevokeTokens, SignOutAllSessions, SignOutSession}
 
   @doc "Delegates to #{ResourceOwner}.execute/1"
   defdelegate sign_in_resource_owner(input), to: ResourceOwner, as: :execute
@@ -33,6 +33,9 @@ defmodule Authenticator do
 
   @doc "Delegates to #{AccessToken}.verify_and_validate/1"
   defdelegate validate_access_token(token), to: AccessToken, as: :verify_and_validate
+
+  @doc "Delegates to #{RevokeTokens}.execute/1"
+  defdelegate revoke_tokens(input), to: RevokeTokens, as: :execute
 
   @doc "Delegates to #{SignOutSession}.execute/1"
   defdelegate sign_out_session(session_or_jti), to: SignOutSession, as: :execute

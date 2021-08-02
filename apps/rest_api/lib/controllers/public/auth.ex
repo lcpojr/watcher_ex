@@ -10,8 +10,8 @@ defmodule RestAPI.Controllers.Public.Auth do
     ResourceOwner
   }
 
+  alias Authenticator.SignOut.Commands.Inputs.RevokeTokens
   alias Authorizer.Rules.Commands.Inputs.AuthorizationCodeSignIn
-
   alias RestAPI.Ports.{Authenticator, Authorizer}
   alias RestAPI.Views.Public.Auth
 
@@ -71,6 +71,15 @@ defmodule RestAPI.Controllers.Public.Auth do
       |> put_view(Auth)
       |> put_status(200)
       |> render("token.json", response: response)
+    end
+  end
+
+  @doc "Revoke the given tokens sessions"
+  @spec revoke(conn :: Plug.Conn.t(), params :: map()) :: Plug.Conn.t()
+  def revoke(conn, params) do
+    with {:ok, input} <- RevokeTokens.cast_and_apply(params),
+         {:ok, _sessions} <- Authenticator.revoke_tokens(input) do
+      send_resp(conn, :ok, "")
     end
   end
 
