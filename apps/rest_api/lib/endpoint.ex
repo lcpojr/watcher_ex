@@ -13,7 +13,7 @@ defmodule RestAPI.Endpoint do
   plug Plug.Parsers,
     parsers: [:urlencoded, :json],
     pass: ["*/*"],
-    json_decoder: Phoenix.json_library()
+    json_decoder: Jason
 
   plug Plug.MethodOverride
   plug Plug.Head

@@ -28,7 +28,7 @@ defmodule Authenticator.SignIn.Commands.Inputs.ResourceOwner do
     field :otp, :string
     field :grant_type, :string
     field :scope, :string
-    field :client_id, :string
+    field :client_id, Ecto.UUID
 
     # Application credentials
     field :client_secret, :string

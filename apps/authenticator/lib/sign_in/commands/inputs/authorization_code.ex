@@ -24,7 +24,7 @@ defmodule Authenticator.SignIn.Commands.Inputs.AuthorizationCode do
   embedded_schema do
     field :code, :string
     field :grant_type, :string
-    field :client_id, :string
+    field :client_id, Ecto.UUID
     field :redirect_uri, :string
 
     # Application credentials

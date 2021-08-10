@@ -7,7 +7,7 @@ defmodule RestAPI.Routers.Public do
   alias RestAPI.Plugs.{Authentication, Authorization, Tracker}
 
   pipeline :rest_api do
-    plug :accepts, ["json"]
+    plug :accepts, ["json", "urlencoded"]
     plug Tracker
   end
 
