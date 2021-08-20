@@ -295,6 +295,46 @@ defmodule Authenticator.SignIn.Commands.RefreshTokenTest do
                Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
     end
 
+    test "fails if refresh_token is invalid" do
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{grant_type: "refresh_token", refresh_token: "invalid"})
+    end
+
+    test "fails if client application does not exist" do
+      scopes = RF.insert_list!(:scope, 3)
+      user = RF.insert!(:user)
+
+      subject_id = user.id
+      client_id = "client_id"
+      client_name = "name"
+      scope = scopes |> Enum.map(& &1.name) |> Enum.join(" ")
+
+      access_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "sub" => subject_id,
+        "typ" => "Bearer",
+        "identity" => "user",
+        "scope" => scope
+      }
+
+      {:ok, _token, %{"jti" => jti} = claims} = build_access_token(access_token_claims)
+
+      insert!(:session, jti: jti, subject_id: subject_id, subject_type: "user", claims: claims)
+
+      refresh_token_claims = %{
+        "aud" => client_id,
+        "azp" => client_name,
+        "typ" => "Bearer",
+        "ati" => jti
+      }
+
+      {:ok, token, _} = build_refresh_token(refresh_token_claims)
+
+      assert {:error, :unauthenticated} ==
+               Command.execute(%{refresh_token: token, grant_type: "refresh_token"})
+    end
+
     test "fails if session does not exist" do
       app_id = Ecto.UUID.generate()
       user_id = Ecto.UUID.generate()
