@@ -363,6 +363,15 @@ defmodule RestAPI.Controllers.Public.AuthTest do
              |> response(200)
     end
 
+    test "fails if access_token and refresh_token are not provided", %{conn: conn} do
+      params = %{}
+
+      assert conn
+             |> put_req_header("content-type", @content_type)
+             |> post(@revoke_endpoint, params)
+             |> response(400)
+    end
+
     test "fails if params are invalid", %{conn: conn} do
       params = %{
         "access_token" => 123,
