@@ -382,8 +382,8 @@ defmodule RestAPI.Controllers.Public.AuthTest do
                "detail" => "The given params failed in validation",
                "error" => "bad_request",
                "response" => %{
-                 "access_token" => ["is invalid"],
-                 "refresh_token" => ["is invalid"]
+                 "access_token" => ["at least one token is required", "is invalid"],
+                 "refresh_token" => ["at least one token is required", "is invalid"]
                },
                "status" => 400
              } ==
